@@ -1,0 +1,2641 @@
+<!DOCTYPE html>
+<!--v01 - template with header, toc, map, and layout for all components-->
+<!--v02 - Added scale bar, map coordinates, measure, LRS readout, and Jump to google-->
+<!--v03 - Added map reset, management of bottom right info div during reset, management of buttons during reset, applied styles to LRS table results, export LRS table results-->
+<!--v04 - Added URL parameters for page startup (tab, basemap, overlays, lat/long/zoom location), added graphics layer for LRS readout clicked point -->
+<!--v05 - Added selectable basemaps, logic controls for tab selection, logic controls for map tools-->
+<!--v06 - Added div for base maps and overlays, toggle between choices to display different basemaps-->
+<!--v07 - Added controls to toggle content between tabs, accept parameters to control tabs, re-organized code-->
+<!--v08 - Added Query Builder functionality to query tab, added roadway inventory layer to map, sketch tab with calculations and line drawing -->
+<!--v09 - Added drag and drop support for CSV event tables-->
+<!--v10 - Added an event to the URL parameters (&event=IH0035-KG,15,30,Red,6,Expand to 8 lanes|US0290-KG,45,55,Blue,6,Test), added point to the URL parameters (&point=30,-97,Blue,12,Test)-->
+<!--v11 - Added an Event tab to the table of contents, added Export to KML-->
+<!--v12 - Added Diagram tab to the table of contents, added remove last, remove all, and generate URL buttons to Events tab, encoded/decoded "#" in color used to generate URL string-->
+<!--v13 - Added ability to toggle the table div in the Query tab, standardized TOC forms, cleaned code comments/spacing/formatting-->
+<!--v14 - Added general purpose div for displaying URLs to share, reorganized/worded a few form buttons-->
+<!--v15 - Added a view/hide button to the SRD form, add LRM identify click event to populate Route, DFO From and to from map is SRD tab is active, add the route event to the map when diagram is created, added zooms to graphics extent or query extent when executed-->
+<!--v16 - Added Share URLs and Right click map/coordinates to clipboard via javascript-->
+<!--v17 - Added Share URL for Query tab, cleaned UI and CSS, updated URL parameters to accept Query by URL-->
+<!--v18 - Added Share URL for Diagram tab, updated URL parameters to accept Diagram by URL, updated point identify to not remove all graphics (just the last point if other line graphics are drawn), updated Table Show/Hide logic-->
+<!--v19 - Added Reference Markers to diagram, Added test for multiple control sections in Diagram (if more than 1, no CS laels shown), added clear button to diagram form, added loading control section message to diagram-->
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <title>TxDOT - Statewide Planning Map</title>
+        <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
+        <script src="https://js.arcgis.com/4.26/"></script>         
+        <style>
+            #header {
+                height: 30px;
+                width: 100%;
+                background-color: #4682B4;
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                color: white;
+            }
+            .logo {
+                font-weight: bold;
+                font-size: 1rem;
+            }      
+            a {
+                color: white;
+                font-size: 12px;
+                text-decoration: none;
+            }        
+            #left-div {
+                position: absolute;
+                left: 0px;
+                top: 30px;
+                width: 300px;
+                height: calc(100vh - 30px);
+                background-color: white;
+                overflow-y: auto;
+                overflow-x: hidden;
+            }
+            #left-div::-webkit-scrollbar {
+              width: 1px;
+            }            
+            #viewDiv {
+                position: absolute;
+                top: 30px;
+                left: 300px;
+                height: calc(100vh - 30px);
+                width: calc(100vw - 300px);
+                float: left;
+                background-color: white;
+                z-index: 0; 
+            }
+            .esri-view .esri-view-surface--inset-outline:focus::after {outline: none !important;}    
+            .esri-view .esri-zoom.esri-widget {
+              position: absolute;
+              top: 45px; /* move the buttons down by 45 pixels */
+            }         
+            .esri-scale-bar {
+              position: absolute;
+              bottom: 20px;
+              left: 15;
+            }          
+            .toolsContainer {
+              position: absolute;
+              top: 15px;
+              right: 12px;
+              display: flex;
+              flex-direction: column;
+              align-items: center;
+              z-index: 1;
+            }
+            .toolsChild {
+              background-color: white;
+              margin-bottom: 7px;
+              padding: 5px;
+              border-radius: 5px;
+              box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+              cursor: pointer;
+            }   
+            #marginal {
+                position: absolute;
+                bottom: 12px;
+                left: 12px;
+                background-color: white;
+                padding: 5px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1; 
+                font-size: calc(9px + 0.390625vw);
+            }      
+            #mapClickResults {
+                position: absolute;
+                bottom: 12px;
+                right: 12px;
+                background-color: white;
+                padding: 5px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+                z-index: 1; 
+                font-size: calc(9px + 0.390625vw);
+            }            
+            .tabsContainer {
+              position: absolute;
+              top: 8px;
+              left: 0px;
+              width: 300px;
+              display: flex;
+              justify-content: center;
+              align-items: center;
+              z-index: 1;
+            }
+            .tabsChild {
+              background-color: white;
+              margin-left: 5px;
+              margin-right: 5px;
+              padding: 5px;
+              border-radius: 5px;
+              box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+              cursor: pointer;
+            }             
+            body {
+                margin: 0;
+                padding: 0;
+            }
+            nav {
+                position: absolute;
+                right: 0px;
+                top: 5px;
+            }
+            #resetMap {
+              position: absolute;
+              top: 134px;
+              left: 13px;
+              background-color: white;
+              margin-left: 3px;
+              margin-right: 3px;
+              padding: 8px;
+              border-radius: 5px;
+              box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+              cursor: pointer;
+            }
+            #searchTool {
+              position: absolute;
+              top: 15px;
+              left: 13px;
+              background-color: white;
+              margin-left: 3px;
+              margin-right: 3px;
+              padding: 8px;
+              border-radius: 5px;
+              box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
+              cursor: pointer;
+            }    
+            tr:nth-child(odd) {background-color: #ffffff;}
+            tr:nth-child(even) {background-color: #f2f2f2;}
+            th {text-align: left;}    
+            #exportSpan {
+              cursor: pointer;
+              color: blue;
+            }
+            .tocTabs {
+              position: absolute;
+              top: 44px;
+              left: 0px;
+              width: 300px;
+            }
+            .tocTabsQuery, .tocTabsSketch, .tocTabsEvent, .tocTabsDiagram {
+              position: absolute;
+              top: 50px;
+              left: 18px;
+              width: 270px;
+              /*border: 1px solid black;*/
+            } 
+            .eventTabInput {
+              width: 80%;
+            }
+            #tocMaps {
+              width: 300px;
+              cursor: pointer;
+            }
+            .basemapHeader {
+              color: white;
+              background-color: #4682B4;
+              text-align: center;
+            }
+            .baseMapList {
+              color: black;
+              font-weight: normal;
+            }
+            #mapTab,#queryTab,#diagramTab,#eventTab,#sketchTab {
+              display: none;
+            }
+            .queryButtonClass {
+                padding: 0.5rem;
+                margin-bottom: 10px;
+            }
+            input[type=text], select, textarea {
+              width: 97%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              resize: vertical;
+              margin-bottom: 15px;
+            }    
+            input[type=number] {
+              width: 89%;
+              padding: 10px;
+              border: 1px solid #ccc;
+              border-radius: 4px;
+              resize: vertical;
+              margin-bottom: 15px;              
+            }
+            #value,#eventDescription,#eventRoute,#inpSRDRouteID,#inpSRDFromDFO,#inpSRDToDFO {
+                width: 89%;
+            }
+            #btnAddCondition,#btnEventMap,#btnInventoryUpdateLRM,#btnUpdateLRM,#btnToggleTableView,#btnToggleDiagramView,#btnDiagramGenerateURL,#btnClearDiagramView {
+                width: 97%;
+            }   
+            #btnRunQuery,#btnClearConditions,#btnRemoveLast,#btnRemoveAll,#btnCalcCost,#btnClearProject,#btnExportJPEG,#btnExportPNG,#btnExportToCSV,#btnQueryGenerateURL,#btnExportToKML,#btnGenerateURL {
+              width: 48%;
+            }
+            #results {
+                position: absolute;
+                top: 25px;
+                left: 70px;
+                right: 55px;
+                bottom: 95px;
+                background-color: #F8F8F8;
+                display: none;
+                overflow: auto;
+            }       
+            #parentCanvas {
+                position: absolute;
+                top: 25px;
+                left: 70px;
+                right: 55px;
+                bottom: 95px;
+                background-color: #F8F8F8;
+                display: none;
+                overflow: hidden;
+            }             
+            .queryTblData {
+                border: 1px solid #F8F8F8;
+                padding: 8px;
+                text-align: left;
+            }
+            .queryTblHeader {
+                border: 1px solid #F8F8F8;
+                padding: 8px;
+                text-align: left;              
+                background-color: #4682B4;
+                color: white;
+                font-weight: bold;
+    	          cursor: pointer;
+            }      
+            .queryTableResults {
+                border-collapse: collapse;
+                width: 100%;
+            } 
+            .modal {
+        			display: none;
+        			position: fixed;
+        			z-index: 1;
+        			left: 0;
+        			top: 0;
+        			width: 100%;
+        			height: 100%;
+        			overflow: auto;
+        			background-color: rgba(0, 0, 0, 0.4);
+        		}
+        		.modal-content {
+        			background-color: #fefefe;
+        			margin: 15% auto;
+        			padding: 20px;
+        			border: 1px solid #888;
+        			width: 30%;
+        			border-radius: 5px;
+        		}
+        		.close {
+        			color: #aaa;
+        			float: right;
+        			font-size: 28px;
+        			font-weight: bold;
+        			cursor: pointer;
+        		}	    
+        		#generalPurpose {
+        		  width: 100%;
+        		  overflow: auto;
+        		}
+        </style>
+        <script>
+            var view;
+            var map;
+            var txdotLayer;
+            var lightGrayLayer;
+            var darkGrayLayer;
+            var imageryLayer;
+            var streetsLayer;  
+            var featureLayer;
+            var featureLayerView;
+            var theQuery="";
+            var queryTask;
+            var query;  
+            var lrsButtonStatus=false;
+            var graphicsLayer;
+            var graphicsLayerLRSIdentify;
+            
+            // URL Parameters
+            var urlParams;
+            var basemapParam;
+            var overlayParam;
+            var tabParam;
+            var locationParam;
+            var eventParam;
+            var pointParam;
+            var queryParam;
+            var diagramParam;
+            
+            //Query Form
+            let conditions = [];
+            
+            //For drawing custom lines
+            var linePoints = [];
+            var lineGraphic;
+            var userDrawnSketchLength=0;
+            
+            //Simplified Roadway Diagram
+            var rulerY; // Vertical position of the ruler
+            var rulerHeight; // Height of the ruler
+            var rulerMargin; // Margin from left and right borders
+            var rulerLength; // Length of the ruler in miles  
+            var rulerWidth;
+            var pixelsPerMile;
+            var labelY; // Y position for upper labels
+            var labelPositions; // X positions for upper labels
+            var labelFactor;
+            var labelValue;            
+            var maxAttributesOnPage=0;
+            var numberOfAttributes=0;
+            var attributeStartY=210;
+            var spacePerAttribute=65;
+            var csNBR;
+            var beginMPT;  
+            var diagramCSBegin;
+            var diagramCSEnd;
+            var diagramTitle;
+            var diagramBeginDFO;
+            var diagramEndDFO;   
+            var inventoryDiagramLog = [];
+            var inventoryDiagramLogAllValues = [];
+            var drawMPTLabels = true;
+            
+            var diagramColors = [
+            ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"],
+            ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"],
+            ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"],
+            ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"]
+            ];
+            
+            //Basemap URLs
+            //Consider putting these in a standalone table in AGO (then query to use in the planning map).  Would be helpful if these weren't hard coded.
+            //Same for Overlays
+            var tileLayerTxDOT = "https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap/VectorTileServer";
+            var tileLayerLightGray = "https://www.arcgis.com/sharing/rest/content/items/507a9905e7154ce484617c7327ee8bc4/resources/styles/root.json";
+            var tileLayerDarkGray = "https://www.arcgis.com/sharing/rest/content/items/4bd376c56f314bc5a36446630db604a6/resources/styles/root.json";
+            var tileLayerStreets = "https://basemaps.arcgis.com/arcgis/rest/services/World_Basemap_v2/VectorTileServer";            
+            
+            require([
+              "esri/Map",
+              "esri/views/MapView",
+              "esri/layers/FeatureLayer",
+              "esri/rest/support/Query",
+              "esri/PopupTemplate",
+              "esri/geometry/Point",
+              "esri/geometry/SpatialReference",
+              "esri/layers/TileLayer",
+              "esri/views/layers/FeatureLayerView",
+              "esri/layers/VectorTileLayer",
+              "esri/widgets/ScaleBar",
+              "esri/widgets/DistanceMeasurement2D",
+              "esri/request",
+              "esri/layers/GraphicsLayer",
+              "esri/Graphic",
+              "esri/Basemap",
+              "esri/geometry/Polyline",
+              "esri/geometry/geometryEngine",
+              "esri/geometry/support/webMercatorUtils",
+              "esri/symbols/SimpleLineSymbol",
+            ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol) {
+              
+              var map = new Map({
+                  //map content added below
+              });
+              
+              //Load map options on startup
+              window.onload = readUrlParams;  
+              
+              //Drag and Drop---------------------------------------------------
+              var dropZone = document.getElementById('viewDiv');
+              
+              // Add an event listener for the drop zone's drop event
+              dropZone.addEventListener('drop', function(event) {
+                event.preventDefault();
+                var file = event.dataTransfer.files[0];
+              
+                if (file.type === 'text/csv') {
+                  var reader = new FileReader();
+                  reader.addEventListener('load', function(event) {
+                    var csv = event.target.result;
+                    var rows = csv.split('\n');
+      
+                    rows = rows.filter(function(row) {
+                      return row.trim() !== '';
+                    });
+              
+                    var data = rows.map(function(row) {
+                      var values = row.match(/(?:[^,"]+|"[^"]*")+/g);
+                      return values.map(function(value) {
+                        return value.replace(/^"(.*)"$/, '$1');
+                      });
+                    });
+                    handleDropFile(data);
+                  });
+              
+                  reader.readAsText(file);
+                } else {
+                  alert('Please drop a CSV file');
+                }
+              });
+              
+              // Add an event listener for the drop zone's dragover event
+              dropZone.addEventListener('dragover', function(event) {
+                event.preventDefault();
+              });
+              
+              function handleDropFile(data) {
+                for (var i = 1; i < data.length; i++) {
+                  getLineworkWithM(data[i][0],data[i][1],data[i][2],data[i][3],data[i][4],data[i][5]);
+                }
+              }
+              
+              //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
+              function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
+                var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0";
+                var paraMeters = "/query?f=json&where=RTE_NM='" + rteID + "'&returnGeometry=true&returnM=true";
+							
+                request(url+paraMeters).then(function(response) {
+                    walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                });                
+              }
+              
+              function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
+                // console.log(theGeom);
+                var theGeomPart;
+                var coordX;
+                var coordY;
+                var coordM;
+                var newLinePoints = [];
+                
+                for (var a=0; a < theGeom.data.features.length; a++) {
+                  theGeomPart = theGeom.data.features[a].geometry.paths; 
+                  for (var j = 0; j < theGeomPart[0].length; j++) {
+                      coordX = theGeomPart[0][j][0];
+                      coordY = theGeomPart[0][j][1];
+                      coordM = theGeomPart[0][j][2];
+                      if (coordM>=theBegin&&coordM<=theEnd) {
+                        newLinePoints.push([a,0,j,coordX,coordY]);                        
+                      }
+                  }
+                }  
+
+                //Loop through the results and split up the array based on any segment breaks
+                let result = [];
+                let currentArr = [newLinePoints[0]];
+                
+                for (let i = 1; i < newLinePoints.length; i++) {
+                  if (newLinePoints[i][0] !== currentArr[0][0]) {
+                    result.push(currentArr);
+                    currentArr = [newLinePoints[i]];
+                  } else {
+                    currentArr.push(newLinePoints[i]);
+                  }
+                }
+                result.push(currentArr); 
+
+                var indexOne;
+                var indexTwo;
+                var indexThree;
+                var segmentArrayLength;
+                
+                //Loop through the results extend the events and add to the map
+                for (var z = 0; z < result.length; z++) {
+                  //For the first point on the segment
+                  indexOne = result[z][0][0];
+                  indexTwo = result[z][0][1];
+                  indexThree = result[z][0][2];   
+                  
+                  if (indexThree>0) {
+                    var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][0];
+                    var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][1];
+                    var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
+                    var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1]; 
+                    var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2]; //the m difference between vertices
+                    var lengthFromFirstPoint = theBegin-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2];  //event from-beginning vertex m                
+                    var newBeginPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthFromFirstPoint);
+                    
+                    //Add to the beginning of the array
+                    //Don't run unless distance is greater than .001
+                    if (lengthFromFirstPoint>.001) {
+                        result[z].unshift([0,0,0,newBeginPoint[0],newBeginPoint[1]]);                  
+                    }
+                  }      
+                  
+                  segmentArrayLength = result[z].length;
+                  
+                  //For the last point on the segment
+                  indexOne = result[z][segmentArrayLength-1][0];
+                  indexTwo = result[z][segmentArrayLength-1][1];
+                  indexThree = result[z][segmentArrayLength-1][2];
+                  
+                  if (indexThree<theGeom.data.features[indexOne].geometry.paths[indexTwo].length-1) {
+                    var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
+                    var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1];
+                    var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][0];
+                    var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][1]; 
+                    var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]; //the m difference between vertices
+                    var lengthBeyondLastPoint = theEnd-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2];  //event from-ending vertex m                
+                    var newEndPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthBeyondLastPoint);
+                    
+                    //Adding to the end of the array
+                    //Don't run unless distance is greater than .001
+                    if (lengthBeyondLastPoint>.001) {
+                      result[z].push([0,0,0,newEndPoint[0],newEndPoint[1]]);
+                    }     
+                  }
+                }
+                
+                let finalResult = result.map(subArr => subArr.map(innerSubArr => innerSubArr.slice(3)));
+
+                for (var x = 0; x < finalResult.length; x++) {
+                  console.log(finalResult[x]);
+                  var line = new Polyline({
+                    paths: [finalResult[x]],
+                    spatialReference: { wkid: 102100 }
+                  });
+          
+                  lineGraphic = new Graphic({
+                    attributes: [rteID,theBegin,theEnd,theColor,theWidth,theDescription],
+                    geometry: line,
+                    symbol: {
+                      type: "simple-line",
+                      color: theColor,
+                      width: theWidth
+                    },
+                    popupTemplate: new PopupTemplate({
+                      title: rteID,
+                      content: theDescription
+                    })                  
+                  });
+                  //Add line to map
+                  graphicsLayer.add(lineGraphic);
+                  
+                  // console.log(finalResult[x][0][1]);
+                  // console.log(finalResult[x][0][0]);
+                  
+                  // //Add begin and end points from segment
+                  // var inputPoint = new Point({
+                  //   x: finalResult[x][0][0],
+                  //   y: finalResult[x][0][1],
+                  //   spatialReference: new SpatialReference({ wkid: 3857 })
+                  // });               
+                  
+                  // // Create a point graphic with the specified properties
+                  // var pointGraphic = new Graphic({
+                  //   geometry: inputPoint,
+                  //   symbol: {
+                  //     type: "simple-marker",
+                  //     color: "Green",
+                  //     size: 10,
+                  //     outline: {
+                  //       color: "Black",
+                  //       width: "1px"
+                  //     }
+                  //   },
+                  //   popupTemplate: new PopupTemplate({
+                  //     title: rteID,
+                  //     content: "Begin Point"
+                  //   }) 
+                  // });
+                  
+                  // // Add the point graphic to the graphics layer
+                  // graphicsLayer.add(pointGraphic);                      
+                }
+                
+                zoomToGraphicExtent();
+              }
+              
+              //Finding the begin/end point of the event
+              function interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,totalLength,segmentLength) {
+                const ratio = (segmentLength*1609.344) / (totalLength*1609.344);
+                
+                // Interpolate the Web Mercator coordinates of the point along the line
+                const interpolatedMercator = [
+                  pointOneX + (ratio * (pointTwoX - pointOneX)),
+                  pointOneY + (ratio * (pointTwoY - pointOneY))
+                ];                
+
+                var newCoord = [interpolatedMercator[0],interpolatedMercator[1]];
+                return newCoord;
+              }
+              //End drag and drop-----------------------------------------------
+              
+              //Base map tile layers--------------------------------------------
+              //TxDOT Tile Layer
+              txdotLayer = new VectorTileLayer({
+                  url: tileLayerTxDOT,
+                  visible: false
+              }); 
+              map.add(txdotLayer);
+              
+              //Light Gray Layer
+              lightGrayLayer = new VectorTileLayer({
+                  url: tileLayerLightGray,
+                  visible: false
+              });
+              map.add(lightGrayLayer);              
+              
+              //Dark Gray Layer
+              darkGrayLayer = new VectorTileLayer({
+                  url: tileLayerDarkGray,
+                  visible: false                  
+              });    
+              map.add(darkGrayLayer);               
+              
+              //ESRI Streets Layer
+              streetsLayer = new VectorTileLayer({
+                  url: tileLayerStreets,
+                  visible: false                  
+              });              
+              map.add(streetsLayer);
+              //End basemap tile layers-----------------------------------------
+        
+              //Add roadway inventory layer
+              var roadwayInventoryLayerUrl = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadway_Inventory/FeatureServer/0";
+              var roadwayInventoryfeatureLayer = new FeatureLayer({
+                url: roadwayInventoryLayerUrl,
+                visible: false,
+                outFields: ["*"]
+              });   
+              map.add(roadwayInventoryfeatureLayer);
+              
+              view = new MapView({
+                container: "viewDiv",
+                map: map,
+                center: [-100, 31.5],
+                zoom: 6
+              });       
+              
+              view.ui.remove("attribution");
+              
+              view.constraints = {
+                minZoom: 5,
+                maxZoom: 21,
+                rotationEnabled: false
+              };
+              
+              //Scale Bar-------------------------------------------------------
+              var scaleBar = new ScaleBar({
+                view: view,
+                unit: "miles"
+              });
+            
+              view.ui.add(scaleBar, {
+                position: "bottom-left"
+              });       
+              
+              scaleBar.style = "";
+              //End Scale Bar---------------------------------------------------
+              
+              //Measure---------------------------------------------------------
+              let measurementWidget = new DistanceMeasurement2D({
+                  view: view
+              });
+              view.ui.add(measurementWidget, "bottom-right");            
+                
+              measurementWidget.visible = false;
+              
+              const measureListener = document.querySelector('#measureButton');
+              measureListener.addEventListener('click', (event) => {
+                if (measurementWidget.visible == true) {
+                    measurementWidget.visible = false;
+                    resetButton("measureButton");                    
+                } else {
+                    measurementWidget.visible = true;
+                    resetButton("lrsButton");
+                    lrsButtonStatus=false;
+                    clearInnerHTML("mapClickResults");                     
+                    activateButton("measureButton");
+                    graphicsLayer.removeAll();                    
+                }
+              });              
+              //End Measure-----------------------------------------------------
+              
+              //Load Roadway Inventory forms------------------------------------
+              view.whenLayerView(roadwayInventoryfeatureLayer).then(function(layerView) {
+                featureLayerView = layerView;
+                populateQueryForm();
+              });    
+              
+              //Re-orders array
+              function sendItemToFront(theArray,itemToMove) {
+                var index = theArray.indexOf(itemToMove);
+                theArray.splice(index, 1);
+                theArray.unshift(itemToMove);                 
+                return theArray;
+              }
+              
+              function populateQueryForm() {
+                var fieldSelect = document.getElementById('field');
+                var outputFieldsSelect = document.getElementById('outputFields');
+
+                //Puts the RIA_RTE_ID, DFO, CS, and MPT columns first
+                var roadwayInventoryFieldsArray = featureLayerView.availableFields;
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"EMP");
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"BMP"); 
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"C_SEC");                
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"TO_DFO");
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"FRM_DFO"); 
+                roadwayInventoryFieldsArray = sendItemToFront(roadwayInventoryFieldsArray,"RIA_RTE_ID");                
+                
+                for (var i = 0; i < roadwayInventoryFieldsArray.length; i++) {
+                  var field = roadwayInventoryFieldsArray[i];
+                  var optionField = document.createElement("option");
+                  var optionSelect = document.createElement("option");
+                  optionField.text = field;
+                  optionField.value = field;
+                  optionSelect.text = field;
+                  optionSelect.value = field;                  
+                  outputFieldsSelect.appendChild(optionSelect);
+                  fieldSelect.appendChild(optionField);                  
+                }   
+              }
+              //End populate Inventory forms------------------------------------
+    
+              //LRS Identify----------------------------------------------------
+              const lrsListener = document.querySelector('#lrsButton');
+              lrsListener.addEventListener('click', (event) => {
+                if (lrsButtonStatus == true) {
+                    resetButton("lrsButton");
+                    lrsButtonStatus = false;
+                    clearInnerHTML("mapClickResults");
+                    graphicsLayerLRSIdentify.removeAll();
+                } else {
+                    resetButton("measureButton");
+                    measurementWidget.visible = false;                    
+                    activateButton("lrsButton");
+                    lrsButtonStatus = true;
+                    clearInnerHTML("mapClickResults");                    
+                }                
+              });
+              
+              view.on("click",function(event){
+                 if (lrsButtonStatus==true) {
+                    graphicsLayerLRSIdentify.removeAll();
+                    let point = view.toMap({x: event.x, y: event.y});
+                    var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs1?Lat="+point.latitude.toFixed(8)+"&Lon="+point.longitude.toFixed(8);
+                    
+                    //add graphic to map
+                    var pointGraphic = new Graphic({
+                          geometry: point,
+                          symbol: {
+                            type: "simple-marker",
+                            color: "red",
+                            size: "10px"
+                          }
+                    });      
+                    
+                    graphicsLayerLRSIdentify.add(pointGraphic);
+                    document.getElementById("mapClickResults").innerHTML = "Calculating LRMs...";
+                    
+                    //Populate LRS Readout
+                    request(url).then(function(response) {
+                        processLRSResponse(response);
+                    });                    
+                 } 
+                 
+                 if (event.button === 2) {
+                    let point = view.toMap({x: event.x, y: event.y});
+                    var mapForURL = "";
+                    if (txdotLayer.visible==true) {
+                      mapForURL = "txdot";
+                    } else if (lightGrayLayer.visible==true) {
+                      mapForURL = "lightgray";
+                    } else if (darkGrayLayer.visible==true) {
+                      mapForURL = "darkgray";
+                    } else {
+                      mapForURL = "esristreets";
+                    }
+                    
+                    var rightClickURL = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map="+mapForURL+"&location="+point.latitude.toFixed(8)+","+point.longitude.toFixed(8)+","+view.zoom;
+                    var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
+                    
+                    navigator.clipboard.writeText(rightClickURL).then(() => {
+                      //nothing
+                    });                    
+                    
+                    //document.getElementById("generalPurpose").innerHTML = "Copy Lat/Long or URL:<br><br>" + latLongOnly + "<br><br>" + rightClickURL;
+                    document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" + rightClickURL;                    
+                    openModal();                   
+                 }
+              });
+              
+              function processLRSResponse(theResponse) {
+                var numbers = theResponse.data;
+                var lowestNumber = numbers[0].distance;
+                var lowestIndex = 0;
+                
+                for (var i = 1; i < numbers.length; i++) {
+                  if (numbers[i] < lowestNumber) {
+                    lowestNumber = numbers[i];
+                    lowestIndex = i;
+                  }
+                }     
+                
+                var lrsReadoutData=[];
+                lrsReadoutData.push(["Conrol Section",theResponse.data[lowestIndex].CTRL_SECT_LN_NBR]);
+                lrsReadoutData.push(["Mile Point",theResponse.data[lowestIndex].CTRL_SECT_MPT]); 
+                lrsReadoutData.push(["Reference Marker",theResponse.data[lowestIndex].RMRKR_PNT_NBR]);
+                lrsReadoutData.push(["Displacement",theResponse.data[lowestIndex].RMRKR_DISPLACEMENT]);                 
+                lrsReadoutData.push(["Route",theResponse.data[lowestIndex].RTE_DEFN_LN_NM]);
+                lrsReadoutData.push(["Distance From Origin",theResponse.data[lowestIndex].RTE_DFO]);
+                lrsReadoutData.push(["Latitude",theResponse.data[lowestIndex].LAT.toFixed(6)]);
+                lrsReadoutData.push(["Longitude",theResponse.data[lowestIndex].LON.toFixed(6)]);
+                
+                if (document.getElementById("diagramTab").style.display == "block"||document.getElementById("eventTab").style.display == "block") {
+                  document.getElementById("inpSRDRouteID").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
+		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM; 
+                  var startingDFO = theResponse.data[lowestIndex].RTE_DFO;
+                 if ((startingDFO-1)<0) {
+                    document.getElementById("inpSRDFromDFO").value = startingDFO;
+                    document.getElementById("inpSRDToDFO").value = startingDFO+1;
+                    document.getElementById("eventBeginDFO").value = startingDFO;
+                    document.getElementById("eventEndDFO").value = startingDFO+1;
+                  } else {
+                    document.getElementById("inpSRDFromDFO").value = startingDFO-1;
+                    document.getElementById("inpSRDToDFO").value = startingDFO+1; 
+                    document.getElementById("eventBeginDFO").value = startingDFO-1;
+                    document.getElementById("eventEndDFO").value = startingDFO+1;                 
+                  }                  
+                }
+               
+                var table = document.createElement("table");
+                table.setAttribute("id", "lrsOutputTable");
+                
+                for (i = 0; i < lrsReadoutData.length; i++) {
+                  var row = document.createElement("tr");
+                  for (var j = 0; j < lrsReadoutData[i].length; j++) {
+                    var cell = document.createElement("td");
+                    var cellText = document.createTextNode(lrsReadoutData[i][j]);
+                    cell.appendChild(cellText);
+                    row.appendChild(cell);
+                  }
+                  table.appendChild(row);
+                }
+                
+                clearInnerHTML("mapClickResults");
+                document.getElementById("mapClickResults").appendChild(table);
+                
+                //Create element for exporting LRS results
+                var newSpan = document.createElement("span");
+                newSpan.setAttribute("id", "exportSpan");                
+                newSpan.innerHTML = "Export Readout";
+              
+                newSpan.addEventListener("click", function() {
+                  exportTableToCSV("#lrsOutputTable");
+                });
+                
+                document.getElementById("mapClickResults").appendChild(newSpan); 
+              }
+              //End LRS Identify------------------------------------------------
+            
+              //Lat Long Coordinates on mouse move------------------------------
+              view.on('pointer-move',function(event){
+                  let point = view.toMap({x: event.x, y: event.y});
+                  document.getElementById("marginal").innerHTML = "Level: " + view.zoom + ", " + point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6);
+              });
+              //End Lat Long Coordinates----------------------------------------
+              
+              //Listeners-------------------------------------------------------
+              //Jump to Google listener
+              const jumpGoogleListener = document.querySelector('#googleMaps');
+              jumpGoogleListener.addEventListener('click', (event) => {
+                openGoogleMaps();
+              }); 
+              
+              //TxDOT map listener
+              const lstTxDOTListener = document.querySelector('#lstTxDOT');
+              lstTxDOTListener.addEventListener('click', (event) => {
+                resetAllBaseMapItems();
+                activateBaseMapItem("lstTxDOT");
+                txdotLayer.visible=true;
+              }); 
+              
+              //Light gray map listener
+              const lstLightGrayListener = document.querySelector('#lstLightGray');
+              lstLightGrayListener.addEventListener('click', (event) => {
+                resetAllBaseMapItems();
+                activateBaseMapItem("lstLightGray");
+                lightGrayLayer.visible=true;
+              });   
+              
+              //Dark gray map listener
+              const lstDarkGrayListener = document.querySelector('#lstDarkGray');
+              lstDarkGrayListener.addEventListener('click', (event) => {
+                resetAllBaseMapItems();
+                activateBaseMapItem("lstDarkGray");
+                darkGrayLayer.visible=true;
+              });    
+              
+              //ESRI Streets map listener
+              const lstESRIListener = document.querySelector('#lstESRI');
+              lstESRIListener.addEventListener('click', (event) => {
+                resetAllBaseMapItems();
+                activateBaseMapItem("lstESRI");
+                streetsLayer.visible=true;
+              });               
+              
+              //Clear and Reset Map Listener
+              const resetListener = document.querySelector('#resetMap');
+              resetListener.addEventListener('click', (event) => {
+                clearAndResetMap();
+              }); 
+              
+              //Maps tab listener
+              const baseMapListener = document.querySelector('#baseMaps');
+              baseMapListener.addEventListener('click', (event) => {
+                resetAllTabs();
+                activateButton("baseMaps");
+                document.getElementById("mapTab").style.display = "block";
+              }); 
+              
+              //Query tab listener
+              const queryListener = document.querySelector('#dataQuery');
+              queryListener.addEventListener('click', (event) => {
+                resetAllTabs();
+                activateButton("dataQuery");
+                document.getElementById("queryTab").style.display = "block";                
+              });   
+              
+              //Roadway diagram listener
+              const roadwayDiagramListener = document.querySelector('#roadwayDiagram');
+              roadwayDiagramListener.addEventListener('click', (event) => {
+                resetAllTabs();
+                activateButton("roadwayDiagram");
+                document.getElementById("diagramTab").style.display = "block";                
+              });    
+              
+              //Event tab listener
+              const eventTabListener = document.querySelector('#eventForm');
+              eventTabListener.addEventListener('click', (event) => {
+                resetAllTabs();
+                activateButton("eventForm");
+                document.getElementById("eventTab").style.display = "block";                
+              });               
+              
+              //Graphic sketch listener
+              const graphicSketchListener = document.querySelector('#graphicSketch');
+              graphicSketchListener.addEventListener('click', (event) => {
+                resetAllTabs();
+                activateButton("graphicSketch");
+                document.getElementById("sketchTab").style.display = "block";                
+              }); 
+              
+              //Check LRM Inputs listener
+              const lrmInputsListener = document.querySelector('#btnUpdateLRM');
+              lrmInputsListener.addEventListener('click', (event) => {
+                checkLRMInputs();              
+              }); 
+              
+              //Add Inventory Attribute listener
+              const addInventoryListener = document.querySelector('#btnInventoryUpdateLRM');
+              addInventoryListener.addEventListener('click', (event) => {
+                addInventoryAttribute(document.getElementById("riAttributes").value.split(","));              
+              });  
+              
+              //Export PNG listener
+              const exportPNGListener = document.querySelector('#btnExportPNG');
+              exportPNGListener.addEventListener('click', (event) => {
+                exportPNG();              
+              }); 
+              
+              //Export JPEG listener
+              const exportJPEGListener = document.querySelector('#btnExportJPEG');
+              exportJPEGListener.addEventListener('click', (event) => {
+                exportJPEG();              
+              });        
+              
+              //Toggle diagram view listener
+              const toggleDiagramListener = document.querySelector('#btnToggleDiagramView');
+              toggleDiagramListener.addEventListener('click', (event) => {
+                toggleVisibility("parentCanvas"); 
+                var buttonToggleDiagram = document.getElementById("parentCanvas");
+                var buttonText = document.getElementById("btnToggleDiagramView");
+                if (buttonToggleDiagram.style.display === "none") {
+                  buttonText.textContent = 'Show Diagram';
+                } else {
+                  buttonText.textContent = 'Hide Diagram';
+                }                
+              });       
+              
+              //Toggle diagram clear listener
+              const toggleClearnDiagramListener = document.querySelector('#btnClearDiagramView');
+              toggleClearnDiagramListener.addEventListener('click', (event) => {
+                toggleVisibility("parentCanvas"); 
+                var buttonToggleDiagram = document.getElementById("parentCanvas");
+                var buttonText = document.getElementById("btnToggleDiagramView");
+                if (buttonToggleDiagram.style.display === "none") {
+                  buttonText.textContent = 'Show Diagram';
+                } else {
+                  buttonText.textContent = 'Hide Diagram';
+                }   
+                
+                inventoryDiagramLog = [];
+                inventoryDiagramLogAllValues = [];
+                clearDrawings();
+                graphicsLayer.removeAll();
+                document.getElementById("inpSRDRouteID").value="";
+                document.getElementById("inpSRDFromDFO").value="";
+                document.getElementById("inpSRDToDFO").value="";                
+              });              
+              
+              
+              //Diagram URL listener
+              const diagramURLListener = document.querySelector('#btnDiagramGenerateURL');
+              diagramURLListener.addEventListener('click', (event) => {
+                exportDiagramToURL();
+              });  
+
+              //Add condition listener
+              const addConditionListener = document.querySelector('#btnAddCondition');
+              addConditionListener.addEventListener('click', (event) => {
+                addCondition();              
+              });          
+              
+              //Clear condition listener
+              const clearConditionListener = document.querySelector('#btnClearConditions');
+              clearConditionListener.addEventListener('click', (event) => {
+                clearConditions();              
+              });  
+              
+              //Run Query listener
+              const runQueryListener = document.querySelector('#btnRunQuery');
+              runQueryListener.addEventListener('click', (event) => {
+                setLayerDefinitionExpression();  
+              });    
+              
+              //Query URL listener
+              const queryURLListener = document.querySelector('#btnQueryGenerateURL');
+              queryURLListener.addEventListener('click', (event) => {
+                exportQueryToURL();
+              });                
+              
+              //Export CSV listener
+              const exportCSVListener = document.querySelector('#btnExportToCSV');
+              exportCSVListener.addEventListener('click', (event) => {
+                exportTableToCSV("#queryResultTable"); 
+              });         
+              
+              //Toggle table view listener
+              const toggleTableListener = document.querySelector('#btnToggleTableView');
+              toggleTableListener.addEventListener('click', (event) => {
+                toggleVisibility("results");                 
+                var buttonToggleTable = document.getElementById("results");
+                var buttonText = document.getElementById("btnToggleTableView");
+                if (buttonToggleTable.style.display==="none") {
+                  buttonText.textContent = 'Show Table';
+                } else {
+                  buttonText.textContent = 'Hide Table';
+                }                   
+              });                
+              
+              //Calculate Sketch Cost listener
+              const sketchCostListener = document.querySelector('#btnCalcCost');
+              sketchCostListener.addEventListener('click', (event) => {
+                deCalculateCost(); 
+              });    
+              
+              //Clear Sketch
+              const sketchClearListener = document.querySelector('#btnClearProject');
+              sketchClearListener.addEventListener('click', (event) => {
+                userDrawnSketchLength=0;
+                graphicsLayer.removeAll();
+                linePoints.length = 0;
+                document.getElementById("deCostResult").innerHTML = "";
+              });                
+              
+              //Add Event Button
+              const addEventButtonListener = document.querySelector('#btnEventMap');
+              addEventButtonListener.addEventListener('click', (event) => {
+                
+                //Clearing the LRS identify tools if they area activated
+                if (lrsButtonStatus==true) {
+                  resetLRSIdentify();                  
+                }
+                
+                // graphicsLayer.removeAll();
+                var eventRoute = document.getElementById("eventRoute").value;
+                var eventBeginDFO = document.getElementById("eventBeginDFO").value;
+                var eventEndDFO = document.getElementById("eventEndDFO").value;
+                var eventColors = document.getElementById("eventColors").value;
+                var eventWidth = document.getElementById("eventWidth").value;
+                var eventDescription = document.getElementById("eventDescription").value;                
+                getLineworkWithM(eventRoute,eventBeginDFO,eventEndDFO,eventColors,eventWidth,eventDescription);
+              });           
+              
+              //Export Events to KML
+              const exportEventsListener = document.querySelector('#btnExportToKML');
+              exportEventsListener.addEventListener('click', (event) => {
+                exportKML();
+              }); 
+              
+              //Remove last event
+              const removeLastEventsListener = document.querySelector('#btnRemoveLast');
+              removeLastEventsListener.addEventListener('click', (event) => {
+                var graphics = graphicsLayer.graphics.items;
+                if (graphics.length > 0) {
+                  var lastGraphic = graphics[graphics.length - 1];
+                  graphicsLayer.remove(lastGraphic);
+                }
+              });                
+              
+              //Remove all events
+              const removeAllEventsListener = document.querySelector('#btnRemoveAll');
+              removeAllEventsListener.addEventListener('click', (event) => {
+                graphicsLayer.removeAll();
+              });         
+              
+              //Generate URL
+              const generateURLEventsListener = document.querySelector('#btnGenerateURL');
+              generateURLEventsListener.addEventListener('click', (event) => {
+                exportGraphicsToURL();
+              });    
+              
+              //Close modal box
+              const exportCloseListener = document.querySelector('#spnClose');
+              exportCloseListener.addEventListener('click', (event) => {
+                closeModal();
+              });               
+              
+              //End listeners---------------------------------------------------
+              
+              //Control buttons and tabs----------------------------------------
+              function resetAllTabs() {
+                resetButton("baseMaps");
+                resetButton("dataQuery");                
+                resetButton("roadwayDiagram");
+                resetButton("eventForm");
+                resetButton("graphicSketch");
+                document.getElementById("mapTab").style.display = "none";
+                document.getElementById("queryTab").style.display = "none";
+                document.getElementById("diagramTab").style.display = "none"; 
+                document.getElementById("eventTab").style.display = "none";                
+                document.getElementById("sketchTab").style.display = "none";
+                document.getElementById("results").style.display = "none";
+                document.getElementById("parentCanvas").style.display = "none";
+                numberOfAttributes=0;
+                inventoryDiagramLog = [];
+                inventoryDiagramLogAllValues = [];                 
+                roadwayInventoryfeatureLayer.visible = false;
+                userDrawnSketchLength=0;
+                graphicsLayer.removeAll();
+                resetLRSIdentify();
+                linePoints.length = 0;
+                document.getElementById("deCostResult").innerHTML = "";                
+              }
+              
+              function resetAllTools() {
+                resetButton("measureButton");
+                resetButton("lrsButton"); 
+              }      
+              
+              function clearAndResetMap() {
+                setZoomAndLocation([31.5,-100,6]);
+                
+                //Reset Diagram
+                document.getElementById("parentCanvas").style.display = "none";
+                numberOfAttributes=0;    
+                inventoryDiagramLog = [];
+                inventoryDiagramLogAllValues = [];                
+                
+                //Reset Table
+                document.getElementById("results").style.display = "none";                
+                  
+                //reset buttons and div
+                clearInnerHTML("mapClickResults");
+                resetAllTools();
+                measurementWidget.visible = false;
+                graphicsLayer.removeAll();
+                graphicsLayerLRSIdentify.removeAll();                
+              }       
+              
+              function resetAllBaseMapItems() {
+                resetBaseMapItem("lstTxDOT");
+                resetBaseMapItem("lstLightGray");
+                resetBaseMapItem("lstDarkGray");
+                //resetBaseMapItem("lstImagery");
+                resetBaseMapItem("lstESRI");
+                //resetBaseMapItem("lstOSM");
+                
+                txdotLayer.visible=false;
+                lightGrayLayer.visible=false;
+                darkGrayLayer.visible=false;
+                streetsLayer.visible=false;
+              }               
+              
+              function resetButton(theElement) {
+                document.getElementById(theElement).style.backgroundColor = "white";  //was #f1f1f1
+                document.getElementById(theElement).style.color = "black";
+              }              
+              
+              function activateButton(theElement) {
+                document.getElementById(theElement).style.backgroundColor = "#4682B4";
+                document.getElementById(theElement).style.color = "white";                
+              }
+              
+              function resetBaseMapItem(theElement) {
+                document.getElementById(theElement).style.color = "black";
+                document.getElementById(theElement).style.fontWeight = "normal";
+              }
+              
+              function activateBaseMapItem(theElement) {
+                document.getElementById(theElement).style.color = "red";
+                document.getElementById(theElement).style.fontWeight = "bold";                
+              }
+              
+              function clearInnerHTML(theElement) {
+                document.getElementById(theElement).innerHTML = "";
+              }
+              //End buttons and tabs--------------------------------------------
+              
+              //Jump to Google Maps---------------------------------------------
+              function openGoogleMaps() {
+                var ctr = view.center;
+                var lat = ctr.latitude;
+                var lon = ctr.longitude;
+                var level = view.zoom + 1;
+                window.open("https://www.google.com/maps/@"+lat+","+lon+","+level+"z");
+              }      
+              //End Google Maps-------------------------------------------------
+              
+              //Create csv export, table id must have the "#"-------------------
+              function exportTableToCSV(theTable) {
+                  const table = document.querySelector(theTable);
+                  if (!table) {
+                      alert('There is no table to export.');
+                      return;
+                  }
+              
+                  const rows = Array.from(table.rows);
+                  const csv = [];
+              
+                  rows.forEach(row => {
+                      const rowData = [];
+                      Array.from(row.cells).forEach(cell => rowData.push(`"${cell.textContent.replace(/"/g, '""')}"`));
+                      csv.push(rowData.join(','));
+                  });
+              
+                  downloadCSV(csv.join('\n'), 'table_export.csv');
+              }
+              //End CSV Export--------------------------------------------------
+              
+              //Execute the csv download----------------------------------------
+              function downloadCSV(csv, filename) {
+                  const csvFile = new Blob([csv], { type: 'text/csv' });
+                  const downloadLink = document.createElement('a');
+              
+                  downloadLink.download = filename;
+                  downloadLink.href = URL.createObjectURL(csvFile);
+                  downloadLink.style.display = 'none';
+              
+                  document.body.appendChild(downloadLink);
+                  downloadLink.click();
+                  document.body.removeChild(downloadLink);
+              }         
+              //End download CSV------------------------------------------------
+              
+              //Read parameters from the URL------------------------------------
+              //Example: http://example.com/?map=txdot&overlay=AADT&tab=maps&location=31.123,-97.123,10&event=IH0035-KG,15,30,Red,6,Expand to 6 lanes
+              function readUrlParams() {
+                //Graphics Layer User Lines and Points
+                graphicsLayer = new GraphicsLayer();
+                map.add(graphicsLayer);               
+                
+                //Graphics Layer LRS Identify
+                graphicsLayerLRSIdentify = new GraphicsLayer();
+                map.add(graphicsLayerLRSIdentify);                 
+                
+                urlParams = new URLSearchParams(window.location.search);
+                basemapParam = urlParams.get("map");
+                overlayParam = urlParams.get("overlay");
+                tabParam = urlParams.get("tab");
+                locationParam = urlParams.get("location");
+                eventParam = urlParams.get("event");
+                pointParam = urlParams.get("point");
+                queryParam = urlParams.get("query");
+                diagramParam = urlParams.get("diagram");
+                
+                if (basemapParam=="txdot") {
+                  resetAllBaseMapItems();                   
+                  txdotLayer.visible=true;
+                  activateBaseMapItem("lstTxDOT");
+                } else if (basemapParam=="lightgray") {
+                  resetAllBaseMapItems();                   
+                  lightGrayLayer.visible=true;
+                  activateBaseMapItem("lstLightGray");                  
+                } else if (basemapParam=="darkgray") {
+                  resetAllBaseMapItems();                   
+                  darkGrayLayer.visible=true;
+                  activateBaseMapItem("lstDarkGray");                  
+                } else if (basemapParam=="esristreets") {
+                  resetAllBaseMapItems();                   
+                  streetsLayer.visible=true;
+                  activateBaseMapItem("lstESRI");                  
+                } else {
+                  resetAllBaseMapItems();                   
+                  lightGrayLayer.visible=true;
+                  activateBaseMapItem("lstLightGray");                  
+                }
+                
+                //Set map zoom and location if provided
+                if (locationParam) {
+                  setZoomAndLocation(locationParam.split(","));
+                }
+                
+                //Add the event if provided
+                if (eventParam) {
+                  var eventParam = eventParam.replace(/%23/g, "#");
+                  const eventArray = eventParam.split('|');
+                  // Output the individual arrays
+                  for (let i = 0; i < eventArray.length; i++) {
+                    const individualArray = eventArray[i].split(',');
+                    getLineworkWithM(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4],individualArray[5]);
+                  }                  
+                }
+                
+                //Add the event if provided
+                if (pointParam) {
+                  const pointArray = pointParam.split('|');
+                  // Output the individual arrays
+                  for (let i = 0; i < pointArray.length; i++) {
+                    const individualArray = pointArray[i].split(',');
+                    mapThePoint(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4]);
+                  }                  
+                }       
+                
+                if (queryParam) {
+                  document.getElementById('conditions').innerHTML = "";
+                  const queryArray = queryParam.split('|');
+                  const queryFields = queryArray[0].split(',');
+                  const queryConditions = queryArray[1].split(' AND ');
+                  
+                  var operators = ['=', '<', '>', '!=', '<=', '>='];                  
+                  for (var i = 0; i < queryConditions.length; i++) {
+                    var text = queryConditions[i];
+                    var foundOperator = operators.find(function(operatorVal) {
+                      return text.includes(operatorVal);
+                    });  
+                    
+                    var arrayConditionsParts = [];
+                    if (foundOperator) {
+                      arrayConditionsParts = text.split(foundOperator);
+                      arrayConditionsParts.splice(1, 0, foundOperator);
+                      var field = arrayConditionsParts[0];
+                      var operator = arrayConditionsParts[1];
+                      var value = arrayConditionsParts[2];
+                      conditions.push({field,operator,value});
+                      
+                      //Add to the display
+                      const li = document.createElement('li');
+                      li.textContent = `${field} ${operator} ${value}`;
+                      document.getElementById('conditions').appendChild(li); 
+                    }                    
+                  }
+                  
+                  view.whenLayerView(roadwayInventoryfeatureLayer).then(function(layerView) {
+                      var selectElement = document.getElementById("outputFields");
+                      for (var i = 0; i < selectElement.options.length; i++) {
+                        var option = selectElement.options[i];
+                        if (queryFields.includes(option.value)) {
+                          option.selected = true;
+                        }
+                      }
+                      setLayerDefinitionExpression();
+                  });                   
+                }
+                
+                if (diagramParam) {
+                  const diagramFullArray = diagramParam.split('|');
+                  const diagramInputs = diagramFullArray[0].split(',');
+                  document.getElementById("inpSRDRouteID").value = diagramInputs[0];
+                  document.getElementById("inpSRDFromDFO").value = diagramInputs[1];
+                  document.getElementById("inpSRDToDFO").value = diagramInputs[2];
+                  
+                  //Get specifics for each attribute in the diagram
+                  const diagramInventoryInputs = diagramFullArray[1].split(',');
+                  const selectElement = document.getElementById("riAttributes");
+                  const selectOptions = selectElement.options;
+                  
+                  for (let i = 0; i < selectOptions.length; i++) {
+                    const optionValue = selectOptions[i].value;
+                    const optionValuesArray = optionValue.split(",");
+                    const lastValue = optionValuesArray[optionValuesArray.length - 1];
+                  
+                    if (diagramInventoryInputs.includes(lastValue)) {
+                      inventoryDiagramLogAllValues.push(optionValuesArray);
+                    }
+                  }
+                  
+                  //Start the build diagram process
+                  checkLRMInputs();                  
+                }
+                
+                //Activate tab if provided
+                if (tabParam=="maps") {
+                  activateButton("baseMaps");
+                  document.getElementById("mapTab").style.display = "block";
+                } else if (tabParam=="query") {
+                  activateButton("dataQuery");
+                  document.getElementById("queryTab").style.display = "block";                  
+                } else if (tabParam=="event") {
+                  activateButton("eventForm");
+                  document.getElementById("eventTab").style.display = "block";                  
+                } else if (tabParam=="diagram") {
+                  activateButton("roadwayDiagram");
+                  document.getElementById("diagramTab").style.display = "block"; 
+                } else if (tabParam=="sketch") {
+                  activateButton("graphicSketch");
+                  document.getElementById("sketchTab").style.display = "block";                  
+                } else {
+                  activateButton("baseMaps");
+                  document.getElementById("mapTab").style.display = "block";                  
+                }
+              }      
+              //End URL parameters----------------------------------------------
+              
+              //Draw map points-------------------------------------------------
+              function mapThePoint(theLat,theLong,theColor,theSize,theDescription) {
+                var inputPoint = new Point({
+                  latitude: theLat,
+                  longitude: theLong
+                });               
+                
+                //Convert the Point to Web Mercator spatial reference
+                var webMercatorPoint = webMercatorUtils.geographicToWebMercator(inputPoint);
+                
+                // Create a point graphic with the specified properties
+                var pointGraphic = new Graphic({
+                  geometry: webMercatorPoint,
+                  symbol: {
+                    type: "simple-marker",
+                    color: theColor,
+                    size: theSize,
+                    outline: {
+                      color: theColor,
+                      width: "1px"
+                    }
+                  },
+                  popupTemplate: new PopupTemplate({
+                    title: theLat + "," + theLong,
+                    content: theDescription
+                  }) 
+                });
+                
+                // Add the point graphic to the graphics layer
+                graphicsLayer.add(pointGraphic);                
+              }
+              //End draw points-------------------------------------------------
+
+              //Set map zoom (30,-100,10)---------------------------------------
+              function setZoomAndLocation(theLocation) {
+                  var point = new Point({
+                    x: theLocation[1],
+                    y: theLocation[0],
+                    spatialReference: new SpatialReference({
+                      wkid: 4326
+                    })
+                  });
+                  view.center = point;
+                  view.zoom = theLocation[2];                 
+              }
+              //End set map zoom------------------------------------------------
+              
+              //Remove startup message in the conditions element
+              function removeStartUpCondition() {
+                  var ulElement = document.getElementById('conditions');
+                  var firstLiElement = ulElement.querySelector('li:first-child');
+                  if (firstLiElement && firstLiElement.textContent === 'Conditions listed here') {
+                    ulElement.removeChild(firstLiElement);
+                  }                  
+              }
+              
+              //Add startup message to conditions element
+              function addStartUpCondition() {
+                  const li = document.createElement('li');
+                  li.textContent = "Conditions listed here";
+                  document.getElementById('conditions').appendChild(li);                
+              }
+              
+              //Query form functions--------------------------------------------
+              function addCondition() {
+                  removeStartUpCondition();
+                  const field = document.getElementById('field').value;
+                  const operator = document.getElementById('operator').value;
+                  const value = document.getElementById('value').value;
+              
+                  conditions.push({ field, operator, value });
+              
+                  const li = document.createElement('li');
+                  li.textContent = `${field} ${operator} ${value}`;
+                  document.getElementById('conditions').appendChild(li);
+              }  
+              
+              function clearConditions() {
+                  conditions = [];
+                  document.getElementById('conditions').innerHTML = '';
+                  document.getElementById('results').innerHTML = '';
+                  document.getElementById("results").style.display = "none";
+                  roadwayInventoryfeatureLayer.visible = false;
+                  addStartUpCondition();
+              }              
+              
+              function setLayerDefinitionExpression() {
+                resetLRSIdentify();
+                var outputFieldsSelect = document.getElementById("outputFields");
+                var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value).join(',');
+                var queryWhere = conditions.map(condition => `${condition.field} ${condition.operator} '${condition.value}'`).join(' AND ');
+            
+                roadwayInventoryfeatureLayer.definitionExpression = queryWhere;
+                roadwayInventoryfeatureLayer.visible=true;
+                
+                var query = new Query();
+                query.where = queryWhere;
+                query.outFields = [outputFieldList];
+                query.returnGeometry = true; // no geometry
+                
+                roadwayInventoryfeatureLayer.queryFeatures(query).then(function(results) {
+                    makeTableFromService(results);
+                });    
+                
+                roadwayInventoryfeatureLayer.queryExtent(query).then(function(results){
+                  var extent = results.extent;
+                  // var expandedExtent = extent.expand(1.15); // Expand the extent by 15%          
+                  view.goTo(results.extent);
+                });                
+              }
+              
+              function makeTableFromService(dataArray) {
+                // console.log(dataArray);
+                  //Get field names
+                  var fieldNames = [];
+                  for(var i=0; i<dataArray.fields.length; i++) {
+                      fieldNames.push(dataArray.fields[i].name);
+                  }
+              
+                  // Create a table to display the data
+                  var table = document.createElement('table');
+                  table.classList.add("queryTableResults"); 
+                  table.setAttribute("id", "queryResultTable");
+                  
+                  var header = document.createElement('tr');  
+                  
+                  for (var i=0; i<fieldNames.length; i++) {
+                      var th = document.createElement('th');
+                      th.classList.add("queryTblHeader");
+                      th.textContent = fieldNames[i];
+                      th.addEventListener('click', onHeaderClick); // Add click event listener
+                      header.appendChild(th);
+                  }
+                  table.appendChild(header);
+                  
+                  //Build the table
+                  for(var i=0; i<dataArray.features.length; i++) {
+                      var row = document.createElement('tr');
+                      for (var x in dataArray.features[i].attributes) {
+                          var td = document.createElement('td');
+                          td.textContent = dataArray.features[i].attributes[x];
+                          td.classList.add("queryTblData");
+                          row.appendChild(td);                        
+                      }
+                      table.appendChild(row);
+                  }
+              
+                  var results = document.getElementById('results');
+                  results.innerHTML = ''; // Clear previous results
+                  results.appendChild(table);
+                  document.getElementById("results").style.display = "block";
+              }               
+              
+              function sortTable(columnIndex, isAscending) {
+                  const table = document.querySelector('#results table');
+                  const rows = Array.from(table.rows).slice(1); // Exclude header row
+              
+                  rows.sort((a, b) => {
+                      const aValue = a.cells[columnIndex].textContent;
+                      const bValue = b.cells[columnIndex].textContent;
+              
+                      if (aValue === bValue) {
+                          return 0;
+                      }
+              
+                      return (aValue < bValue ? -1 : 1) * (isAscending ? 1 : -1);
+                  });
+              
+                  for (const row of rows) {
+                      table.appendChild(row);
+                  }
+              }
+              
+              function onHeaderClick(event) {
+                  const th = event.target;
+                  const isAscending = th.getAttribute('data-sort-order') !== 'asc';
+                  const columnIndex = Array.from(th.parentElement.children).indexOf(th);
+              
+                  sortTable(columnIndex, isAscending);
+              
+                  // Update the sort order attribute
+                  Array.from(th.parentElement.children).forEach(header => header.removeAttribute('data-sort-order'));
+                  th.setAttribute('data-sort-order', isAscending ? 'asc' : 'desc');
+              }              
+              //End query form functions----------------------------------------
+              
+              //view event to track drawing-------------------------------------
+              view.on("click", function(event) {
+                var testSketchDiv = document.getElementById("sketchTab");
+                if (testSketchDiv.style.display == "block") {
+                  let point = view.toMap({x: event.x, y: event.y});
+
+                  //add graphic to map
+                  var pointGraphic = new Graphic({
+                        geometry: point,
+                        symbol: {
+                          type: "simple-marker",
+                          color: "red",
+                          size: "10px",
+                          outline: {
+                            color: "red",
+                            width: "2px"
+                          }
+                        }
+                  });      
+                  
+                  graphicsLayer.add(pointGraphic);                  
+                  
+                  linePoints.push([point.longitude,point.latitude]);
+                  if (linePoints.length > 1) {
+                    addLine(linePoints);
+                  }                  
+                }
+              });   
+              //end view event--------------------------------------------------
+              
+              //Adding user drawn lines to the map------------------------------
+              function addLine(points) {
+                var line = new Polyline({
+                  paths: [points],
+                  spatialReference: { wkid: 4326 }
+                });
+        
+                userDrawnSketchLength = geometryEngine.geodesicLength(line, "miles").toFixed(3);
+        
+                lineGraphic = new Graphic({
+                  geometry: line,
+                  symbol: {
+                    type: "simple-line",
+                    color: "red",
+                    width: 4
+                  }
+                });
+        
+                graphicsLayer.add(lineGraphic);
+              } 
+              //End user drawn lines--------------------------------------------
+              
+              //Sketch Cost-----------------------------------------------------
+              function deCalculateCost() {
+        				if (userDrawnSketchLength > 0) {
+        					//Nothing
+        				} else {
+        					alert("Please draw a line before calculating costs.");
+        					return;
+        				}
+        
+        				var deProjectType = document.getElementById("selPrjType").value;
+        				var deAreaType = document.getElementById("selPrjAreaType").value;
+        				var deRouteType = document.getElementById("selPrjRouteType").value;
+        				var deDivided = document.getElementById("selPrjDividedType").value;
+        				var deFrontageRoads = document.getElementById("selPrjFrontageRoads").value;
+        				var deLanes = document.getElementById("txtPrjLanes").value;
+        				var deProjectLength = Math.round(userDrawnSketchLength * 1000) / 1000;
+        
+        				if (deLanes < 1) {
+        					alert("Number of Lanes must be greater than 0.");
+        					return;
+        				}
+        
+        				if (deRouteType == "E") {
+        					deDivided = "H";
+        				}
+        
+        				var userProjectInput = deProjectType + deAreaType + deRouteType + deDivided;
+        				var codeArray = new Array("ADFH","ADFI","BDFH","BDFI","ADGH","ADGI","BDGH","BDGI","ADEH","BDEH","ACFH","ACFI","BCFH","BCFI","ACGH","ACGI","BCGH","BCGI","ACEH","BCEH");
+        				var costArray = new Array(2891181,1523096,679775,410606,1567558,1142895,743221,527346,2500000,585985,3307443,1424801,883591,742257,2948087,1413481,1213519,853382,5463629,917134);
+        				var prjCostPerMile;
+        
+        				var i;
+        				for (i = 0; i < 20; i++) {
+        					if (userProjectInput == codeArray[i]) {
+        						prjCostPerMile = costArray[i];
+        					}
+        				}
+        
+        				var totalRoadTypeCost = prjCostPerMile * deLanes * deProjectLength;
+        				var totalFrontageRoadCost = 0;
+        
+        				if (deFrontageRoads == "2") {
+        					totalFrontageRoadCost = 1250000 * deProjectLength * 4;
+        				} else {
+        					totalFrontageRoadCost = 0;
+        				}
+        
+        				//Summing total project cost and writing to output
+        				var theOutputArea = document.getElementById("deCostResult");
+        				var totalProjectCost = totalRoadTypeCost + totalFrontageRoadCost;
+        				totalProjectCost = Math.round(totalProjectCost / 1000) * 1000;
+        				theOutputArea.innerHTML =	"<br>Project Length: <br>" + deProjectLength + " miles<br><br>Estimated Construction Cost: <br>$" +	totalProjectCost.toLocaleString();
+        			}  
+        			//End Sketch Cost-------------------------------------------------
+              
+              //Export KML------------------------------------------------------
+              function exportKML() {
+                var graphics = graphicsLayer.graphics.toArray();
+                console.log(graphics);
+                
+                var kml = '<?xml version="1.0" encoding="UTF-8"?>' +
+                  '<kml xmlns="http://www.opengis.net/kml/2.2">' +
+                  '<Document><visibility>1</visibility><open>1</open>';
+        
+                graphics.forEach(function (graphic) {
+                  var geometry = graphic.geometry;
+                  var symbol = graphic.symbol;
+                  var title = graphic.popupTemplate.title;
+                  var content = graphic.popupTemplate.content;
+        
+                  // Extract line color and width from symbol if it is a SimpleLineSymbol
+                  var lineColor, lineWidth;
+                  if (symbol instanceof SimpleLineSymbol) {
+                    lineColor = symbol.color.toHex();
+                    lineWidth = symbol.width;
+                  }
+                  
+                  // Remove the "#" symbol
+                  var stringWithoutHash = lineColor.substring(1);
+                  
+                  // Extract the parts to be swapped
+                  var part1 = stringWithoutHash.substring(0, 2); // "00"
+                  var part2 = stringWithoutHash.substring(2, 4); // "bf"
+                  var part3 = stringWithoutHash.substring(4); // "ff"
+                  
+                  // Reorder the parts
+                  var reorderedString = part3 + part2 + part1;
+                  
+                  // Append "7f" to the front of the reordered string
+                  lineColor = "7f" + reorderedString;                  
+        
+                  // Build KML for the graphic
+                  var graphicKML = '<Placemark>' +
+                    '<name>' + title + '</name>' +
+                    '<description>' + content + '</description>';
+                    
+                  // Add line color and width to KML
+                  if (lineColor && lineWidth) {
+                    graphicKML += '<Style>' +
+                      '<LineStyle>' +
+                      '<color>' + lineColor + '</color>' +
+                      '<width>' + lineWidth + '</width>' +
+                      '</LineStyle>' +
+                      '</Style>';
+                  }                    
+        
+                  // Add geometry information to KML
+                  if (geometry.type === 'polyline') {
+                    graphicKML += '<LineString>' + '<coordinates>';
+                    
+                    geometry.paths[0].forEach(function (vertex) {
+                      // Convert Web Mercator coordinates to lat/long
+                      var lngLat = webMercatorUtils.xyToLngLat(vertex[0], vertex[1]);
+                      var lng = lngLat[0].toFixed(6);
+                      var lat = lngLat[1].toFixed(6);
+              
+                      graphicKML += lng + ',' + lat + ' ';
+                    });                    
+                    graphicKML += '</coordinates>' + '</LineString>';
+                  }
+                  graphicKML += '</Placemark>';
+                  kml += graphicKML;
+                });
+        
+                kml += '</Document>' + '</kml>';
+                downloadFile('export.kml', kml);
+              }
+              
+              // Function to download the KML file
+              function downloadFile(filename, content) {
+                var element = document.createElement('a');
+                element.setAttribute('href', 'data:text/plain;charset=utf-8,' + encodeURIComponent(content));
+                element.setAttribute('download', filename);
+                element.style.display = 'none';
+                document.body.appendChild(element);
+                element.click();
+                document.body.removeChild(element);
+              }
+              //End KML Export--------------------------------------------------
+              
+              //Check diagram fields--------------------------------------------
+              function checkLRMInputs() {
+                diagramTitle = document.getElementById("inpSRDRouteID").value;
+                diagramBeginDFO = Number(document.getElementById("inpSRDFromDFO").value);
+                diagramEndDFO = Number(document.getElementById("inpSRDToDFO").value);
+                
+                //Check that Route input is not empty
+                if (document.getElementById("inpSRDRouteID").value.length==0) {
+                    alert("Please enter a Route ID in the route field.");
+                    document.getElementById("inpSRDRouteID").focus();
+                    return;
+                }                
+                
+                //Check that DFO Begin input is not empty
+                if (document.getElementById("inpSRDFromDFO").value.length==0) {
+                    alert("Please enter a number in the Begin DFO field.");
+                    document.getElementById("inpSRDFromDFO").focus();
+                    return;
+                }
+                
+                //Check that DFO End input is not empty
+                if (document.getElementById("inpSRDToDFO").value.length==0) {
+                    alert("Please enter a number in the End DFO field.");
+                    document.getElementById("inpSRDToDFO").focus();
+                    return;
+                }                
+                
+                //Check that Begin DFO is numeric
+                if (isNaN(diagramBeginDFO)) {
+                    alert("Please enter a number in the Begin DFO field.");
+                    document.getElementById("inpSRDFromDFO").value = "";
+                    document.getElementById("inpSRDFromDFO").focus();
+                    return;
+                }
+                
+                //Check that End DFO is numberic
+                if (isNaN(diagramEndDFO)) {
+                    alert("Please enter a number in the End DFO field.");
+                    document.getElementById("inpSRDToDFO").value = "";
+                    document.getElementById("inpSRDToDFO").focus();
+                    return;
+                }           
+                
+                if (diagramBeginDFO>diagramEndDFO) {
+                    alert("Begin DFO must be less than End DFO. Please check roadway DFO fields.");
+                    document.getElementById("inpSRDFromDFO").focus(); 
+                    return;
+                }      
+                
+                //Clearing the LRS identify tools if they area activated
+                if (lrsButtonStatus==true) {
+                  resetLRSIdentify();
+                }              
+                
+                graphicsLayer.removeAll();
+                // inventoryDiagramLog = [];
+                // inventoryDiagramLogAllValues = [];                 
+                
+                //Building the Diagram
+                buildDiagram(diagramTitle,diagramBeginDFO,diagramEndDFO);
+                //Adding the event to the map
+                getLineworkWithM(diagramTitle,diagramBeginDFO,diagramEndDFO,"#000000",6,"Route: "+diagramTitle+"<br>From DFO: "+diagramBeginDFO+"<br>To DFO: "+diagramEndDFO);
+              }         
+                
+              function buildDiagram(diagramTitle,diagramBeginDFO,diagramEndDFO) {
+                var canvasParentDiv = document.getElementById("parentCanvas");
+                canvasParentDiv.style.display = "block";
+                
+                // Set the canvas element's dimensions
+                var canvas = document.getElementById("myCanvas");
+                canvas.width = canvasParentDiv.clientWidth;
+                canvas.height = canvasParentDiv.clientHeight; 
+                
+                maxAttributesOnPage = Math.floor((canvas.height-attributeStartY)/(spacePerAttribute+5)); 
+                console.log("Max Attributes: "+maxAttributesOnPage);
+                numberOfAttributes=0;
+                
+                // Get the 2D rendering context of the canvas
+                var context = canvas.getContext("2d");
+                
+                //Draw neatline
+                drawPolygon([[0,0],[canvas.width,0],[canvas.width,canvas.height],[0,canvas.height],[0,0]],2,"#FFFFFF","#D3D3D3");
+                
+                //Draw header
+                drawPolygon([[0,0],[canvas.width,0],[canvas.width,30],[0,30],[0,0]],1,"#4682B4","#4682B4");
+                
+                //Ruler variables
+                rulerY = 90; // Vertical position of the ruler
+                rulerHeight = 20; // Height of the ruler
+                rulerMargin = 35; // Margin from left and right borders
+                rulerLength = (diagramEndDFO-diagramBeginDFO).toFixed(3); // Length of the ruler in miles  
+                rulerWidth = canvas.width - rulerMargin * 2;
+                pixelsPerMile = rulerWidth / rulerLength;
+                
+                //Draw ruler
+                drawRectangle(rulerMargin,rulerY,rulerWidth,rulerHeight,"#D3D3D3"); 
+                
+                // Calculate upper label positions
+                labelY = rulerY - rulerHeight / 2 - 20; // Y position for upper labels
+                labelPositions = [rulerMargin, rulerMargin + rulerWidth / 4, rulerMargin + rulerWidth / 2, rulerMargin + rulerWidth * 3 / 4, canvas.width - rulerMargin]; // X positions for upper labels
+                labelFactor = roundToDecimalPlace((rulerLength/4),3);
+                labelValue = diagramBeginDFO;
+                 
+                //Diagram heading text
+                drawText("TxDOT",10,22,"#FFFFFF","18");
+                drawTextCenter(diagramTitle,labelPositions[2],22,"#FFFFFF","18");
+                
+                //Mileage Label
+                var txtWidth = context.measureText((diagramEndDFO-diagramBeginDFO).toFixed(3) + " mi.").width;
+                drawText((diagramEndDFO-diagramBeginDFO).toFixed(3) + " mi.",canvas.width-(txtWidth*.6),22,"#FFFFFF","18");                
+                 
+                //DFO Label
+                drawTextCenter("DFO",labelPositions[0],labelY-15,"#000000","10");
+                
+                //Add Datestamp
+                const currentDate = new Date();
+                
+                // Get the individual components of the date
+                const month = String(currentDate.getMonth() + 1);
+                const day = String(currentDate.getDate());
+                const year = String(currentDate.getFullYear());
+                
+                // Create the date stamp string
+                const dateStamp = `${month}/${day}/${year}`;                
+                drawText(dateStamp,canvas.width-35,canvas.height-10,"#000000","12");
+                drawText("Source: TxDOT Roadway Inventory, TPP-Data Management",170,canvas.height-10,"#000000","12");
+                
+                //Draw the upper labels and tick marks
+                for (let i = 0; i < labelPositions.length; i++) {
+                  const labelX = labelPositions[i];
+                  //Draw DFO Labels
+                  drawTextCenter(roundToDecimalPlace(labelValue,3),labelX,labelY,"#000000",12);
+            
+                  //Draw tick marks end caps
+                  if (i==0||i==labelPositions.length-1) {
+                    drawLine(labelX,rulerY-20,labelX,rulerY+40,1,"#000000");
+                  } else {
+                    //Intermediate DFO
+                    drawLine(labelX,rulerY-20,labelX,rulerY,1,"#000000");
+                    //Intermediate MPT
+                    drawLine(labelX,rulerY+20,labelX,rulerY+40,1,"#FF0000");
+                  }
+                  
+                  labelValue += labelFactor;
+                }                
+                
+                //Draw Multiple Control Sections found
+                drawTextCenter("Verifying Control Sections...",labelPositions[2],labelY+115,"#FF0000","12");                
+                
+                var urlFromDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs4?RouteID="+diagramTitle+"&DistanceFromOrigin="+diagramBeginDFO;
+                var urlToDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs4?RouteID="+diagramTitle+"&DistanceFromOrigin="+diagramEndDFO;
+                
+                var diagramBMP = "";
+                var diagramEMP = "";
+                
+                request(urlFromDFO).then(function(response) {
+                    //Getting begin CS and BMP
+                    diagramCSBegin = [response.data[0].CTRL_SECT_LN_NBR,response.data[0].CTRL_SECT_MPT];
+
+                    //Getting end CS and EMP
+                    request(urlToDFO).then(function(response) {
+                      diagramCSEnd = [response.data[0].CTRL_SECT_LN_NBR,response.data[0].CTRL_SECT_MPT];
+                      
+                      //If the Begin and End CS match, call the CS portion of the diagram
+                      if (diagramCSBegin[0]===diagramCSEnd[0]) {
+                        drawMPTLabels = true;
+                        processControlSectionRuler(diagramCSBegin[0],diagramCSBegin[1]);
+                      } else {
+                        //Add the inventory attributes but don't label milepoints
+                        drawMPTLabels = false;
+                        
+                        //Draw white box to clear loading message
+                        drawRectangle(labelPositions[2]-125,labelY+105,250,20,"#FFFFFF");
+                        //Draw Multiple Control Sections found
+                        drawTextCenter("Multiple Control Sections",labelPositions[2],labelY+115,"#FF0000","12");
+                        
+                        if (inventoryDiagramLogAllValues.length>0) {
+                          //Add inventory attributes from the URL
+                          for (var i = 0; i < inventoryDiagramLogAllValues.length; i++) {
+                            addInventoryAttribute(inventoryDiagramLogAllValues[i]);
+                          }
+                        }                        
+                      }
+                    });                                 
+                });  
+              }              
+              //End check diagram fields----------------------------------------
+              
+              function processControlSectionRuler(theCSNBR,theCSBMP) {
+                csNBR = theCSNBR;
+                beginMPT = theCSBMP;
+                var csLabelValue = beginMPT;
+                
+                //Draw the lower labels and tick marks
+                for (let i = 0; i < labelPositions.length; i++) {
+                  const labelX = labelPositions[i];
+                  //Draw MPT Labels
+                  drawTextCenter(roundToDecimalPlace(csLabelValue,3),labelX,labelY+90,"#FF0000",12)                  
+                  csLabelValue += labelFactor;
+                }                 
+                
+                //Adding a dash
+                csNBR = csNBR.substring(0, 4) + "-" + csNBR.substring(4);
+                //Draw white box to clear loading message
+                drawRectangle(labelPositions[2]-125,labelY+105,250,20,"#FFFFFF");                
+                //Draw Control Section Text
+                drawTextCenter("Control Section: "+csNBR,labelPositions[2],labelY+115,"#FF0000","14");  
+                //Milepoint Label
+                drawTextCenter("Milepoint",labelPositions[0],labelY+105,"#FF0000","10");
+                
+                if (inventoryDiagramLogAllValues.length>0) {
+                  //Add inventory attributes from the URL
+                  for (var i = 0; i < inventoryDiagramLogAllValues.length; i++) {
+                    addInventoryAttribute(inventoryDiagramLogAllValues[i]);
+                  }
+                }
+              }              
+              
+              function addInventoryAttribute(inventoryAttribute) {
+                if (numberOfAttributes>maxAttributesOnPage) {
+                  alert("Maximum number of attributes reached.");
+                  return;
+                }
+          
+                inventoryDiagramLog.push(inventoryAttribute[2]);
+                var inventoryService = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/" + inventoryAttribute[0] + "/FeatureServer/0";
+                
+                if (inventoryAttribute[2]=="Reference Markers") {
+                  var theFields = "RTE_NM,DFO," + inventoryAttribute[1];                 
+                  var theQuery = "RTE_NM='" + diagramTitle + "'" + " AND (DFO < " + diagramEndDFO + " AND DFO > " + diagramBeginDFO + ")";
+                  var theOrder = "RTE_NM ASC, DFO ASC";  
+                  var theRequestURL = inventoryService + "/query?f=json&orderByFields=" + theOrder + "&returnGeometry=false&where=" + theQuery + "&outFields=" + theFields;                    
+                  
+                  //Request for Points
+                  request(theRequestURL).then(function(response) {
+                      processInventoryAttributePoint(response,inventoryAttribute[2]);
+                  });                  
+                } else {
+                  var theFields = "RTE_NM,BEGIN_DFO,END_DFO," + inventoryAttribute[1];                 
+                  var theQuery = "RTE_NM='" + diagramTitle + "'" + " AND (BEGIN_DFO < " + diagramEndDFO + " AND END_DFO > " + diagramBeginDFO + ")";
+                  var theOrder = "RTE_NM ASC, BEGIN_DFO ASC"; 
+                  var theRequestURL = inventoryService + "/query?f=json&orderByFields=" + theOrder + "&returnGeometry=false&where=" + theQuery + "&outFields=" + theFields;                    
+                  
+                  //Loading status message that get effectively erased
+                  drawTextCenter("Loading " + inventoryAttribute[2],labelPositions[2],attributeStartY+(numberOfAttributes*spacePerAttribute)+15,"#000000","10");                  
+                  
+                  //Request for Lines
+                  request(theRequestURL).then(function(response) {
+                      processInventoryAttribute(response,inventoryAttribute[2]);
+                  });                  
+                }
+              }
+              
+              function processInventoryAttributePoint(response,theInventoryLabel) {
+                var returnedFeatures = response.data.features;
+                console.log(returnedFeatures);
+                var attBeginDFO;
+                var attValueGroup;
+                var attValue=45;
+                var dfoValue;
+                var mptValue;
+                
+                for (var i = 0; i < returnedFeatures.length; i++) {
+                  attBeginDFO = returnedFeatures[i].attributes.DFO;
+                  attValueGroup = returnedFeatures[i].attributes;
+                  
+                  const jsonArray = Object.entries(attValueGroup); 
+                  
+                  for (let j = 0; j < jsonArray.length; j++) {
+                    const [key, value] = jsonArray[j];
+                    if (key=="RTE_NM"||key=="DFO") {
+                      //nothing
+                    } else {
+                      attValue = value;
+                    }
+                  }
+                  
+                  var eventBeginPixelValue = rulerMargin+(pixelsPerMile*(attBeginDFO-diagramBeginDFO));
+                  //Draw background rectangle for Marker Number
+                  drawRectangle(eventBeginPixelValue-6,attributeStartY-127,12,34,"#008000");
+                  attValue = attValue.toString();
+                  
+                  //Draw stacked text
+                  var markerTextStartY = attributeStartY-116;
+                  
+                  //Offsetting based on marker character length
+                  if (attValue.length==1) {
+                    markerTextStartY+=10
+                  }
+                  if (attValue.length==2) {
+                    markerTextStartY+=5
+                  }
+                  
+                  for (let j = 0; j < attValue.length; j++) {
+                    const character = attValue.charAt(j);
+                    console.log(character);
+                    drawText(character,eventBeginPixelValue,markerTextStartY,"#FFFFFF",12);
+                    markerTextStartY += 10;
+                  }                    
+                }
+              }              
+            
+              function processInventoryAttribute(response,theInventoryLabel) {
+                var returnedFeatures = response.data.features;
+                var attBeginDFO;
+                var attEndDFO;
+                var attValueGroup;
+                var attValue;
+                var dfoValue;
+                var mptValue;
+                
+                for (var i = 0; i < returnedFeatures.length; i++) {
+                  attBeginDFO = returnedFeatures[i].attributes.BEGIN_DFO;
+                  attEndDFO = returnedFeatures[i].attributes.END_DFO;
+                  attValueGroup = returnedFeatures[i].attributes;
+                  
+                  const jsonArray = Object.entries(attValueGroup); 
+                  
+                  for (let j = 0; j < jsonArray.length; j++) {
+                    const [key, value] = jsonArray[j];
+                    if (key=="RTE_NM"||key=="BEGIN_DFO"||key=="END_DFO") {
+                      //nothing
+                    } else {
+                      attValue = value;
+                    }
+                  }
+                  
+                  //Clip to graphic DFO range
+                  if (attBeginDFO<diagramBeginDFO) {
+                    attBeginDFO=diagramBeginDFO;
+                  }
+                  if (attEndDFO>diagramEndDFO) {
+                    attEndDFO=diagramEndDFO;
+                  }                
+                  
+                  //Selecting alternating colors
+                  const [darkColor, lightColor] = diagramColors[numberOfAttributes];
+                  const selectedColor = i % 2 === 0 ? lightColor : darkColor;                  
+                  
+                  var eventBeginPixelValue = rulerMargin+(pixelsPerMile*(attBeginDFO-diagramBeginDFO));
+                  var eventEndPixelValue = (pixelsPerMile*(attEndDFO-attBeginDFO));
+                  
+                  //Draw event
+                  drawRectangle(eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute),eventEndPixelValue,20,selectedColor);
+                  
+                  //If length of event is greater than label for event then draw the label
+                  var canvas = document.getElementById("myCanvas");
+                  var context = canvas.getContext("2d");
+                  var txtWidth = context.measureText(attValue).width+10;
+
+                  if (txtWidth<eventEndPixelValue) {
+                    //Draw label for event
+                    drawTextCenter(attValue,eventBeginPixelValue+(Math.round(eventEndPixelValue/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+15,"#FFFFFF",13);                  
+                  }
+                  
+                  if (i>0) {
+                    //Draw vertical dividing events
+                    drawLine(eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute),eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute)+20,1,"#000000");                    
+                    
+                    //Not drawing labels if event is too small
+                    if (txtWidth<eventEndPixelValue) {
+                      //Draw DFO label
+                      dfoValue = roundToDecimalPlace(((eventBeginPixelValue-rulerMargin)/pixelsPerMile)+diagramBeginDFO,3);
+                      drawTextCenter(dfoValue,eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute)-3,"#000000",11); 
+                      
+                      //Draw MPT label
+                      if (drawMPTLabels==true) {
+                        mptValue = roundToDecimalPlace(((eventBeginPixelValue-rulerMargin)/pixelsPerMile)+beginMPT,3);;
+                        drawTextCenter(mptValue,eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute)+31,"#FF0000",11);                        
+                      }
+                    }
+                  }
+                }
+                drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
+                numberOfAttributes+=1;
+              }
+              
+              //Drawing functions-----------------------------------------------
+              function drawCircle(begX,begY,theRadius,theColor) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.beginPath();
+                  ctx.fillStyle = theColor;
+                  ctx.arc(begX,begY,theRadius,0,2*Math.PI);
+                  ctx.fill();
+                  // ctx.stroke();
+              }              
+              
+              function drawRectangle(begX,begY,theWidth,theHeight,theColor) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.fillStyle = theColor;
+                  ctx.fillRect(begX,begY,theWidth,theHeight);
+                  //   ctx.stroke();
+              }       
+              
+              function drawPolygon(theCoords,theWidth,fillColor,outlineColor,theScale) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.scale(theScale, theScale);
+                  ctx.beginPath();
+                  ctx.lineWidth = theWidth;
+              
+                  //First point
+                  ctx.moveTo(theCoords[0][0],theCoords[0][1]);
+              
+                  //Remainder of points
+                  for (var i = 0; i < theCoords.length; i++) {
+                      if (i > 0) {
+                          ctx.lineTo(theCoords[i][0],theCoords[i][1]);
+                      }
+                  }
+              
+                  //Closing the polygon
+                  ctx.closePath();
+              
+                  //Colors and styles
+                  ctx.fillStyle = fillColor;
+                  ctx.fill();
+                  ctx.strokeStyle = outlineColor;
+                  ctx.stroke();
+              }      
+              
+              function drawPoint(begX,begY,theRadius,theColor) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.beginPath();
+                  ctx.fillStyle = theColor;
+                  ctx.arc(begX,begY,theRadius,0,2*Math.PI);
+                  ctx.fill();
+              }
+              
+              function drawLine(begX,begY,endX,endY,theWidth,theColor) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.beginPath();
+                  ctx.lineWidth = theWidth;
+                  ctx.moveTo(begX,begY);
+                  ctx.lineTo(endX,endY);
+                  ctx.strokeStyle = theColor;
+                  ctx.stroke();
+              }              
+              
+              function clearDrawings() {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.setTransform(1, 0, 0, 1, 0, 0);
+                  ctx.clearRect(0, 0, canvas.width, canvas.height);
+              }      
+              
+              function drawText(theText,theX,theY,theColor,theSize) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.font = theSize + "px sans-serif";
+                  ctx.fillStyle = theColor;
+                  // ctx.textAlign = "center";
+                  ctx.fillText(theText,theX,theY);
+              }   
+              
+              function drawTextCenter(theText,theX,theY,theColor,theSize) {
+                  var canvas = document.getElementById("myCanvas");
+                  var ctx = canvas.getContext("2d");
+                  ctx.font = theSize + "px sans-serif";
+                  ctx.fillStyle = theColor;
+                  ctx.textAlign = "center";
+                  ctx.fillText(theText,theX,theY);
+              }               
+              //End drawing functions-------------------------------------------
+              
+              //Numberic Operations---------------------------------------------
+              function roundToDecimalPlace(value,decimals) {
+                  return Number(Math.round(value+'e'+decimals)+'e-'+decimals);
+              }
+              
+              //Graphic Export Options------------------------------------------
+              function exportJPEG() {
+                  var exportCanvas = document.getElementById("myCanvas");
+                  var dataURL = exportCanvas.toDataURL();
+              
+                  if (window.navigator.msSaveBlob) {
+                      window.navigator.msSaveBlob(exportCanvas.msToBlob(), "exportImage.jpeg");
+                  }
+                  else {
+                      const a = document.createElement("a");
+                      document.body.appendChild(a);
+                      a.href = exportCanvas.toDataURL('image/jpeg', 1.0);
+                      a.download = "exportImage.jpeg";
+                      a.click();
+                      document.body.removeChild(a);
+                  }
+              }        
+              
+              function exportPNG() {
+                  var exportCanvas = document.getElementById("myCanvas");
+                  var dataURL = exportCanvas.toDataURL();
+                  
+                  if (window.navigator.msSaveBlob) {
+                      window.navigator.msSaveBlob(exportCanvas.msToBlob(), "exportImage.png");
+                  }
+                  else {
+                      const a = document.createElement("a");
+                      document.body.appendChild(a);
+                      a.href = exportCanvas.toDataURL();
+                      a.download = "exportImage.png";
+                      a.click();
+                      document.body.removeChild(a);
+                  }
+              }       
+              //End Export Options----------------------------------------------
+
+              //Show or Hide Div------------------------------------------------
+              function toggleVisibility(theElement) {
+                var div = document.getElementById(theElement);
+                if (div.style.display === "none") {
+                  div.style.display = "block";
+                } else {
+                  div.style.display = "none";
+                }
+              }
+              //----------------------------------------------------------------
+
+              //Download controls
+              function openModal() {
+          			document.getElementById("modal").style.display = "block";
+          		}
+          
+          		function closeModal() {
+          			document.getElementById("modal").style.display = "none";
+          		}
+          		
+          		function zoomToGraphicExtent() {
+                var graphicsExtent = graphicsLayer.graphics.reduce(function(extent, graphic) {
+                  return extent ? extent.union(graphic.geometry.extent) : graphic.geometry.extent;
+                }, null);
+                
+                view.goTo(graphicsExtent);                
+          		}
+          
+              //Export Query to URL---------------------------------------------
+              function exportQueryToURL() {
+                var outputFieldsSelect = document.getElementById("outputFields");
+                var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value).join(',');
+                var queryWhere = conditions.map(condition => `${condition.field}${condition.operator}${condition.value}`).join(' AND ');                
+                
+                var arrayString = "?tab=query&query=" + outputFieldList + "|" + queryWhere;
+                var fullString = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html" + arrayString;
+                
+                navigator.clipboard.writeText(fullString).then(() => {
+                      //nothing
+                }); 
+                
+                document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" +fullString;
+                openModal();                
+              }
+              //----------------------------------------------------------------
+              
+              //Export Diagram to URL-------------------------------------------
+              function exportDiagramToURL () {
+                var diagramAttributes = inventoryDiagramLog.join(',');
+                var arrayString = "?tab=diagram&diagram=" + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO;
+                var fullString = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html" + arrayString + "|" + diagramAttributes;
+                
+                navigator.clipboard.writeText(fullString).then(() => {
+                      //nothing
+                }); 
+                
+                document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" + fullString;
+                openModal();                  
+              }
+              //----------------------------------------------------------------
+              
+              //Export Graphics to URL------------------------------------------
+              function exportGraphicsToURL() {
+                var outputArray = [];
+                var graphics = graphicsLayer.graphics.items;
+                if (graphics.length > 0) {
+                  for (var i = 0; i< graphics.length; i++) {
+                    outputArray.push(graphics[i].attributes);
+                  }
+                }                
+                
+                var arrayString = outputArray.map(function(innerArray) {
+                  return innerArray.join(",");
+                }).join("|");    
+                
+                arrayString = "?tab=event&event=" + arrayString;
+                var replacedString = arrayString.replace(/#/g, "%23");
+                replacedString = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html" + replacedString;
+                
+                navigator.clipboard.writeText(replacedString).then(() => {
+                      //nothing
+                }); 
+                
+                document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" +replacedString;
+                openModal();
+              }  
+              //End Export Graphics---------------------------------------------              
+              
+              function resetLRSIdentify() {
+                graphicsLayerLRSIdentify.removeAll();
+                resetAllTools();
+                clearInnerHTML("mapClickResults");
+                lrsButtonStatus=false;                
+              }
+            // end require - - -        
+            });          
+        </script>
+    </head>
+    <body>
+        <div id="header">
+            <div class="logo">&nbsp;&nbsp;TxDOT - Statewide Planning Map</div>
+            <nav>
+                <a target="_blank" title="View the Planning Map Help Document" href="https://txdot.maps.arcgis.com/apps/Cascade/index.html?appid=a9c6a2a7ff7944c19ce532968db96dd8">Help</a>
+                <a target="_blank" title="About the Planning Map" href="https://www.txdot.gov/projects/project-tracker.html">About</a>
+                <a href="mailto:tpp-gis@txdot.gov" title="Contact TPP-GIS">Contact</a>
+                &nbsp;&nbsp;
+            </nav>        
+        </div>
+        <div id="left-div">
+            <div id="tabsParent" class="tabsContainer">
+                <div class="tabsChild" id="baseMaps" title="Base Maps and Overlays">Map</div>
+                <div class="tabsChild" id="dataQuery" title="View Inventory Data">Query</div>
+                <div class="tabsChild" id="eventForm" title="Add Lines to the Map">Event</div>                
+                <div class="tabsChild" id="roadwayDiagram" title="Create a Simplified Roadway Diagram">SRD</div>                
+                <div class="tabsChild" id="graphicSketch" title="Sketch a Route and Estimate Costs">Plan</div>
+            </div>
+            <div class="tocTabs" id="mapTab">
+        			<table id="tocMaps">
+        			<tr><th class="basemapHeader">Basemaps</th></tr>
+        			<tr><td class="baseMapList" id='lstTxDOT'>TxDOT</td></tr>
+        			<tr><td class="baseMapList" id='lstLightGray'>TxDOT Light Gray</td></tr>
+        			<tr><td class="baseMapList" id='lstDarkGray'>TxDOT Dark Gray</td></tr>
+        			<!--<tr><td class="baseMapList" id='lstImagery'>Texas Imagery Service</td></tr>        			-->
+        			<tr><td class="baseMapList" id='lstESRI'>Esri Streets</td></tr>
+        			<!--<tr><td class="baseMapList" id='lstOSM'>Open Street Map</td></tr>-->
+              <tr><th class="basemapHeader">Overlays</th></tr>
+        			<tr><td id="CLEAR" style="color:red; font-weight: bold;">Clear Overlays</td></tr>
+        			<tr><td id='AADT'>AADT</td></tr>
+			        <tr><td id='Control_Section'>Control Sections</td></tr>        			
+        			<tr><td id='TxDOT_Projects'>TxDOT Projects</td></tr>
+        			</table>
+            </div>
+            <div class="tocTabsQuery" id="queryTab">
+              Choose Output Fields<br><br>
+              <select id="outputFields" multiple size="10"></select>
+              Build Query<br><br>
+              <select id="field"></select>
+              <select id="operator">
+                  <option value="=">Equals</option>
+                  <option value="<>">Does not equal</option>
+                  <option value="<">Less than</option>
+                  <option value=">">Greater than</option>
+                  <option value="<=">Less than or equal to</option>
+                  <option value=">=">Greater than or equal to</option>
+                  <!--<option value="LIKE">LIKE (use % as a wildcard)</option>-->
+              </select>
+              <input type="text" id="value" placeholder="Enter a value to query">
+              <button class="queryButtonClass" id="btnAddCondition">Add Condition</button>
+              <ul id="conditions">
+                <li>Conditions listed here</li>
+              </ul><br>
+              <button class="queryButtonClass" id="btnRunQuery">Run Query</button>
+              <button class="queryButtonClass" id="btnClearConditions">Clear</button>
+              <button class="queryButtonClass" id="btnToggleTableView">Show/Hide Table</button>              
+              <button class="queryButtonClass" id="btnExportToCSV">Export CSV</button>
+              <button id="btnQueryGenerateURL" class="queryButtonClass">Share URL</button>               
+            </div>
+            <div class="tocTabsDiagram" id="diagramTab">
+                Roadway<br><br>
+                <input id="inpSRDRouteID" type="text" value="" placeholder="Route ID - Example: US0290-KG">
+                <input id="inpSRDFromDFO" type="text" value="" placeholder="Begin Measure - Example: 15">
+                <input id="inpSRDToDFO" type="text" value="" placeholder="End Measure - Example: 20">
+                <button id="btnUpdateLRM" class="queryButtonClass">Add to Diagram</button>
+                <br>
+                <br>
+                Inventory<br><br>
+                <select id="riAttributes" name="riAttribute">
+                    TxDOT_Base_Thickness
+                    <option value="TxDOT_AADT_SRD,AADT_CUR,AADT">Annual Average Daily Traffic 2021</option>
+                    <option value="TxDOT_Route_City_SRD,CITY_NM,City Limit">City</option>                    
+                    <option value="TxDOT_Route_County_SRD,CNTY_NM,County">County</option>
+                    <option value="TxDOT_Route_District_SRD,DIST_NM,District">District</option>
+                    <option value="TxDOT_Functional_Classification_SRD,FC_DESC,Functional System">Functional System</option>
+                    <option value="TxDOT_Median_Width_SRD,MDN_WIDTH,Median Width">Median Width</option>
+                    <option value="TxDOT_Number_of_Through_Lanes_SRD,LANE_CNT,Number of Lanes">Number of Lanes</option> 
+                    <option value="TxDOT_Truck_Percent_SRD,TRK_PCT,Percent Truck">Percent Truck 2021</option>
+                    <option value="TxDOT_Reference_Markers_SRD,MRKR_NBR,Reference Markers">Reference Markers</option>
+                    <option value="TxDOT_Roadbed_Base_SRD,BASE_TYPE_DSCR,Roadbed Base">Roadbed Base</option>
+                    <option value="TxDOT_Base_Thickness_SRD,BASE_THCK,Base Thickness">Roadbed Base Thickness</option>
+                    <option value="TxDOT_Roadbed_Width_SRD,RDBD_WIDTH,Roadbed Width">Roadbed Width</option>
+                    <option value="TxDOT_Minimum_Right_of_Way_Width_SRD,ROW_WIDTH,ROW Width">ROW Width (minimum)</option>
+                    <option value="TxDOT_Inside_Shoulder_Width_SRD,WIDTH,Shoulder Width Inside">Shoulder Width Inside</option>
+                    <option value="TxDOT_Outside_Shoulder_Width_SRD,WIDTH,Shoulder Width Outside">Shoulder Width Outside</option>                    
+                    <option value="TxDOT_Speed_Limits_SRD,SPD_LMT,Speed Limit">Speed Limit</option>
+                    <option value="TxDOT_Roadbed_Surface_SRD,SRFC_TYPE,Surface Type">Surface Type</option>                    
+                </select> 
+                <button id="btnInventoryUpdateLRM" class="queryButtonClass">Add to Diagram</button>
+                <button id="btnToggleDiagramView" class="queryButtonClass">Show/Hide Diagram</button>                
+                <button id="btnClearDiagramView" class="queryButtonClass">Clear</button>
+                <button id="btnExportPNG" class="queryButtonClass">Export PNG</button>
+                <button id="btnExportJPEG" class="queryButtonClass">Export JPEG</button> 
+                <button id="btnDiagramGenerateURL" class="queryButtonClass">Share URL</button>                 
+            </div>
+            <div class="tocTabsEvent" id="eventTab">
+                Add Events to the Map<br><br>
+                <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
+                <input type="number" id="eventBeginDFO" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000"/>
+                <input type="number" id="eventEndDFO" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
+                <select id="eventColors" name="Color">
+                    <option value="#000000">Black</option>
+                    <option value="#cc6600">Brown</option>
+                    <option value="#009933">Green</option>
+                    <option value="#00bfff">Light Blue</option>
+                    <option value="#ff00ff">Magenta</option>
+                    <option value="#ff8000">Orange</option>
+                    <option value="#ff0000">Red</option>
+                    <option value="#14375a">TxDOT Blue</option>
+                    <option value="#ffff00">Yellow</option>
+                  </select>
+                <input type="number" id="eventWidth" name="Width" placeholder="Line Width - Example: 4" min="1" max="8"/>
+                <input type="text" id="eventDescription" placeholder="Description for the Pop-Up" name="Desc"/>
+                <br>
+                <button id="btnEventMap" class="queryButtonClass">Add to Map</button>  
+                <button id="btnRemoveLast" class="queryButtonClass">Remove Last</button>
+                <button id="btnRemoveAll" class="queryButtonClass">Clear</button>
+                <button id="btnExportToKML" class="queryButtonClass">Export KML</button>                 
+                <button id="btnGenerateURL" class="queryButtonClass">Share URL</button>                 
+            </div>            
+            <div class="tocTabsSketch" id="sketchTab">
+              <div id="sketchContents">
+                * This tool is for planning purposes.  
+                It is not a tool for roadway design or engineering purposes.<br><br>  
+                Construction cost estimates are calculated using average project cost by type from August 2003 to August 2013 in 2013 dollars.<br><br>  
+                Frontage roads assumed two lanes per direction when selected.  
+      					<br><br>
+    						<select id="selPrjType" name="selPrjType">
+    							<option value="A">New Roadway</option>
+    							<option value="B">Reconstruction</option>
+    						</select>
+    						<br>
+    						<select id="selPrjAreaType" name="selPrjAreaType">
+    							<option value="C">Urban</option>
+    							<option value="D">Rural</option>
+    						</select>
+    						<br>
+    						<select id="selPrjRouteType" name="selPrjRouteType">
+    							<option value="E">Freeway</option>
+    							<option value="F">Arterial</option>
+    							<option value="G">Collector</option>
+    						</select>
+    						<br>
+    						<select id="selPrjDividedType" name="selPrjDividedType">
+    							<option value="H">Divided</option>
+    							<option value="I">Undivided</option>
+    						</select>
+    						<br>
+    						<select id="selPrjFrontageRoads" name="selPrjFrontageRoads">
+    							<option value="1">No</option>
+    							<option value="2">Yes</option>
+    						</select>
+    						<br>
+    						<input type="number" id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
+    						<br>
+    						<button id="btnCalcCost" class="queryButtonClass" title="Estimate Project Cost">Calculate Cost</button>
+    						<button id="btnClearProject" class="queryButtonClass" title="Clear Project">Clear</button>
+    						<div id="deCostResult"></div>      					
+              </div>
+            </div>            
+        </div>
+        <div id="viewDiv">
+            <!--Map Tools-->
+            <div id="toolsParent" class="toolsContainer">
+                <div class="toolsChild" id="measureButton" title="Measure">M</div>
+                <div class="toolsChild" id="lrsButton" title="LRS Identify">L</div>
+                <div class="toolsChild" id="googleMaps" title="Jump to Google">J</div>
+                <div class="toolsChild" id="print" title="Print Map">P</div>
+                <div class="toolsChild" id="legend" title="View Legend">L</div>
+            </div>   
+            <div id="marginal">
+            <!--Map coordinates and scale bar-->
+            </div>
+            <div id="mapClickResults">
+            <!--Measure and LRS results, Legend-->
+            </div>     
+            <div id="searchTool" title="Search Tool">S</div>
+            <div id="resetMap" title="Clear and reset map">&#x21BB;</div>
+            <div id="results">Build a query and view the results here...</div>
+            <div id="parentCanvas">
+    			      <canvas id="myCanvas">
+                    <!--custom graphics here-->
+                </canvas>
+            </div>  
+            <div id="modal" class="modal">
+          		<div class="modal-content">
+          			<span id="spnClose" class="close">&times;</span>
+          			  <div id="generalPurpose"></div>
+          		</div>
+          	</div>            
+        </div>
+    </body>
+</html>
