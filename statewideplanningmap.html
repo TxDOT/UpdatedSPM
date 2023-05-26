@@ -365,6 +365,7 @@
             var diagramEndDFO;   
             var inventoryDiagramLog = [];
             var inventoryDiagramLogAllValues = [];
+            let itemArr = []
             var drawMPTLabels = true;
             
             var diagramColors = [
@@ -403,14 +404,30 @@
               "esri/geometry/geometryEngine",
               "esri/geometry/support/webMercatorUtils",
               "esri/symbols/SimpleLineSymbol",
-            ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol) {
+              "esri/layers/OpenStreetMapLayer"
+            ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
+                        request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer) {
               
               var map = new Map({
                   //map content added below
               });
+
+              //load toc feature layer
+
+              let tocFeatureLayer = new FeatureLayer({
+                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers/FeatureServer/0"
+              })
               
+              //load startup function
+              startup()
+
+              function startup(){
+                //Load map options on startup
+                window.onload = readUrlParams;
+                loadTOCContent()
+              }
               //Load map options on startup
-              window.onload = readUrlParams;  
+              //window.onload = readUrlParams;  
               
               //Drag and Drop---------------------------------------------------
               var dropZone = document.getElementById('viewDiv');
@@ -911,36 +928,36 @@
               }); 
               
               //TxDOT map listener
-              const lstTxDOTListener = document.querySelector('#lstTxDOT');
-              lstTxDOTListener.addEventListener('click', (event) => {
-                resetAllBaseMapItems();
-                activateBaseMapItem("lstTxDOT");
-                txdotLayer.visible=true;
-              }); 
+              // const lstTxDOTListener = document.querySelector('#lstTxDOT');
+              // lstTxDOTListener.addEventListener('click', (event) => {
+              //   resetAllBaseMapItems();
+              //   activateBaseMapItem("lstTxDOT");
+              //   txdotLayer.visible=true;
+              // }); 
               
-              //Light gray map listener
-              const lstLightGrayListener = document.querySelector('#lstLightGray');
-              lstLightGrayListener.addEventListener('click', (event) => {
-                resetAllBaseMapItems();
-                activateBaseMapItem("lstLightGray");
-                lightGrayLayer.visible=true;
-              });   
+              // //Light gray map listener
+              // const lstLightGrayListener = document.querySelector('#lstLightGray');
+              // lstLightGrayListener.addEventListener('click', (event) => {
+              //   resetAllBaseMapItems();
+              //   activateBaseMapItem("lstLightGray");
+              //   lightGrayLayer.visible=true;
+              // });   
               
-              //Dark gray map listener
-              const lstDarkGrayListener = document.querySelector('#lstDarkGray');
-              lstDarkGrayListener.addEventListener('click', (event) => {
-                resetAllBaseMapItems();
-                activateBaseMapItem("lstDarkGray");
-                darkGrayLayer.visible=true;
-              });    
+              // //Dark gray map listener
+              // const lstDarkGrayListener = document.querySelector('#lstDarkGray');
+              // lstDarkGrayListener.addEventListener('click', (event) => {
+              //   resetAllBaseMapItems();
+              //   activateBaseMapItem("lstDarkGray");
+              //   darkGrayLayer.visible=true;
+              // });    
               
-              //ESRI Streets map listener
-              const lstESRIListener = document.querySelector('#lstESRI');
-              lstESRIListener.addEventListener('click', (event) => {
-                resetAllBaseMapItems();
-                activateBaseMapItem("lstESRI");
-                streetsLayer.visible=true;
-              });               
+              // //ESRI Streets map listener
+              // const lstESRIListener = document.querySelector('#lstESRI');
+              // lstESRIListener.addEventListener('click', (event) => {
+              //   resetAllBaseMapItems();
+              //   activateBaseMapItem("lstESRI");
+              //   streetsLayer.visible=true;
+              // });               
               
               //Clear and Reset Map Listener
               const resetListener = document.querySelector('#resetMap');
@@ -1217,7 +1234,11 @@
               }       
               
               function resetAllBaseMapItems() {
-                resetBaseMapItem("lstTxDOT");
+                let tocBasemapItems = itemArr.filter(x => x.tocType === "Basemap")
+                tocBasemapItems.forEach((bsmap)=>{
+                  resetBaseMapItem(bsmap.name)
+                })
+                resetBaseMapItem("lstTxDOT"); 
                 resetBaseMapItem("lstLightGray");
                 resetBaseMapItem("lstDarkGray");
                 //resetBaseMapItem("lstImagery");
@@ -2442,6 +2463,87 @@
                 clearInnerHTML("mapClickResults");
                 lrsButtonStatus=false;                
               }
+
+              //load Table of Contents items
+              async function loadTOCContent(){
+                let returnToc = await tocFeatureLayer.queryFeatures()
+                
+                returnToc.features.forEach((x)=>{
+                  let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
+                  //console.log(splitUrl)
+                  itemArr.push({name: x.attributes.name, url: splitUrl,tocType: x.attributes.tocType})
+                })
+
+                createTOC(itemArr)  
+                addBasemapAndFeatureToMap(itemArr)
+                  
+                console.log(map)
+                // console.log(map)
+              }
+
+              function createTOC(tocObj){
+                console.log(tocObj)
+                const tocTable = document.getElementById("tocMaps")
+                tocTable.innerHTML = `
+                <tr><th class="basemapHeader">Basemap</th></tr>
+                  <tbody id="basemapRow">
+                  </tbody>
+                <tr><th class="basemapHeader">Overlays</th></tr>
+                  <tbody id="featRow"> 
+                  </tbody>
+                `
+                for(i=0; i < tocObj.length; i++){
+                  let tr = document.createElement("tr")
+                  let td = document.createElement("td")
+                  td.id = `${tocObj[i].name}`
+                  td.className = "baseMapList"
+                  td.appendChild(document.createTextNode(`${tocObj[i].name}`))
+                  tr.appendChild(td)
+
+                  if(tocObj[i].tocType === "FeatureLayer"){
+                    document.getElementById("featRow").appendChild(tr)
+                    continue
+                  }
+                  document.getElementById("basemapRow").appendChild(tr)
+                }
+              } 
+
+              function addBasemapAndFeatureToMap(featLayerUrlArr){
+                for(i=0; i < featLayerUrlArr.length; i++){
+                  //add Feature Layer Info
+                  if(!featLayerUrlArr[i].url) continue //remove once Inrix set up
+                  if(featLayerUrlArr[i].tocType === "FeatureLayer"){
+                    featLayerUrlArr[i].url.forEach((x)=>{
+                    if(x.split("FeatureServer/").length < 1){
+                      //add esri subtype sublayer 
+                      
+                    }
+                    let addFeatureLayer = new FeatureLayer({
+                                                url: featLayerUrlArr[i].url,
+                                                visible: false
+                                          })
+                    map.add(addFeatureLayer)
+                    })
+                    continue
+                  }
+
+                  //add BaseMap info
+                  if(featLayerUrlArr[i].name !== "Open Street Map"){
+                    let vectorBaseMap = new VectorTileLayer({
+                      url: featLayerUrlArr[i].url,
+                      visible: false
+                    })
+                    map.add(vectorBaseMap)
+                    continue
+                  }
+
+                  let OSMBasemap = new OpenStreetMapLayer({
+                    visible: false
+                  })
+
+                  map.add(OSMBasemap)
+                }                  
+              }
             // end require - - -        
             });          
         </script>
@@ -2466,18 +2568,18 @@
             </div>
             <div class="tocTabs" id="mapTab">
         			<table id="tocMaps">
-        			<tr><th class="basemapHeader">Basemaps</th></tr>
+        			<!-- <tr><th class="basemapHeader">Basemaps</th></tr>
         			<tr><td class="baseMapList" id='lstTxDOT'>TxDOT</td></tr>
         			<tr><td class="baseMapList" id='lstLightGray'>TxDOT Light Gray</td></tr>
-        			<tr><td class="baseMapList" id='lstDarkGray'>TxDOT Dark Gray</td></tr>
+        			<tr><td class="baseMapList" id='lstDarkGray'>TxDOT Dark Gray</td></tr> -->
         			<!--<tr><td class="baseMapList" id='lstImagery'>Texas Imagery Service</td></tr>        			-->
-        			<tr><td class="baseMapList" id='lstESRI'>Esri Streets</td></tr>
+        			<!-- <tr><td class="baseMapList" id='lstESRI'>Esri Streets</td></tr> -->
         			<!--<tr><td class="baseMapList" id='lstOSM'>Open Street Map</td></tr>-->
-              <tr><th class="basemapHeader">Overlays</th></tr>
+              <!-- <tr><th class="basemapHeader">Overlays</th></tr>
         			<tr><td id="CLEAR" style="color:red; font-weight: bold;">Clear Overlays</td></tr>
         			<tr><td id='AADT'>AADT</td></tr>
 			        <tr><td id='Control_Section'>Control Sections</td></tr>        			
-        			<tr><td id='TxDOT_Projects'>TxDOT Projects</td></tr>
+        			<tr><td id='TxDOT_Projects'>TxDOT Projects</td></tr> -->
         			</table>
             </div>
             <div class="tocTabsQuery" id="queryTab">
