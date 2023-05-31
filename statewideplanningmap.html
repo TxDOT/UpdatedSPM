@@ -43,6 +43,11 @@
                 color: white;
                 font-size: 12px;
                 text-decoration: none;
+            }
+            #layerSearch{
+              position: relative;
+              width: 90%;
+              left: .2rem;
             }        
             #left-div {
                 position: absolute;
@@ -56,7 +61,7 @@
             }
             #left-div::-webkit-scrollbar {
               width: 1px;
-            }            
+            }       
             #viewDiv {
                 position: absolute;
                 top: 30px;
@@ -167,7 +172,14 @@
               border-radius: 5px;
               box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
               cursor: pointer;
-            }    
+            }
+
+            #searchBox{
+              position: relative;
+              top: 0.1rem;
+              left: 2rem;
+              border-radius: 5px;
+            }
             tr:nth-child(odd) {background-color: #ffffff;}
             tr:nth-child(even) {background-color: #f2f2f2;}
             th {text-align: left;}    
@@ -374,6 +386,8 @@
             ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"],
             ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"]
             ];
+
+            let mainTOCLayers = ["AADT", "Air Quality", "Area Offices"]
             
             //Basemap URLs
             //Consider putting these in a standalone table in AGO (then query to use in the planning map).  Would be helpful if these weren't hard coded.
@@ -404,9 +418,12 @@
               "esri/geometry/geometryEngine",
               "esri/geometry/support/webMercatorUtils",
               "esri/symbols/SimpleLineSymbol",
-              "esri/layers/OpenStreetMapLayer"
+              "esri/layers/OpenStreetMapLayer",
+              "esri/widgets/Search",
+              "esri/layers/SubtypeGroupLayer",
+              "esri/widgets/Legend"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
-                        request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer) {
+                        request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, Legend) {
               
               var map = new Map({
                   //map content added below
@@ -423,8 +440,14 @@
 
               function startup(){
                 //Load map options on startup
-                window.onload = readUrlParams;
-                loadTOCContent()
+                
+                window.onload = () => {
+                  loadTOCContent()
+                  initBasemapOverlayToggle()
+                  readUrlParams()
+                  searchOverlays()
+                }
+                //searchOverlays() 
               }
               //Load map options on startup
               //window.onload = readUrlParams;  
@@ -672,6 +695,15 @@
                   visible: false                  
               });              
               map.add(streetsLayer);
+
+              let OSMBasemap = new OpenStreetMapLayer({
+                visible: false
+              })
+
+              map.add(OSMBasemap);
+              let basemapAll = [{name: "lstTxDOT", featLayer: txdotLayer}, {name: "lstLightGray", featLayer: lightGrayLayer}, 
+                                  {name: "lstDarkGray", featLayer: darkGrayLayer}, {name: "lstESRI", featLayer: streetsLayer},
+                                  {name: "lstOSM", featLayer: OSMBasemap}]
               //End basemap tile layers-----------------------------------------
         
               //Add roadway inventory layer
@@ -703,12 +735,36 @@
                 view: view,
                 unit: "miles"
               });
-            
+
+              let searchBar = new Search({
+                view: view,
+                allPlaceholder: "Search for TxDOT Item",
+                includeDefaultSources: false,
+                visible: false,
+                container: searchBox,
+                autoSelect: false,
+                sources: map.layers.items
+              })
+
+              let legend = new Legend({
+                view: view,
+                visible: false,
+              })
+
               view.ui.add(scaleBar, {
                 position: "bottom-left"
-              });       
+              });
+
+              view.ui.add(legend,{
+                position: "bottom-right"
+              })
+              view.ui.add(searchBar, {
+                position: "top-left",
+              })
               
               scaleBar.style = "";
+
+
               //End Scale Bar---------------------------------------------------
               
               //Measure---------------------------------------------------------
@@ -735,6 +791,9 @@
               });              
               //End Measure-----------------------------------------------------
               
+              document.getElementById("searchTool").addEventListener("click", (event) =>{
+                searchBar.visible = searchBar.visible === true ? false : true
+              })
               //Load Roadway Inventory forms------------------------------------
               view.whenLayerView(roadwayInventoryfeatureLayer).then(function(layerView) {
                 featureLayerView = layerView;
@@ -926,10 +985,64 @@
               jumpGoogleListener.addEventListener('click', (event) => {
                 openGoogleMaps();
               }); 
-              
+
+              function toggleLayer(id){
+                if(id.includes("lst")) return toggleBaseMap(id)
+                let returnId = itemArr.find(it => it.name === id)
+                returnId.url.forEach((url) => {
+                  let layerId = map.layers.items.find((lyrId) => {
+                    if(!lyrId.parsedUrl) return
+                    let returnLayer = lyrId.parsedUrl.path === url ? lyrId.parsedUrl.path === url : lyrId.url === url
+                    return returnLayer
+                  })
+                  layerId.visible === true ? setInvisible(layerId, returnId, id) : setIsVisible(layerId, returnId, id)
+                })
+
+                let isVisible = itemArr.find(x => x.visible)
+                isVisible ? resetBaseMapItem("CLEAR") : activateBaseMapItem("CLEAR")
+              }
+
+              function setInvisible(layerId, returnId, id){
+                layerId.visible = false;
+                resetBaseMapItem(id)
+                returnId.visible = 0
+                legend.visible = false
+              }
+
+              function setIsVisible(layerId, returnId, id){
+                layerId.visible = true;
+                activateBaseMapItem(id)
+                returnId.visible = 1
+                legend.visible = true
+              }
+
+              function initBasemapOverlayToggle(){
+                document.getElementById("tocMaps").addEventListener("click", (event)=>{
+                  if(event.target.id === "CLEAR") return clearOverlay(event.target.id)
+                  if(event.target.id === "layerSearch") return
+                  return toggleLayer(event.target.id)
+                })
+              }
+
+              function toggleBaseMap(idName){
+                console.log(idName)
+                resetAllBaseMapItems();
+                activateBaseMapItem(`${idName}`);
+                let basemap = basemapAll.find(x => x.name === idName)
+                basemap.featLayer.visible = true
+                return
+              }
+
+              function clearOverlay(id){
+                let overlayVisible = itemArr.filter(x => x.visible === 1) //set text to black
+
+                overlayVisible.forEach(x => toggleLayer(x.name))
+              }
               //TxDOT map listener
               // const lstTxDOTListener = document.querySelector('#lstTxDOT');
+              
               // lstTxDOTListener.addEventListener('click', (event) => {
+              //   console.log(event)
               //   resetAllBaseMapItems();
               //   activateBaseMapItem("lstTxDOT");
               //   txdotLayer.visible=true;
@@ -959,6 +1072,13 @@
               //   streetsLayer.visible=true;
               // });               
               
+              // //OSM map listener
+              // const osmMapListener = document.querySelector('#lstOSM')
+              // osmMapListener.addEventListener("click", (event)=>{
+              //   resetAllBaseMapItems();
+              //   activateBaseMapItem("lstOSM");
+              //   streetsLayer.visible=true;
+              // })
               //Clear and Reset Map Listener
               const resetListener = document.querySelector('#resetMap');
               resetListener.addEventListener('click', (event) => {
@@ -1234,21 +1354,12 @@
               }       
               
               function resetAllBaseMapItems() {
-                let tocBasemapItems = itemArr.filter(x => x.tocType === "Basemap")
-                tocBasemapItems.forEach((bsmap)=>{
-                  resetBaseMapItem(bsmap.name)
-                })
-                resetBaseMapItem("lstTxDOT"); 
-                resetBaseMapItem("lstLightGray");
-                resetBaseMapItem("lstDarkGray");
-                //resetBaseMapItem("lstImagery");
-                resetBaseMapItem("lstESRI");
-                //resetBaseMapItem("lstOSM");
                 
-                txdotLayer.visible=false;
-                lightGrayLayer.visible=false;
-                darkGrayLayer.visible=false;
-                streetsLayer.visible=false;
+               
+                basemapAll.forEach((x) => {
+                  resetBaseMapItem(x.name)
+                  x.featLayer.visible = false
+                })
               }               
               
               function resetButton(theElement) {
@@ -1268,7 +1379,8 @@
               
               function activateBaseMapItem(theElement) {
                 document.getElementById(theElement).style.color = "red";
-                document.getElementById(theElement).style.fontWeight = "bold";                
+                document.getElementById(theElement).style.fontWeight = "bold";
+
               }
               
               function clearInnerHTML(theElement) {
@@ -2470,79 +2582,111 @@
                 
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  //console.log(splitUrl)
-                  itemArr.push({name: x.attributes.name, url: splitUrl,tocType: x.attributes.tocType})
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.tocType, visible: 0})
                 })
 
                 createTOC(itemArr)  
-                addBasemapAndFeatureToMap(itemArr)
-                  
-                console.log(map)
-                // console.log(map)
+                await addBasemapAndFeatureToMap(itemArr)
               }
 
               function createTOC(tocObj){
                 console.log(tocObj)
                 const tocTable = document.getElementById("tocMaps")
-                tocTable.innerHTML = `
-                <tr><th class="basemapHeader">Basemap</th></tr>
-                  <tbody id="basemapRow">
-                  </tbody>
-                <tr><th class="basemapHeader">Overlays</th></tr>
+                tocTable.innerHTML += `
                   <tbody id="featRow"> 
                   </tbody>
                 `
                 for(i=0; i < tocObj.length; i++){
-                  let tr = document.createElement("tr")
-                  let td = document.createElement("td")
-                  td.id = `${tocObj[i].name}`
-                  td.className = "baseMapList"
-                  td.appendChild(document.createTextNode(`${tocObj[i].name}`))
-                  tr.appendChild(td)
-
-                  if(tocObj[i].tocType === "FeatureLayer"){
-                    document.getElementById("featRow").appendChild(tr)
+                  if(mainTOCLayers.includes(tocObj[i].name)){
+                    appendChildToOverlayList(tocObj[i].name, tocObj[i].tocType)
                     continue
                   }
-                  document.getElementById("basemapRow").appendChild(tr)
+                  buildDropDown(tocObj[i].name)
+                  //document.getElementById("basemapRow").appendChild(tr)
                 }
+
+
               } 
 
-              function addBasemapAndFeatureToMap(featLayerUrlArr){
-                for(i=0; i < featLayerUrlArr.length; i++){
+              function buildDropDown(name){
+                let dropdown = document.getElementById("layerSearch")
+                let option = document.createElement("option")
+                option.value = name
+                option.appendChild(document.createTextNode(name))
+                dropdown.appendChild(option)
+              }
+
+              function appendChildToOverlayList(layerItem, layerType){
+                  console.log(layerItem)
+                  let tr = document.createElement("tr")
+                  let td = document.createElement("td")
+                  td.id = layerItem
+                  td.className = "baseMapList"
+                  td.appendChild(document.createTextNode(layerItem))
+                  tr.appendChild(td)
+       
+
+                  if(layerType === "FeatureLayer"){
+                    console.log(layerItem)
+                    document.getElementById("featRow").appendChild(tr)
+                    return
+                  }
+              }
+
+              async function addBasemapAndFeatureToMap(featLayerUrlArr){
+                let addToMapPromise = new Promise((res, rej) =>{
+                  for(i=0; i < featLayerUrlArr.length; i++){
                   //add Feature Layer Info
-                  if(!featLayerUrlArr[i].url) continue //remove once Inrix set up
-                  if(featLayerUrlArr[i].tocType === "FeatureLayer"){
-                    featLayerUrlArr[i].url.forEach((x)=>{
-                    if(x.split("FeatureServer/").length < 1){
-                      //add esri subtype sublayer 
-                      
+                    if(!featLayerUrlArr[i].url) continue //remove once Inrix set up
+                    if(featLayerUrlArr[i].tocType === "FeatureLayer"){
+                      featLayerUrlArr[i].url.forEach((url)=>{
+                      if(url.split("FeatureServer/").length <= 1){
+                        //add esri subtype sublayer
+                        let subtypeGroup = new SubtypeGroupLayer({
+                          url: url,
+                          visible: false
+                        }) 
+                        
+                        map.add(subtypeGroup)
+                      }
+
+                      let addFeatureLayer = new FeatureLayer({
+                                                  url: url,
+                                                  visible: false
+                                            })
+                      map.add(addFeatureLayer)
+                      })
+                      continue
                     }
-                    let addFeatureLayer = new FeatureLayer({
-                                                url: featLayerUrlArr[i].url,
-                                                visible: false
-                                          })
-                    map.add(addFeatureLayer)
-                    })
-                    continue
+
+                    //add BaseMap info
+                    // if(featLayerUrlArr[i].name !== "Open Street Map"){
+                    //   let vectorBaseMap = new VectorTileLayer({
+                    //     url: featLayerUrlArr[i].url,
+                    //     visible: false
+                    //   })
+                    //   map.add(vectorBaseMap)
+                    //   continue
+                    // }
+
+                    // let OSMBasemap = new OpenStreetMapLayer({
+                    //   visible: false
+                    // })
+
+                    // map.add(OSMBasemap)
+                    
                   }
+                  res("complete")
+                })
+                return await addToMapPromise
+              }
 
-                  //add BaseMap info
-                  if(featLayerUrlArr[i].name !== "Open Street Map"){
-                    let vectorBaseMap = new VectorTileLayer({
-                      url: featLayerUrlArr[i].url,
-                      visible: false
-                    })
-                    map.add(vectorBaseMap)
-                    continue
-                  }
-
-                  let OSMBasemap = new OpenStreetMapLayer({
-                    visible: false
-                  })
-
-                  map.add(OSMBasemap)
-                }                  
+              function searchOverlays(){
+                document.getElementById("layerSearch").addEventListener("change", (event)=>{
+                  appendChildToOverlayList(event.target.value, "FeatureLayer")
+     
+                  console.log(event.target.value)
+                })
               }
             // end require - - -        
             });          
@@ -2568,16 +2712,18 @@
             </div>
             <div class="tocTabs" id="mapTab">
         			<table id="tocMaps">
-        			<!-- <tr><th class="basemapHeader">Basemaps</th></tr>
+        			<tr><th class="basemapHeader">Basemaps</th></tr>
         			<tr><td class="baseMapList" id='lstTxDOT'>TxDOT</td></tr>
         			<tr><td class="baseMapList" id='lstLightGray'>TxDOT Light Gray</td></tr>
-        			<tr><td class="baseMapList" id='lstDarkGray'>TxDOT Dark Gray</td></tr> -->
-        			<!--<tr><td class="baseMapList" id='lstImagery'>Texas Imagery Service</td></tr>        			-->
-        			<!-- <tr><td class="baseMapList" id='lstESRI'>Esri Streets</td></tr> -->
-        			<!--<tr><td class="baseMapList" id='lstOSM'>Open Street Map</td></tr>-->
-              <!-- <tr><th class="basemapHeader">Overlays</th></tr>
+        			<tr><td class="baseMapList" id='lstDarkGray'>TxDOT Dark Gray</td></tr>
+        			<tr><td class="baseMapList" id='lstImagery'>Texas Imagery Service</td></tr>        			
+        			<tr><td class="baseMapList" id='lstESRI'>Esri Streets</td></tr>
+        			<tr><td class="baseMapList" id='lstOSM'>Open Street Map</td></tr>
+              <tr><th class="basemapHeader">Overlays</th></tr>
+              <select id="layerSearch" placeholder="Search for Layer"></select>
         			<tr><td id="CLEAR" style="color:red; font-weight: bold;">Clear Overlays</td></tr>
-        			<tr><td id='AADT'>AADT</td></tr>
+              
+        			<!-- <tr><td id='AADT'>AADT</td></tr>
 			        <tr><td id='Control_Section'>Control Sections</td></tr>        			
         			<tr><td id='TxDOT_Projects'>TxDOT Projects</td></tr> -->
         			</table>
@@ -2725,6 +2871,7 @@
             <!--Measure and LRS results, Legend-->
             </div>     
             <div id="searchTool" title="Search Tool">S</div>
+            <div id="searchBox"></div>
             <div id="resetMap" title="Clear and reset map">&#x21BB;</div>
             <div id="results">Build a query and view the results here...</div>
             <div id="parentCanvas">
