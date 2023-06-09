@@ -926,7 +926,7 @@
                 //clear current contents in outputFields first
                 var roadwayInventoryFieldsArray = featureLayerView.availableFields;
                 console.log(roadwayInventoryFieldsArray)
-                let arrToMove = ["RIA_RTE_ID", "DFO", "CS", "MPT"]
+                let arrToMove = ["RIA_RTE_ID", "FROM_DFO", "TO_DFO", "C_SEC", "BMP", "EMP"]
                 let returnRdwyInventoryArr = sendItemToFront(roadwayInventoryFieldsArray,arrToMove)
                 return returnRdwyInventoryArr
               }
@@ -1130,7 +1130,15 @@
               }); 
 
               document.getElementById("legend").addEventListener("click", (event) => {
-                legend.visible === true ? legend.visible = false : legend.visible = true
+                if(legend.visible === true){
+                  legend.visible = false
+                  resetButton("legend")
+                  return
+                }
+
+                activateButton("legend")
+                legend.visible = true
+                return
               })
 
               function toggleLayer(id){
@@ -1861,12 +1869,18 @@
                   const field = document.getElementById('field').value;
                   const operator = document.getElementById('operator').value;
                   const value = document.getElementById('value').value;
-              
-                  conditions.push({ field, operator, value });
-              
-                  const li = document.createElement('li');
-                  li.textContent = `${field} ${operator} ${value}`;
-                  document.getElementById('conditions').appendChild(li);
+                  let currentOperation = `${field} ${operator} ${value}`;
+                  let isExist = conditions.find(x => Object.values(x).toString() === currentOperation.split(" ").toString())
+                  console.log(isExist)
+                  if(!isExist){
+                    conditions.push({ field, operator, value });
+                    console.log(conditions)
+                    const li = document.createElement('li');
+                    li.textContent = currentOperation
+                    document.getElementById('conditions').appendChild(li);
+                    return
+                  }
+                return    
               }  
               
               function clearConditions() {
@@ -2820,10 +2834,13 @@
                 
                 const tocTable = document.getElementById("tocMaps")
                 tocTable.innerHTML += `
-                  <small>Select a Feature Layer to add to map:</small>
-                  <select id="layerSearch" placeholder="Search for Layer"></select>
                   <tr><td id="CLEAR" style="color:red; font-weight: bold;">Clear Overlays</td></tr>
                   <tbody id="featRow"> 
+                  </tbody>
+                  <tr><th class="basemapHeader">Additional Overlays</th></tr>
+                  <small>Select a Feature Layer to add to map:</small>
+                  <select id="layerSearch" placeholder="Search for Layer"></select>
+                  <tbody id="addFeatRow"> 
                   </tbody>
                 `
                 for(i=0; i < tocObj.length; i++){
@@ -2864,7 +2881,7 @@
        
                   if(layerType === "FeatureLayer"){
                     console.log(layerItem)
-                    initBuild === false ? document.getElementById("featRow").appendChild(tr) : documentFrag.appendChild(tr)
+                    initBuild === false ? document.getElementById("addFeatRow").appendChild(tr) : documentFrag.appendChild(tr)
                     return
                   }
               }
@@ -3087,7 +3104,7 @@
         			<tr><td class="baseMapList" id='imagery'>Texas Imagery Service</td></tr>        			
         			<tr><td class="baseMapList" id='esristreets'>Esri Streets</td></tr>
         			<tr><td class="baseMapList" id='osm'>Open Street Map</td></tr>
-              <tr><th class="basemapHeader">Overlays</th></tr>
+              <tr><th class="basemapHeader">Common Overlays</th></tr>
               
         			
               
