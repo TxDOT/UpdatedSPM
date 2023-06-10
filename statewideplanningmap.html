@@ -1871,7 +1871,6 @@
                   const value = document.getElementById('value').value;
                   let currentOperation = `${field} ${operator} ${value}`;
                   let isExist = conditions.find(x => Object.values(x).toString() === currentOperation.split(" ").toString())
-                  console.log(isExist)
                   if(!isExist){
                     conditions.push({ field, operator, value });
                     console.log(conditions)
