@@ -26,13 +26,17 @@
         <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
         <script src="https://js.arcgis.com/4.26/"></script>         
         <style>
+            #printWidget{
+              position:relative;
+              top: 5rem;
+            }
             #queryStatus{
               position: absolute;
               height: 160px;
               width: 200px;
               bottom: 50%;
               left: 50%;
-              z-index: 0;
+              z-index: 3;
               margin-left: auto;
               margin-right: auto;
               margin-top: auto;
@@ -43,8 +47,19 @@
               text-align: center;
               border-radius: 5px;
               padding: 10px;
-              border: 2px solid red; 
+              border: .5px solid black; 
             }
+            #queryMessageBtn{
+              position: relative;
+              top: 3.5rem;
+              left: 9rem;
+            }
+
+            #queryMessagePara{
+              position: relative;
+              bottom: 3rem;
+            }
+
             #header {
                 height: 30px;
                 width: 100%;
@@ -89,7 +104,28 @@
                 width: calc(100vw - 300px);
                 float: left;
                 background-color: white;
-                z-index: 0; 
+                z-index: 1; 
+            }
+            .textArea{
+              position: relative;
+              border: .15rem dashed rgba(70,130,180,.5);
+              height: 3rem;
+              bottom: .5rem;
+              width: 2rem;
+              left: 1rem;
+            }
+            .textArea:hover{
+              cursor: pointer
+            }
+            #previewUrl{
+              position: relative;
+              width: 85%;
+              left: 1.5rem;
+            }
+            #previewBtn{
+              position: relative;
+              left: .7rem;
+              bottom: .3rem;
             }
             .esri-view .esri-view-surface--inset-outline:focus::after {outline: none !important;}    
             .esri-view .esri-zoom.esri-widget {
@@ -345,7 +381,7 @@
         		.modal-content {
         			background-color: #fefefe;
         			margin: 15% auto;
-        			padding: 20px;
+        			/* padding: 20px; */
         			border: 1px solid #888;
         			width: 30%;
         			border-radius: 5px;
@@ -358,8 +394,8 @@
         			cursor: pointer;
         		}	    
         		#generalPurpose {
-        		  width: 100%;
-        		  overflow: auto;
+        		  width: 90%;
+        		  /* overflow: auto; */
         		}
         </style>
         <script>
@@ -436,6 +472,8 @@
             ];
 
             let mainTOCLayers = ["AADT", "Air Quality", "Area Offices"]
+
+            let displayPopupInfo = [{}]
             
             //Basemap URLs
             //Consider putting these in a standalone table in AGO (then query to use in the planning map).  Would be helpful if these weren't hard coded.
@@ -472,8 +510,12 @@
               "esri/widgets/Legend",
               "esri/layers/WebTileLayer",
               "esri/layers/WMTSLayer",
+              "esri/widgets/Print",
+              "esri/widgets/Print/PrintViewModel",
+              "esri/widgets/Expand"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
-                        request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, Legend, WebTileLayer, WMTSLayer) {
+                        request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand) {
               
               var map = new Map({
                   //map content added below
@@ -482,10 +524,11 @@
               //load toc feature layer
 
               let tocFeatureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers/FeatureServer/0"
+                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
               })
               
               //load startup function
+              const getURLParams = (url) => new URLSearchParams(url)
               startup()
 
               function startup(){
@@ -497,6 +540,7 @@
                   onViewLoad()
                   readUrlParams()
                   queryPageBtnDisable()
+                  prieviewURL()
                 }
               }
               //Load map options on startup
@@ -825,7 +869,48 @@
               
               scaleBar.style = "";
 
+              let printer;
+              document.getElementById("print").addEventListener("click", ()=>{
+                if(!printer){
+                  activateButton("print")
+                  printer = new Print({
+                    view: view,
+                    printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
+                    visible: true,
+                  }) 
 
+                  view.ui.add(printer, {
+                    position: "bottom-right"
+                  })
+                  return
+                }
+
+                if(printer.visible === false){
+                  console.log("hello printer")
+                  printer.visible = true
+                  activateButton("print")
+                  return
+                }
+
+                printer.visible = false
+                resetButton("print")
+                return
+              })
+
+              // let printerExpand = new Expand({
+              //   view: view,
+              //   content: printer
+              // })
+
+              
+              // view.ui.add(printerExpand,{
+              //   position:"top-right",
+              //   index: 0
+              // })
+
+              // print.on("submit", (event)=>{
+              //   console.log(event.link.url)
+              // })
               //End Scale Bar---------------------------------------------------
               
               //Measure---------------------------------------------------------
@@ -856,9 +941,15 @@
               searchBar.when((x) => {
                 //only toggle whensearchBar.sources is built
                 document.getElementById("searchTool").addEventListener("click", (event) =>{
-                  searchBar.visible = searchBar.visible === true ? false : true
-                  searchBar.sources = searchSources
-                  console.log(searchSources)
+                  if(searchBar.visible === true){
+                    searchBar.visible = false
+                    resetButton("searchTool")
+                    return
+                  }
+
+                  searchBar.visible = true
+                  activateButton("searchTool")
+                  return
                 })
               })
               //End Search--------------------------------------------------------------------
@@ -926,7 +1017,7 @@
                 //clear current contents in outputFields first
                 var roadwayInventoryFieldsArray = featureLayerView.availableFields;
                 console.log(roadwayInventoryFieldsArray)
-                let arrToMove = ["RIA_RTE_ID", "DFO", "CS", "MPT"]
+                let arrToMove = ["RIA_RTE_ID", "FRM_DFO", "TO_DFO", "C_SEC", "BMP", "EMP"]
                 let returnRdwyInventoryArr = sendItemToFront(roadwayInventoryFieldsArray,arrToMove)
                 return returnRdwyInventoryArr
               }
@@ -1033,16 +1124,12 @@
                       mapForURL = "esristreets";
                     }
                     
-                    var rightClickURL = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map="+mapForURL+"&location="+point.latitude.toFixed(8)+","+point.longitude.toFixed(8)+","+view.zoom;
+                    let rightClickURL = `${window.location.href}?map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
+                    //var rightClickURL = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map="+mapForURL+"&location="+point.latitude.toFixed(8)+","+point.longitude.toFixed(8)+","+view.zoom;
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
                     
-                    navigator.clipboard.writeText(rightClickURL).then(() => {
-                      //nothing
-                    });                    
-                    
-                    //document.getElementById("generalPurpose").innerHTML = "Copy Lat/Long or URL:<br><br>" + latLongOnly + "<br><br>" + rightClickURL;
-                    document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" + rightClickURL;                    
-                    openModal();                   
+                    queryToUrl(rightClickURL)
+                                    
                  }
               });
               
@@ -1130,7 +1217,15 @@
               }); 
 
               document.getElementById("legend").addEventListener("click", (event) => {
-                legend.visible === true ? legend.visible = false : legend.visible = true
+                if(legend.visible === true){
+                  legend.visible = false
+                  resetButton("legend")
+                  return
+                }
+
+                activateButton("legend")
+                legend.visible = true
+                return
               })
 
               function toggleLayer(id){
@@ -1159,6 +1254,7 @@
                 resetBaseMapItem(id)
                 returnId.visible = 0
                 legend.visible = false
+                resetButton("legend")
               }
 
               function setIsVisible(layerId, returnId, id){
@@ -1166,6 +1262,7 @@
                 activateBaseMapItem(id)
                 returnId.visible = 1
                 legend.visible = true
+                activateButton("legend")
               }
 
               function initBasemapOverlayToggle(){
@@ -1367,6 +1464,7 @@
               const queryURLListener = document.querySelector('#btnQueryGenerateURL');
               queryURLListener.addEventListener('click', (event) => {
                 exportQueryToURL();
+                return
               });                
               
               //Export CSV listener
@@ -1460,7 +1558,9 @@
                 selectQuery(event.target.value)
               })
               
-
+              document.getElementById("spnClose").addEventListener("click", ()=>{
+                resetShareUrl()
+              })
               //End listeners---------------------------------------------------
               
               //Control buttons and tabs----------------------------------------
@@ -1598,8 +1698,6 @@
                 lightGrayLayer.visible = true
                 return
               }
-
-              const getURLParams = (url) => new URLSearchParams(url)
               
               //Example: http://example.com/?map=txdot&overlay=AADT&tab=maps&location=31.123,-97.123,10&event=IH0035-KG,15,30,Red,6,Expand to 6 lanes
               function readUrlParams() {
@@ -1837,12 +1935,14 @@
                 let templateClone = getTemplate.content.cloneNode(true)
                 let div = templateClone.querySelectorAll("div")
                 console.log(div)
-                div[0].style.height = "300px"
-                div[0].style.width = "300px"
-                div[0].childNodes[0].textContent = "Query Message"
+                div[0].style.height = "150px"
+                div[0].style.width = "350px"
                 let p = document.createElement("p")
-                if(type === "error"){
+                p.id = "queryMessagePara"
+                if(type === "error" || type === null){
                   let btn = document.createElement("button")
+                  btn.id = "queryMessageBtn"
+                  btn.className = "tabsChild"
                   btn.textContent = "CLOSE"
                   btn.onclick = () => {removeQuertResponseUI()}
                   div[0].appendChild(btn)
@@ -1861,12 +1961,17 @@
                   const field = document.getElementById('field').value;
                   const operator = document.getElementById('operator').value;
                   const value = document.getElementById('value').value;
-              
-                  conditions.push({ field, operator, value });
-              
-                  const li = document.createElement('li');
-                  li.textContent = `${field} ${operator} ${value}`;
-                  document.getElementById('conditions').appendChild(li);
+                  let currentOperation = `${field} ${operator} ${value}`;
+                  let isExist = conditions.find(x => Object.values(x).toString() === currentOperation.split(" ").toString())
+                  if(!isExist){
+                    conditions.push({ field, operator, value });
+                    console.log(conditions)
+                    const li = document.createElement('li');
+                    li.textContent = currentOperation
+                    document.getElementById('conditions').appendChild(li);
+                    return
+                  }
+                return    
               }  
               
               function clearConditions() {
@@ -1890,6 +1995,11 @@
                   featLayer.definitionExpression = where;
                   let returnQuery = await featLayer.queryFeatures(query)
                   console.log(returnQuery)
+                  if(!returnQuery.features.length){
+                    removeQuertResponseUI()
+                    queryResponseUI(`Whelp, no items were returned.  Update your query and try again.`, null)
+                    return
+                  }
                   makeTableFromService(returnQuery);
                   featLayer.visible = true;
                   removeQuertResponseUI()
@@ -2713,6 +2823,13 @@
               }
               //----------------------------------------------------------------
 
+              function resetShareUrl(){
+                document.getElementById("text").textContent = "Click to Share!";
+                document.getElementById("text").style.color = "black"
+
+                document.getElementById("previewUrl").textContent = ""
+                document.getElementById("previewUrl").hidden = true
+              }
               //Download controls
               function openModal() {
           			document.getElementById("modal").style.display = "block";
@@ -2729,6 +2846,32 @@
                 
                 view.goTo(graphicsExtent);                
           		}
+
+              function prieviewURL(){
+                document.getElementById("previewBtn").addEventListener("click", ()=>{
+                  console.log("clicked")
+                  console.log(document.getElementById("previewUrl").hidden)
+                  document.getElementById("previewUrl").hidden === true ?  document.getElementById("previewUrl").hidden = false :
+                                                                           document.getElementById("previewUrl").hidden = true
+                })
+                return
+              }
+
+              function queryToUrl(textString){
+                console.log(textString)
+                openModal();
+                document.getElementById("previewUrl").textContent = textString
+                document.getElementById("generalPurpose").addEventListener("click", ()=>{
+                  navigator.clipboard.writeText(textString)
+                  .then(()=>{
+                    document.getElementById("text").textContent = "URL Copied!";
+                    document.getElementById("text").style.color = "green"
+                  })
+                  .catch(err => console.log("exportQuery:", err))
+                  
+                })
+                return
+              }
           
               //Export Query to URL---------------------------------------------
               function exportQueryToURL() { //bridge, roadway
@@ -2740,13 +2883,8 @@
                 let arrayString = `?queryType=${queryType}&tab=query&query=${outputFieldList}|${queryWhere}`
                
                 var fullString = `${window.location.href}${arrayString}`;
-                
-                navigator.clipboard.writeText(fullString)
-                  .then(() => {
-                      document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" +fullString;
-                      openModal();            
-                  })
-                  .catch(err => console.log("QueryToUrlErr:", err))
+
+                queryToUrl(fullString)
                 return
               }
               //----------------------------------------------------------------
@@ -2755,14 +2893,10 @@
               function exportDiagramToURL () {
                 var diagramAttributes = inventoryDiagramLog.join(',');
                 var arrayString = "?tab=diagram&diagram=" + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO;
-                var fullString = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html" + arrayString + "|" + diagramAttributes;
+                let fullString = `${window.location.href}${arrayString}|${diagramAttributes}`
                 
-                navigator.clipboard.writeText(fullString).then(() => {
-                      //nothing
-                }); 
-                
-                document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" + fullString;
-                openModal();                  
+                queryToUrl(fullString)
+                return
               }
               //----------------------------------------------------------------
               
@@ -2782,14 +2916,9 @@
                 
                 arrayString = "?tab=event&event=" + arrayString;
                 var replacedString = arrayString.replace(/#/g, "%23");
-                replacedString = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html" + replacedString;
+                replacedString = `${window.location.href}${replacedString}`
                 
-                navigator.clipboard.writeText(replacedString).then(() => {
-                      //nothing
-                }); 
-                
-                document.getElementById("generalPurpose").innerHTML = "URL copied to clipboard (CTRL+V to paste):<br><br>" +replacedString;
-                openModal();
+                queryToUrl(replacedString)
               }  
               //End Export Graphics---------------------------------------------              
               
@@ -2804,30 +2933,35 @@
               async function loadTOCContent(){
                 const docFrag = document.createDocumentFragment()
                 let returnToc = await tocFeatureLayer.queryFeatures()
-                
+                console.log(returnToc)
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.tocType, visible: 0})
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, visible: 0})
                 })
-
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
                 searchOverlays(docFrag)
               }
 
               function createTOC(tocObj, documentFrag){
-                console.log(tocObj)
                 
                 const tocTable = document.getElementById("tocMaps")
                 tocTable.innerHTML += `
-                  <small>Select a Feature Layer to add to map:</small>
-                  <select id="layerSearch" placeholder="Search for Layer"></select>
                   <tr><td id="CLEAR" style="color:red; font-weight: bold;">Clear Overlays</td></tr>
                   <tbody id="featRow"> 
                   </tbody>
+                  <tr><th class="basemapHeader">Additional Overlays</th></tr>
+                  <small>Select a Feature Layer to add to map:</small>
+                  <select id="layerSearch" placeholder="Search for Layer"></select>
+                  <tbody id="addFeatRow"> 
+                  </tbody>
                 `
+                let previousItem
                 for(i=0; i < tocObj.length; i++){
+                  if(tocObj[i].name === previousItem) continue
+                  previousItem = tocObj[i].name
                   if(mainTOCLayers.includes(tocObj[i].name)){
+                    
                     appendChildToOverlayList(tocObj[i].name, tocObj[i].tocType, true, documentFrag)
                     continue
                   }
@@ -2864,7 +2998,7 @@
        
                   if(layerType === "FeatureLayer"){
                     console.log(layerItem)
-                    initBuild === false ? document.getElementById("featRow").appendChild(tr) : documentFrag.appendChild(tr)
+                    initBuild === false ? document.getElementById("addFeatRow").appendChild(tr) : documentFrag.appendChild(tr)
                     return
                   }
               }
@@ -2874,21 +3008,22 @@
                 let [idLeft, idRight] = id.split("removeOverlay")
                 let url = itemArr.find(name => name.name === idRight)
                 let returnfeatLayer = retrieveFeatureLayer(url.name)
-                returnfeatLayer.forEach(x => x.visible === true ? x.visible = false : x.visible = true)
+                returnfeatLayer.forEach(x => x.visible = false )
 
                 document.getElementById(idRight).remove()
               }
 
-              function addFeatureLayerToMap(featLayer){
-                featLayer.url.forEach((url)=>{
-                
+              function addFeatureLayerToMap(featLayer, popupInfo){
+                // featLayer.url.forEach((url)=>{
                   let addFeatureLayer = new FeatureLayer({
-                    url: url,
+                    url: featLayer.url,
                     visible: false,
                     outFields: ["*"],
-                    name: featLayer.name
+                    name: featLayer.name,
+                    popupEnabled: true,
+                    popupTemplate: popupInfo,
                   })
-                      
+  
                   addFeatureLayer.when((layer)=>{
                   //need to add TxDOT_Top_100_Congested_Roadways, TxDOT_Districts, Texas_County_Boundaries_Detailed, TxDOT_Roadways_Search 
 
@@ -2901,31 +3036,24 @@
                   })
                       //}
                   map.add(addFeatureLayer)
-                })
+                // })
 
                 return
               }
 
               async function addBasemapAndFeatureToMap(featLayerUrlArr){
-                let addToMapPromise = new Promise((res, rej) =>{
+                let addToMapPromise = new Promise(async(res, rej) =>{
                   for(i=0; i < featLayerUrlArr.length; i++){
                   //add Feature Layer Info
                     if(!featLayerUrlArr[i].url) continue //remove once Inrix set up
                     if(featLayerUrlArr[i].tocType === "FeatureLayer" || featLayerUrlArr[i].tocType === "Search"){
-                      addFeatureLayerToMap(featLayerUrlArr[i])
+                      let popupObj = JSON.parse(featLayerUrlArr[i].popup)
+                      let popupInfo = await createpopupTemplate(featLayerUrlArr[i].name, popupObj)
+                      addFeatureLayerToMap(featLayerUrlArr[i], popupInfo)
                       continue
                     }
-
-
-                    //map.add(webLayer)
-                    
-                    
                     
                   }
-                  // webLayer.getTileUrl = (level, col, row) => {
-                  //   console.log(level,col,row)
-                  // }
-                  
                   res("complete")
                 })
 
@@ -2970,14 +3098,8 @@
 
                 map.add(webLayer)
                 
-
-                //map.add(webLayer)
-                
-
                 return await addToMapPromise
               }
-
-             
 
               function createSourcesArr(featLayer){
                 let sourcesObj = [{url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Projects/FeatureServer/0", name: "TxDOT_Projects", searchFields: ["CONTROL_SECT_JOB"], displayField: "CONTROL_SECT_JOB", outFields: ["CONTROL_SECT_JOB ","DISTRICT_NUMBER ","LAYMAN_DESCRIPTION1","HIGHWAY_NUMBER"]},
@@ -3056,6 +3178,36 @@
                 return quadKey;
               } 
               
+              async function createpopupTemplate(titleField, popupInfo){
+                  let template = {
+                    title: titleField,
+                    content: [{
+                      type: "fields",
+                      fieldInfos: []
+                    }]
+                  }
+
+                  if(!popupInfo) return
+                  let fieldName = Object.values(popupInfo)
+                  let label = Object.keys(popupInfo)
+                  fieldName.forEach((i,x) => {
+                    let a = {
+                      fieldName: i,
+                      label: label[x]
+                    }
+                    template.content[0].fieldInfos.push(a)
+                  })
+                  // for(i=0; i < test.length; i++){
+                  //   console.log(test[i])
+                  //   // let a = {
+                  //   //   //fieldName: fieldName[i],
+                  //   //   label: label[i]
+                  //   // }
+                  //   // template.content[0].fieldInfos.push(a)
+                  // }
+                return template
+              }
+
             // end require - - -        
             });          
         </script>
@@ -3087,7 +3239,7 @@
         			<tr><td class="baseMapList" id='imagery'>Texas Imagery Service</td></tr>        			
         			<tr><td class="baseMapList" id='esristreets'>Esri Streets</td></tr>
         			<tr><td class="baseMapList" id='osm'>Open Street Map</td></tr>
-              <tr><th class="basemapHeader">Overlays</th></tr>
+              <tr><th class="basemapHeader">Common Overlays</th></tr>
               
         			
               
@@ -3126,6 +3278,7 @@
               <button id="btnQueryGenerateURL" class="queryButtonClass">Share URL</button>
               <template id="queryTemplate">
                 <div id="queryStatus">
+                  <h1 style="position:relative; color:white; background-color: #4682B4; height: 2rem; bottom: 1.7rem; width: 23.1rem; right:0.6rem; border-radius: 5px;" >Query Message</h1>
                 </div>
               </template>             
             </div>
@@ -3234,11 +3387,11 @@
         <div id="viewDiv">
             <!--Map Tools-->
             <div id="toolsParent" class="toolsContainer">
-                <div class="toolsChild" id="measureButton" title="Measure">M</div>
-                <div class="toolsChild" id="lrsButton" title="LRS Identify">L</div>
-                <div class="toolsChild" id="googleMaps" title="Jump to Google">J</div>
-                <div class="toolsChild" id="print" title="Print Map">P</div>
-                <div class="toolsChild" id="legend" title="View Legend">L</div>
+                <div class="toolsChild esri-icon-measure" id="measureButton" title="Measure"></div>
+                <div class="toolsChild esri-icon-map-pin" id="lrsButton" title="LRS Identify"></div>
+                <div class="toolsChild esri-icon-applications" id="googleMaps" title="Jump to Google"></div>
+                <div class="toolsChild esri-icon-printer" id="print" title="Print Map"></div>
+                <div class="toolsChild esri-icon-layer-list" id="legend" title="View Legend"></div>
             </div>   
             <div id="marginal">
             <!--Map coordinates and scale bar-->
@@ -3246,7 +3399,7 @@
             <div id="mapClickResults">
             <!--Measure and LRS results, Legend-->
             </div>     
-            <div id="searchTool" title="Search Tool">S</div>
+            <div id="searchTool" title="Search Tool" class="esri-icon-search"></div>
             <div id="searchBox"></div>
             <div id="resetMap" title="Clear and reset map">&#x21BB;</div>
             <div id="results">Build a query and view the results here...</div>
@@ -3257,8 +3410,16 @@
             </div>  
             <div id="modal" class="modal">
           		<div class="modal-content">
-          			<span id="spnClose" class="close">&times;</span>
-          			  <div id="generalPurpose"></div>
+                <h2 style="color:white; background-color: #4682B4; position:relative; bottom: 2rem; padding-left: 1rem; padding-right: 1rem;">
+                  Share URL
+                  <span id="spnClose" class="close">&times;</span>
+                </h2>
+                    <p style="position:relative; bottom: 2rem; padding-left: 1rem; padding-right: 1rem;">Looking to share URLs around? Click on the below box, to copy the url and share!</p>
+                    <div id="generalPurpose" class="textArea">
+                      <p id="text" style="position:relative; top: .1rem; left: 40%;">Click to Share URL</p>
+                    </div>
+                    <button id="previewBtn" class="tabsChild">Preview URL</button>
+                    <textarea id="previewUrl" hidden="true" disabled></textarea>
           		</div>
           	</div>            
         </div>
