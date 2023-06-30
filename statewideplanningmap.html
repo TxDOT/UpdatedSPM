@@ -46,8 +46,7 @@
               color: #444444;
               font-size: .8rem;
               text-align: center;
-              padding: 10px;
-              border: .5px solid black; 
+              padding: 10px; 
             }
 
             #serviceDownDiv{
@@ -57,23 +56,26 @@
               top: 5%;
               height: 2.5rem;
               width: 35%;
-              background-color: red;
               color: white;
               border-radius: 5px;
               padding: .5rem;
             }
 
             #queryMessageBtn{
-              position: relative;
-              top: 3rem;
-              left: 8rem;
+              position: absolute;
+              bottom: .7rem;
+              right: 1.4rem;
             }
             .esri-icon-notice-triangle{
               font-size: 1rem;
             }
             #queryMessagePara{
-              position: relative;
-              bottom: 3rem;
+              position: absolute;
+              top: 3rem;
+              left: 1.4rem;
+              font-size: 1.1rem;
+              padding-right: .5rem;
+              text-align: left;
             }
             .main{
               font-family: Roboto, Avenir, Helvetica, Arial, sans-serif !important;
@@ -120,8 +122,14 @@
               background-color: white !important;
               z-index: 1 !important;
             }
+            .esri-icon-collapse{
+              rotate: 90deg;
+              position: absolute;
+              top: 20rem;
+              left: 15rem;
+            }
             #header {
-                height: 50px;
+                height: 44px;
                 width: 100%;
                 background-color: rgb(20, 55, 90);
                 display: flex;
@@ -140,17 +148,17 @@
                 text-decoration: none;
                 top: .5rem;
             }
-            #layerSearch{
+            /* #layerSearch{
               position: relative;
               width: 90%;
               left: .2rem;
-            }
+            } */
             #left-div {
                 position: absolute;
                 left: 0px;
-                top: 50px;
+                top: 44px;
                 width: 300px;
-                height: calc(100vh - 50px);
+                height: calc(100vh - 44px);
                 background-color: white;
                 overflow-y: auto;
                 overflow-x: hidden;
@@ -160,9 +168,9 @@
             }       
             #viewDiv {
                 position: absolute;
-                top: 50px;
+                top: 44px;
                 left: 300px;
-                height: calc(100vh - 50px);
+                height: calc(100vh - 44px);
                 width: calc(100vw - 300px);
                 float: left;
                 background-color: white;
@@ -180,10 +188,10 @@
               cursor: pointer
             }
             #previewUrl{
-              position: relative;
-              width: 85%;
-              left: 1.5rem;
-              bottom: 2rem;
+              position: absolute;
+              width: 19rem;
+              right: 1.35rem;
+              bottom: 3rem;
             }
             #previewBtn{
               position: relative;
@@ -219,6 +227,7 @@
               box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
               cursor: pointer;
             }
+
             .spmMainBtn{
               outline: #14375A;
               background-color: none;
@@ -229,13 +238,64 @@
               width: 5rem;
               text-decoration: underline;
             }
+            .spmMainBtn:disabled{
+              background-color: none;
+              background: none;
+              cursor: default;
+              border: 1px #888 solid;
+              height: 2rem;
+              width: 5rem;
+              text-decoration: underline;
+              pointer-events: none;
+            }
             .spmMainBtn:active{
               background: rgba(20,55,90,.5);
+            }
+
+            .spmSecondaryBtn{ 
+              background-color: none;
+              background: none;
+              cursor: pointer;
+              border: 1px #14375A solid;
+              height: 2rem;
+              width: 5rem;
+            }
+
+            .spmSecondaryBtn:disabled{
+              outline: #888;
+              background-color: none;
+              background: none;
+              cursor: default;
+              border: 1px #888 solid;
+              height: 2rem;
+              width: 5rem;
+              pointer-events: none;
+            }
+            .spmSecondaryBtn:active{
+              background: rgba(20,55,90,.5);;
             }
             .spmDropDown{
               border: 1px solid #14375A;
               background: none;
               border-radius: 0px;
+            }
+            .spmDropDown:disabled{
+              border: 1px solid #888;
+              color:#888;
+              outline: #888
+            }
+            #modalHeader{
+              position: relative;
+              bottom: 1.6rem;
+              color: white;
+              background-color: #14375A;
+              text-align: left;
+              padding-left: 1.3rem;
+              padding-right: 1rem;
+              padding-top: .6rem;
+              height: 2rem;
+              width: 95.5%;
+              right: .6rem;
             }
             #marginal {
                 position: absolute;
@@ -258,9 +318,9 @@
                 box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
                 z-index: 1; 
                 font-size: calc(9px + 0.390625vw);
-            }            
+            }         
             .tabsContainer {
-              position: absolute;
+              position: relative;
               top: 8px;
               right: 12px;
               width: 300px;
@@ -270,7 +330,7 @@
               z-index: 1;
             }
             .tabsChild {
-              background-color: #F8F8F8;
+              background-color: none;
               margin-left: 5px;
               margin-right: 5px;
               padding: 5px;
@@ -306,15 +366,19 @@
 
             #rmvDiv{
               position: absolute;
-              height: 0rem;
-              padding-left: 1rem;
-              left: 80%;
+              left: 83%;
+              /* top: .33rem; */
+              padding-top: .2rem;
+              background: none;
+              background-color: none;
+              cursor: pointer;
+              border: none;
             }
 
             .removeOverlay{
               position: relative;
-              bottom: 1.25rem;
-              left: 73%;
+              bottom: 0.07rem;
+              left: 83%;
               background: none;
               background-color: none;
               cursor: pointer;
@@ -378,6 +442,10 @@
               cursor: pointer;
               font-size: 14px;
             }
+            #addFeatRow{
+              position: relative;
+              bottom: .5rem;
+            }
             .basemapHeader {
               color: white;
               background-color: #204e70;
@@ -416,6 +484,23 @@
               border: 2px solid red;
             }
 
+            input:disabled{
+              border: 1px solid #888;
+              color: #888;
+            }
+
+            tr:hover{
+              background-color: rgba(32, 78, 112, .4);
+              cursor: pointer;
+              border: 1px solid black;
+            }
+            .dropDown{
+              position: relative;
+              display: block;
+              overflow: hidden;
+              width: 19rem;
+            }
+
             .error{
               width: 100%;
               font-size: 1rem;
@@ -438,20 +523,32 @@
             #btnRunQuery,#btnClearConditions,#btnRemoveLast,#btnRemoveAll,#btnCalcCost,#btnClearProject,#btnExportJPEG,#btnExportPNG,#btnExportToCSV,#btnQueryGenerateURL,#btnExportToKML,#btnGenerateURL {
               width: 48%;
             }
+            #btnRunQuery{
+              position:relative;
+              left:8.4rem;
+            }
             #btnRunQuery:disabled{
               pointer-events: none;
-              opacity: .65;
+            }
+            #btnClearConditions{
+              position:relative;
+              right: 8.3rem;
             }
             #results {
                 position: absolute;
-                top: 25px;
+                top: 315px;
                 left: 70px;
                 right: 55px;
                 bottom: 95px;
                 background-color: #F8F8F8;
                 display: none;
                 overflow: auto;
-            }       
+                height: 30rem;
+                border: 1px solid black;
+            }
+            .resizeTable{
+              resize: both;
+            }
             #parentCanvas {
                 position: absolute;
                 top: 25px;
@@ -471,7 +568,7 @@
                 border: 1px solid #F8F8F8;
                 padding: 8px;
                 text-align: left;              
-                background-color: #4682B4;
+                background-color: #14375A;
                 color: white;
                 font-weight: bold;
     	          cursor: pointer;
@@ -479,7 +576,32 @@
             .queryTableResults {
                 border-collapse: collapse;
                 width: 100%;
-            } 
+            }
+            .cellHighlight{
+              background-color: rgba(32, 78, 112, .4);
+            }
+            .queryBuilder{
+              position: absolute;
+            }
+
+            #operatorBuilder{
+              left: 7.5rem;
+              top: 0%;
+              width: fit-content;
+            }
+            #fieldBuilder{
+              width: 4rem;
+              word-wrap: break-word;
+            }
+            #valueBuilder{
+              left: 11rem;
+              top: 0%;
+              width: fit-content;
+            }
+            section{
+              position: relative;
+              height: 4rem;
+            }
             .modal {
         			display: none;
         			position: fixed;
@@ -500,12 +622,23 @@
         			border-radius: 0px;
               position: relative;
         		}
+            .overlay{
+              position: fixed;
+              top: 0;
+              bottom: 0;
+              left: 0;
+              right: 0;
+              width: 100%;
+              height: 100%;
+              background: rgba(0, 0, 0, 0.5);
+              z-index: 1;
+            }
         		#spnClose {
               position: relative;
               bottom: .5rem;
               left: 23.5rem;
-
         		}
+            
             
         </style>
         <script>
@@ -528,6 +661,7 @@
             let bridgeInventoryFieldsArray = []
             //let searchSources = []
             let basemapAll;
+            let queryTableResults;
             
             // URL Parameters
             var urlParams;
@@ -649,6 +783,7 @@
                   initBasemapOverlayToggle()
                   onViewLoad()
                   readUrlParams()
+                  //moveTable()
                   //queryPageBtnDisable()
                 }
               }
@@ -1013,7 +1148,7 @@
               let printer;
               document.getElementById("print").addEventListener("click", ()=>{
                 if(!printer){
-                  activateButton("print")
+                  activateToolButton("print")
                   printer = new Print({
                     view: view,
                     printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
@@ -1028,7 +1163,7 @@
 
                 if(printer.visible === false){
                   printer.visible = true
-                  activateButton("print")
+                  activateToolButton("print")
                   return
                 }
 
@@ -1071,7 +1206,7 @@
                     resetButton("lrsButton");
                     lrsButtonStatus=false;
                     clearInnerHTML("mapClickResults");                     
-                    activateButton("measureButton");
+                    activateToolButton("measureButton");
                     graphicsLayer.removeAll();                    
                 }
               });              
@@ -1088,7 +1223,7 @@
                   }
 
                   searchBar.visible = true
-                  activateButton("searchTool")
+                  activateToolButton("searchTool")
                   return
                 })
               })
@@ -1098,12 +1233,120 @@
 
               const getCurrentQuerySelection = () => document.getElementById("querySelectionFilter").value
 
+
+              function disableQuery(){
+                let isChecked = document.querySelector(`input[name="featQuery"]:checked`)
+                if(!isChecked){
+                  for(let i in document.querySelector('#queryTab').childNodes[1]){
+                    if(i > 1){
+                      document.querySelector('#queryTab').childNodes[1][i].disabled = true
+                    }
+                    else{
+                      
+                    }
+                  }
+                  return true
+                }
+                return false
+              }
+
+              function addEventListener(tabname, isAllDisabled){
+                let getItems = document.querySelector(tabname)
+                let inputFields = getItems.querySelectorAll(".noDisabled1")
+                initValueCheck(inputFields, getItems)
+                inputFields.forEach((x,i) =>{
+                  console.log(x)
+                  if(x.tagName === "SELECT"){
+                    selectEventListner(x.id)
+                  }
+                  else{
+                    inputEventListner(x.id)
+                  }
+                })
+              }
+              document.getElementById("ri").addEventListener("change", () => document.getElementById("field").disabled = false)
+
+              document.getElementById("bridge").addEventListener("change", () => document.getElementById("field").disabled = false)
+
+              function selectEventListner(id){
+                console.log(id)
+                document.getElementById(id).addEventListener("change", (event)=>{
+                  console.log(event)
+                  if(event.target.value != ""){
+                    event.target.nextElementSibling.disabled = false
+                    if(event.target.type === "select-multiple"){
+                      console.log("hey1")
+                      let classBtn = event.target.nextElementSibling.className.split(" ")
+                      document.querySelectorAll(`.${classBtn[1]}`).forEach(x => x.disabled = false)
+                    }
+                    
+                  }
+                  else{
+                    console.log(event.target)
+                    event.target.nextElementSibling.disabled = true
+                    if(event.target.type === "select-multiple"){
+                      let classBtn = event.target.nextElementSibling.className.split(" ")
+                      document.querySelectorAll(`.${classBtn[1]}`).forEach(x => x.disabled = true)
+                    }
+                  }
+                })
+              }
+
+              function inputEventListner(id){
+                document.getElementById(id).addEventListener("input", (event)=>{
+                  console.log(event.target)
+                  displayErrorMsg(event.target.validity)
+                  if(event.target.value != ""){
+                    if(event.target.nextElementSibling.tagName === 'BR'){
+                      event.target.nextElementSibling.disabled = false
+                    }
+                    event.target.nextElementSibling.disabled = false
+                  }
+                  else{
+                    console.log(event.target)
+                    event.target.nextElementSibling.disabled = true
+                  }
+                })
+              }
+
               function toggleQueryBtns(id, status) {
                 let btns = document.getElementById(id).getElementsByTagName("button")
                 for(let btn in btns){
-                  //console.log(btn)
+                  console.log(btn)
                   btns[btn].disabled = status
                 }
+              }
+
+              function initValueCheck(values, tab){
+                console.log(tab.getElementsByTagName("button"))
+                console.log(values)
+                let a = 0;
+                for(let i =0; i < tab.children[0].length; i++){
+                  if(tab.children[0][i].value === "" && tab.children[0][i].tagName != "BUTTON"){
+                    console.log(tab.children[0][i])
+                    a++
+                  }
+                }
+                let btns = tab.getElementsByTagName("button")
+                
+                if(a > 0 ){
+                  for(let b in btns){
+                    console.log("hey")
+                    console.log(btns[b])
+                    if(btns[b].tagName === "BUTTON"){
+                      document.getElementById(btns[b].id).disabled = true
+                    }
+                    return
+                  }
+                }
+                for(let b in btns){
+                  console.log(btns[b])
+                  if(btns[b].tagName === "BUTTON"){
+                    console.log(btns[b].id)
+                    document.getElementById(btns[b].id).disabled = false;
+                  }
+                }
+
               }
 
               function displayErrorMsg(validity){
@@ -1127,56 +1370,69 @@
                 
                 //let btns = document.getElementById(id).getElementsByTagName("button")
 
-                ["change", "input"].forEach((x) => {
-                  document.getElementById(id).addEventListener(x, (event) => {
+                // ["change", "input"].forEach((x) => {
+                //   document.getElementById(id).addEventListener(x, (event) => {
                     
-                    if(event.target.tagName === "SELECT"){
-                      let input = document.getElementById(id).getElementsByTagName("input")
-                      for(let i in input){
-                        if(!input[i].value) continue
-                        displayErrorMsg(input[i].validity)
-                        if(input[i].value.length < 1){
-                          toggleQueryBtns(id, true)
-                          continue
-                        }
-                        toggleQueryBtns(id, false)
-                        continue
-                      }   
-                    }
-                    if(event.target.tagName === "INPUT"){
-                      displayErrorMsg(event.target.validity)
-                      
-                      let select = document.getElementById(id).getElementsByTagName("select")
-                      for(let i in select){
-                        if(select[i].value|| event.target.value.length < 1){
-                          toggleQueryBtns(id, true)
-                          continue
-                        }
-                        toggleQueryBtns(id, false)
-                        continue
-                      }   
-                    }
-                    // let selectOutput = document.getElementById("outputFields")
-                    // event.target.value.length && selectOutput.value.length ? toggleQueryBtns(id, false) : toggleQueryBtns(id, true)
+                //     if(event.target.tagName === "SELECT"){
+                //       let input = document.getElementById(id).getElementsByTagName("input")
+                //       for(let i in input){
+                //         if(!input[i].value) continue
+                //         displayErrorMsg(input[i].validity)
+                //         if(input[i].value.length < 1){
+                //           toggleQueryBtns(id, true)
+                //           continue
+                //         }
+                //         toggleQueryBtns(id, false)
+                //         continue
+                //       }   
+                //     }
+                //     if(event.target.tagName === "INPUT"){
+                //       displayErrorMsg(event.target.validity)
+                //       let select = document.getElementById(id).getElementsByTagName("select")
+                //       console.log(event.target)
+                //       for(let i in select){
+                //         if(select[i].value|| event.target.value.length < 1){
+                //           toggleQueryBtns(id, true)
+                //           continue
+                //         }
+                //         toggleQueryBtns(id, false)
+                //         continue
+                //       }   
+                //     }
+                //     // let selectOutput = document.getElementById("outputFields")
+                //     // event.target.value.length && selectOutput.value.length ? toggleQueryBtns(id, false) : toggleQueryBtns(id, true)
 
-                  })
-                })
+                //   })
+                // })
               }
               
               function onViewLoad(){
                 let url = getURLParams(window.location.search)
                 let getQueryType = window.location.search ? url.get("queryType") ?? "RoadInventory" : "RoadInventory"
-                for(let q of document.getElementById("querySelectionFilter").options){
-                  if(q.value === getQueryType){
-                    q.selected = true
-                  }
-                }
+                // for(let q of document.getElementById("querySelectionFilter").input){
+                //   console.log(q)
+                //   if(q.value === getQueryType){
+                //     q.selected = true
+                //   }
+                // }
                 
                 let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
                 view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
                   featureLayerView = layerView;
                   populateQueryForm(getQueryType);
                 });
+                if(conditions.length < 1){
+                  document.getElementById("outputFields").disabled = true
+                  clearConditions()
+                }
+                for(let z=0; z < document.getElementsByTagName("INPUT").length; z++){
+                  if(document.getElementsByTagName("INPUT")[z].type != "radio"){
+                    document.getElementsByTagName("INPUT")[z].textContent = ""
+                    //document.getElementsByTagName("INPUT")[z].value = ""
+                  }
+                  
+                }
+                //document.getElementsByTagName("INPUT")
                 return;
               }
               
@@ -1209,6 +1465,16 @@
                   return
                 }
                 populateQueryForm(event)
+              }
+
+              function typeAhead(){
+                ///
+                document.getElementById("tableSearch").addEventListener("input", (event)=>{
+                  let regex = new RegExp(`${event.target.value}`)
+
+                  console.log(queryTableResults)
+                })
+                
               }
 
               async function populateQueryForm(type) {
@@ -1251,7 +1517,7 @@
                 } else {
                     resetButton("measureButton");
                     measurementWidget.visible = false;                    
-                    activateButton("lrsButton");
+                    activateToolButton("lrsButton");
                     lrsButtonStatus = true;
                     clearInnerHTML("mapClickResults");                    
                 }                
@@ -1333,7 +1599,7 @@
                 if (document.getElementById("diagramTab").style.display == "block"||document.getElementById("eventTab").style.display == "block") {
                   document.getElementById("inpSRDRouteID").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
 		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM; 
-                  var startingDFO = theResponse.data[lowestIndex].RTE_DFO;
+                  var startingDFO = Number(theResponse.data[lowestIndex].RTE_DFO.toFixed(3));
                  if ((startingDFO-1)<0) {
                     document.getElementById("inpSRDFromDFO").value = startingDFO;
                     document.getElementById("inpSRDToDFO").value = startingDFO+1;
@@ -1344,7 +1610,20 @@
                     document.getElementById("inpSRDToDFO").value = startingDFO+1; 
                     document.getElementById("eventBeginDFO").value = startingDFO-1;
                     document.getElementById("eventEndDFO").value = startingDFO+1;                 
-                  }                  
+                  }
+                  
+                  ["#diagramTab","#eventTab"].forEach((x) =>{
+                      let getField = document.querySelectorAll(x)
+                      console.log(getField[0])
+                      for(let a=0; a < getField[0].children[0].length; a++){
+                        if(getField[0].children[0][a].tagName != "BUTTON" && getField[0].children[0][a].value.length){
+                            getField[0].children[0][a].disabled = false
+                            getField[0].children[0][a].nextElementSibling.disabled = false
+                            
+                        }
+                      }
+                  })
+                 
                 }
                
                 var table = document.createElement("table");
@@ -1399,7 +1678,7 @@
                   return
                 }
 
-                activateButton("legend")
+                activateToolButton("legend")
                 legend.visible = true
                 return
               })
@@ -1429,7 +1708,7 @@
                 layerId.visible = false;
                 resetBaseMapItem(id)
                 returnId.visible = 0
-                legend.visible = false
+                //legend.visible = false
                 resetButton("legend")
               }
 
@@ -1437,7 +1716,7 @@
                 layerId.visible = true;
                 activateBaseMapItem(id)
                 returnId.visible = 1
-                legend.visible = true
+                //legend.visible = true
                 activateButton("legend")
               }
 
@@ -1516,33 +1795,44 @@
                 resetAllTabs();
                 activateButton("baseMaps");
                 document.getElementById("mapTab").style.display = "block";
+                document.getElementById("viewDiv").style.cursor = "default"
               }); 
               
               //Query tab listener
               const queryListener = document.querySelector('#dataQuery');
               queryListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                let isAllDisabled = disableQuery()
                 activateButton("dataQuery");
                 pageBtnDisable("queryTab")
-                document.getElementById("queryTab").style.display = "block";                
+                addEventListener("#queryTab", isAllDisabled)
+                document.getElementById("queryTab").style.display = "block";
+                document.getElementById("viewDiv").style.cursor = "default"               
               });   
               
               //Roadway diagram listener
               const roadwayDiagramListener = document.querySelector('#roadwayDiagram');
               roadwayDiagramListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                console.log(event)
+                let isAllDisabled = disableQuery()
                 activateButton("roadwayDiagram");
-                document.getElementById("diagramTab").style.display = "block";                
+                pageBtnDisable("eventTab");
+                addEventListener("#diagramTab", isAllDisabled)
+                document.getElementById("diagramTab").style.display = "block";
+                document.getElementById("viewDiv").style.cursor = "default"           
               });    
               
               //Event tab listener
               const eventTabListener = document.querySelector('#eventForm');
               eventTabListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                let isAllDisabled = disableQuery()
                 activateButton("eventForm");
-
                 pageBtnDisable("eventTab")
-                document.getElementById("eventTab").style.display = "block";                
+                addEventListener("#eventTab", isAllDisabled)
+                document.getElementById("eventTab").style.display = "block";       
+                document.getElementById("viewDiv").style.cursor = "default"        
               });               
               
               //Graphic sketch listener
@@ -1550,14 +1840,19 @@
               graphicSketchListener.addEventListener('click', (event) => {
                 resetAllTabs();
                 activateButton("graphicSketch");
-                document.getElementById("sketchTab").style.display = "block";                
+                document.getElementById("sketchTab").style.display = "block";
+                createServiceDown("Click to draw line", "#204e70")
+                setTimeout(()=>{
+                  document.getElementById("serviceDownDiv").remove()
+                },2000)        
               }); 
               
               //Check LRM Inputs listener
               const lrmInputsListener = document.querySelector('#btnUpdateLRM');
               lrmInputsListener.addEventListener('click', (event) => {
-                checkLRMInputs();              
-              }); 
+                checkLRMInputs();
+                document.querySelectorAll(".srdBtn").forEach(y => y.disabled = false)
+              })
               
               //Add Inventory Attribute listener
               const addInventoryListener = document.querySelector('#btnInventoryUpdateLRM');
@@ -1593,14 +1888,15 @@
               //Toggle diagram clear listener
               const toggleClearnDiagramListener = document.querySelector('#btnClearDiagramView');
               toggleClearnDiagramListener.addEventListener('click', (event) => {
-                toggleVisibility("parentCanvas"); 
+                //toggleVisibility("parentCanvas"); 
                 var buttonToggleDiagram = document.getElementById("parentCanvas");
                 var buttonText = document.getElementById("btnToggleDiagramView");
-                if (buttonToggleDiagram.style.display === "none") {
-                  buttonText.textContent = 'Show Diagram';
-                } else {
-                  buttonText.textContent = 'Hide Diagram';
-                }   
+                buttonToggleDiagram.style.display = "none"
+                // if (buttonToggleDiagram.style.display === "none") {
+                //   buttonText.textContent = 'Show Diagram';
+                // } else {
+                //   buttonText.textContent = 'Hide Diagram';
+                // }   
                 
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
@@ -1634,7 +1930,8 @@
               //Run Query listener
               const runQueryListener = document.querySelector('#btnRunQuery');
               runQueryListener.addEventListener('click', (event) => {
-                let getQueryFeatLayer = retrieveFeatureLayer(document.getElementById("querySelectionFilter").value)
+                console.log(document.querySelector(`input[name="featQuery"]:checked`))
+                let getQueryFeatLayer = retrieveFeatureLayer(document.querySelector(`input[name="featQuery"]:checked`).value)
                 setLayerDefinitionExpression(getQueryFeatLayer[0]);  
               });    
               
@@ -1654,7 +1951,7 @@
               //Toggle table view listener
               const toggleTableListener = document.querySelector('#btnToggleTableView');
               toggleTableListener.addEventListener('click', (event) => {
-                toggleVisibility("results");                 
+                toggleVisibility("results");           
                 var buttonToggleTable = document.getElementById("results");
                 var buttonText = document.getElementById("btnToggleTableView");
                 if (buttonToggleTable.style.display==="none") {
@@ -1682,7 +1979,6 @@
               //Add Event Button
               const addEventButtonListener = document.querySelector('#btnEventMap');
               addEventButtonListener.addEventListener('click', (event) => {
-                
                 //Clearing the LRS identify tools if they area activated
                 if (lrsButtonStatus==true) {
                   resetLRSIdentify();                  
@@ -1727,19 +2023,16 @@
               });    
               
               //Close modal box
-              const exportCloseListener = document.querySelector('#spnClose');
-              exportCloseListener.addEventListener('click', (event) => {
-                closeModal();
-              }); 
+              // const exportCloseListener = document.querySelector('#spnClose');
+              // exportCloseListener.addEventListener('click', (event) => {
+              //   closeModal();
+              // }); 
               
               document.getElementById("querySelectionFilter").addEventListener("change", (event) =>{
+                console.log(event)
                 selectQuery(event.target.value)
               })
               
-              document.getElementById("spnClose").addEventListener("click", ()=>{
-                resetShareUrl()
-              })
-
               //End listeners---------------------------------------------------
               
               //Control buttons and tabs----------------------------------------
@@ -1814,6 +2107,12 @@
                 document.getElementById(theElement).style.backgroundColor = "#f8f8f8";
                 document.getElementById(theElement).style.color = "#204e70";  
                 document.getElementById(theElement).style.textDecoration = "underline";         
+                return
+              }
+
+              function activateToolButton(theElement){
+                document.getElementById(theElement).style.backgroundColor = "#204e70";
+                document.getElementById(theElement).style.color = "white";  
                 return
               }
               
@@ -2128,7 +2427,12 @@
               function addStartUpCondition() {
                   const li = document.createElement('li');
                   li.textContent = "Conditions listed here";
-                  document.getElementById('conditions').appendChild(li);                
+                  document.getElementById('conditions').appendChild(li); 
+                  document.getElementById("outputFields").disabled = true
+                  // let btns = document.querySelectorAll(".tableBtn")
+                  // for(let i in btns){
+                  //   btns[i].disabled = true;
+                  // }
               }
 
               function resetFeatureLayer(roadId){
@@ -2142,11 +2446,18 @@
                 let getTemplate = document.getElementById("queryTemplate")
                 let templateClone = getTemplate.content.cloneNode(true)
                 let div = templateClone.querySelectorAll("div")
-                div[0].style.height = "150px"
+                div[0].style.height = "250px"
                 div[0].style.width = "350px"
+                let innerModal = document.createElement("div")
+                let h2 = document.createElement("h2")
+                let textArea = document.createElement("textarea")
+                innerModal.classList.add("overlay")
                 let p = document.createElement("p")
                 p.id = "queryMessagePara"
-                if(type === "error" || type === null){
+                textArea.id = "previewUrl"
+                h2.id = "modalHeader"
+
+                if(type === "button" || type === null){
                   let btn = document.createElement("button")
                   btn.id = "queryMessageBtn"
                   btn.className = "spmMainBtn"
@@ -2156,15 +2467,42 @@
                   }
                   div[0].appendChild(btn)
                 }
-                p.textContent = text
+                
+                textArea.textContent = text.url
+                textArea.disabled = true
+                text.url ? textArea.style.display = "block" : textArea.style.display = "none"
+
+                h2.textContent = text.header
+                p.textContent = text.para
+                div[0].appendChild(h2)
+                div[0].appendChild(textArea)
+                
                 div[0].appendChild(p)
+                document.body.appendChild(innerModal)
                 document.body.appendChild(templateClone)
-                //openModal()
               }
 
-              const removeQueryResponseUI = () => document.getElementById("queryStatus").remove()
- 
+              const removeQueryResponseUI = () => {
+                document.getElementById("queryStatus").remove()
+                document.querySelector(".overlay").remove()
+              }
+              
               //Query form functions--------------------------------------------
+              // document.getElementById("field").addEventListener("change", (event)=> {
+              //   console.log(event)
+              //   document.getElementById("fieldBuilder").textContent = event.target.value
+              // })
+
+              // document.getElementById("operator").addEventListener("change", (event)=> {
+              //   console.log(event)
+              //   document.getElementById("operatorBuilder").textContent = event.target.value
+              // })
+
+              // document.getElementById("value").addEventListener("input", (event)=> {
+              //   console.log(event)
+              //   document.getElementById("valueBuilder").textContent = event.target.value
+              // })
+
               function addCondition() {
                   removeStartUpCondition();
                   const field = document.getElementById('field').value;
@@ -2177,22 +2515,25 @@
                     const li = document.createElement('li');
                     li.textContent = currentOperation
                     document.getElementById('conditions').appendChild(li);
+                    document.getElementById("outputFields").disabled = false
                     return
                   }
                 return    
               }  
-              
+
               function clearConditions() {
                   conditions = [];
+                  document.getElementById("value").value = ""
                   document.getElementById('conditions').innerHTML = '';
                   document.getElementById('results').innerHTML = '';
                   document.getElementById("results").style.display = "none";
+                  document.getElementById("btnToggleTableView").disabled = true;
                   //roadwayInventoryfeatureLayer.visible = false;
                   addStartUpCondition();
               }              
               
               async function runAssetQuery(where, outFields, featLayer){
-                queryResponseUI("Hey, Query is doing its thing.")
+                queryResponseUI({para: "Hey, Query is doing its thing.", header:"Query Message"})
                 var query = new Query();
                 query.where = where;
                 query.outFields = [outFields];
@@ -2203,16 +2544,19 @@
                   let returnQuery = await featLayer.queryFeatures(query)
                   if(!returnQuery.features.length){
                     removeQueryResponseUI()
-                    queryResponseUI(`Whelp, no items were returned.  Update your query and try again.`, null)
+                    queryResponseUI({para: `Whelp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null)
                     return
                   }
+                  queryTableResults = returnQuery
+                  document.getElementById("btnToggleTableView").disabled = false
                   makeTableFromService(returnQuery);
                   featLayer.visible = true;
                   removeQueryResponseUI()
                 }
                 catch(err){
+                  console.log(err)
                   removeQueryResponseUI()
-                  queryResponseUI(`Whelp, ${err.details.messages[0]}`, "error") 
+                queryResponseUI({para:`Whelp, Invalid query check your parameters and retry.`, header: "Query Message"}, "button") 
                 }
               }
 
@@ -2232,7 +2576,50 @@
                   view.goTo(results.extent);
                 });                
               }
-              
+
+              function getRowInfo(event){
+                let evt = event.target;
+                let test = []
+                console.log(event.target)
+                while(evt){
+                  test.push(evt.innerHTML)
+                  evt = evt.nextElementSibling
+                }
+                let comparteArr = test.map((x) => {
+                  if(!x){
+                    return null
+                  }
+                  return x
+                })
+
+                let rowArr = []
+                let returnResult = queryTableResults.features.filter((x) => {
+                  for(let i in x.attributes){
+                    if(typeof(x.attributes[i]) === "number"){
+                      x.attributes[i] = x.attributes[i].toString()
+                    }
+                  }
+                  // console.log(JSON.stringify(comparteArr), JSON.stringify(Object.values(x.attributes)))
+                  if(JSON.stringify(comparteArr) === JSON.stringify(Object.values(x.attributes))){
+                    rowArr.push(x.geometry)
+                  }
+                  
+                })
+                console.log(rowArr)
+
+                
+                view.goTo(rowArr)
+
+
+                // while(selectedRow.nextElementSibling != null){
+                //   console.log(selectedRow.nextElementSibling.innerHTML)
+                //   //rowArr.push(selectedRow.innerHTML)
+                //   //rowArr.push(selectedRow.nextElementSibling.innerHTML)
+                  
+                // }
+                // console.log(rowArr)
+              }
+
               async function makeTableFromService(dataArray) {
                   let makeTablePromise = new Promise((res,rej) => {
                     var fieldNames = [];
@@ -2242,6 +2629,10 @@
               
                   // Create a table to display the data
                     var table = document.createElement('table');
+                    let searchBox = document.createElement("input")
+                    searchBox.id = "tableSearch"
+                    searchBox.oninput = () => {typeAhead()}
+                    table.appendChild(searchBox)
                     table.classList.add("queryTableResults"); 
                     table.setAttribute("id", "queryResultTable");
                   
@@ -2257,12 +2648,20 @@
                     table.appendChild(header);
                   
                   //Build the table
+                    console.log(dataArray.features)
                     for(var i=0; i<dataArray.features.length; i++) {
                         var row = document.createElement('tr');
+                        row.addEventListener("click", (evt)=>{
+                          getRowInfo(evt)
+                        })
                         for (var x in dataArray.features[i].attributes) {
-                            var td = document.createElement('td');
+                            
+                            td = document.createElement('td');
                             td.textContent = dataArray.features[i].attributes[x];
                             td.classList.add("queryTblData");
+                            if(x===0){
+                              td.classList.add("esri-icon-zoom-in-magnifying-glass")
+                            }
                             row.appendChild(td);                        
                         }
                         table.appendChild(row);
@@ -2316,6 +2715,8 @@
               view.on("click", function(event) {
                 var testSketchDiv = document.getElementById("sketchTab");
                 if (testSketchDiv.style.display == "block") {
+                  
+                  document.getElementById("viewDiv").style.cursor = "crosshair"
                   let point = view.toMap({x: event.x, y: event.y});
 
                   //add graphic to map
@@ -2587,7 +2988,7 @@
                 drawPolygon([[0,0],[canvas.width,0],[canvas.width,canvas.height],[0,canvas.height],[0,0]],2,"#FFFFFF","#D3D3D3");
                 
                 //Draw header
-                drawPolygon([[0,0],[canvas.width,0],[canvas.width,30],[0,30],[0,0]],1,"#4682B4","#4682B4");
+                drawPolygon([[0,0],[canvas.width,0],[canvas.width,30],[0,30],[0,0]],1,"#14375A","#4682B4");
                 
                 //Ruler variables
                 rulerY = 90; // Vertical position of the ruler
@@ -2658,7 +3059,9 @@
                 var diagramBMP = "";
                 var diagramEMP = "";
                 
-                request(urlFromDFO).then(function(response) {
+                request(urlFromDFO)
+                  .then(function(response) {
+                    console.log(response)
                     //Getting begin CS and BMP
                     diagramCSBegin = [response.data[0].CTRL_SECT_LN_NBR,response.data[0].CTRL_SECT_MPT];
 
@@ -2677,17 +3080,21 @@
                         //Draw white box to clear loading message
                         drawRectangle(labelPositions[2]-125,labelY+105,250,20,"#FFFFFF");
                         //Draw Multiple Control Sections found
-                        drawTextCenter("Multiple Control Sections",labelPositions[2],labelY+115,"#FF0000","12");
-                        
+                        inventoryDiagramLogAllValues.length ? drawTextCenter("Multiple Control Sections",labelPositions[2],labelY+115,"#FF0000","12") : drawTextCenter("Unable to draw Control Sections...",labelPositions[2],labelY+115,"#FF0000","12");
                         if (inventoryDiagramLogAllValues.length>0) {
                           //Add inventory attributes from the URL
                           for (var i = 0; i < inventoryDiagramLogAllValues.length; i++) {
+                            
                             addInventoryAttribute(inventoryDiagramLogAllValues[i]);
                           }
-                        }                        
+                        }                    
                       }
                     });                                 
-                });  
+                  })
+                  .catch((err) =>{
+                    console.log(err)
+                  });
+
               }              
               //End check diagram fields----------------------------------------
               
@@ -2758,7 +3165,6 @@
               
               function processInventoryAttributePoint(response,theInventoryLabel) {
                 var returnedFeatures = response.data.features;
-                console.log(returnedFeatures);
                 var attBeginDFO;
                 var attValueGroup;
                 var attValue=45;
@@ -2798,7 +3204,6 @@
                   
                   for (let j = 0; j < attValue.length; j++) {
                     const character = attValue.charAt(j);
-                    console.log(character);
                     drawText(character,eventBeginPixelValue,markerTextStartY,"#FFFFFF",12);
                     markerTextStartY += 10;
                   }                    
@@ -2963,6 +3368,7 @@
               }   
               
               function drawTextCenter(theText,theX,theY,theColor,theSize) {
+                  console.log(theText,theX,theY,theColor,theSize)
                   var canvas = document.getElementById("myCanvas");
                   var ctx = canvas.getContext("2d");
                   ctx.font = theSize + "px sans-serif";
@@ -3046,9 +3452,10 @@
           		}
 
               function queryToUrl(textString){
-                openModal();
+                //openModal();
                   navigator.clipboard.writeText(textString)
                   .then(()=>{
+                    queryResponseUI({para: "URL has been copied! Paste and go.", url: textString, header:"Share URL"}, "button")
                     document.getElementById("previewUrl").textContent = textString
                   })
                   .catch(err => console.log("exportQuery:", err))
@@ -3058,7 +3465,6 @@
           
               //Export Query to URL---------------------------------------------
               function exportQueryToURL() { //bridge, roadway
-                console.log(window.location)
                 var outputFieldsSelect = document.getElementById("outputFields");
                 let queryType = getCurrentQuerySelection()
                 var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value).join(',');
@@ -3134,7 +3540,9 @@
                   </tbody>
                   <tr><th class="basemapHeader">Additional Overlays</th></tr>
                   <small style="position:relative; left: .3rem;">Select a Feature Layer to add to map:</small>
-                  <select id="layerSearch" placeholder="Search for Layer" class="spmDropDown"></select>
+                  <div class="dropDown">
+                  <select name="dropDown" id="layerSearch" placeholder="Search for Layer"></select>
+                  </div>
                   <tbody id="addFeatRow"> 
                   </tbody>
                 `
@@ -3170,13 +3578,12 @@
                   let td = document.createElement("td")
                   td.id = layerItem
                   td.className = "baseMapList"
-
+                  let div = document.createElement("div")
+                  div.id = layerItem
                   let dwnloadBtn = document.createElement("button")
                   dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-error noDwnloadBtn" : "esri-icon-download dwnloadBtn"
                   noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
                   dwnloadBtn.onclick = () => downloadOverlay(layerItem)
-                  td.appendChild(dwnloadBtn)
-                  td.appendChild(document.createTextNode(layerItem))
                   if(initBuild === false){
                     let btnDiv = document.createElement("div")
                     btnDiv.id = "rmvDiv"
@@ -3186,6 +3593,11 @@
                     rmvButton.id = `removeOverlay${layerItem}`
                     td.appendChild(btnDiv)
                   }
+                  td.appendChild(dwnloadBtn)
+                  div.appendChild(document.createTextNode(layerItem))
+                  div.style.width = "80%"
+                  td.appendChild(div)
+
                   tr.appendChild(td)
        
                   if(layerType === "FeatureLayer"){
@@ -3352,26 +3764,19 @@
 
               function retrieveQuadKey(zoom,y,x){
                 let key = []
-								console.log("start:", zoom)
 
 								for (let i = zoom; i > 0; i--){
-                  console.log("i:",i)
                   let keyVal = 0;
                   let mask = 1 << (i - 1);
-                  console.log("mask:", mask)
                   if ((x & mask) !== 0) {
-                    console.log("x:", x)
                     keyVal++;
 									}
                   if ((y & mask) !== 0) {
-                    console.log("y:", y)
                     keyVal+=2;
                   }
 									key.push(keyVal);
 								}
-                console.log(key)
                 let quadKey = key.join("");
-                console.log(quadKey)
                 return quadKey;
               } 
               
@@ -3426,10 +3831,8 @@
                 let featList = retrieveFeatureLayer(featLayer)
 
                 for(let i=0; i < featList.length; i++){
-                  console.log(featList[i])
                   let returnFetch = await fetch(`https://opendata.arcgis.com/api/v3/datasets/${featList[i].sourceJSON.serviceItemId}_${featList[i].sourceJSON.id}`)
                   let resp = await returnFetch.json()
-                  console.log(resp.meta.request)
                   let a = document.createElement("a")
                   a.href = `${resp.meta.request}/downloads/data?format=fgdb&spatialRefId=4326&where=1=1`
                   a.target = "_blank"
@@ -3587,25 +3990,60 @@
                 let returnStatus = fetch(url)
                   .then((resp) => resp.json())
                   .then((data) =>{
-                    console.log(data)
                     if(!data.error) return
                     if(data.error.code === 404 || data.error.code === 499){
-                      createServiceDown()
+                      let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
+                      createServiceDown(alertTxt, "red")
                       //turn on service down div
                     }
                   })
               }
               
-              function createServiceDown(){
+              function createServiceDown(text, color){
                 let serviceTemp = document.getElementById("serviceDown")
                 let serviceTempClone = serviceTemp.content.cloneNode(true)
                 let div = serviceTempClone.querySelectorAll("div")
-                console.log(div)
-                div[1].textContent = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
+                div[1].textContent = text 
+                div[1].style.backgroundColor = color
                 document.body.appendChild(serviceTempClone)
               }
+
+              function moveTable(){
+                let routeTable = document.getElementById("results")
+                var mousePosition;
+                var offset = [0,0];
+                var isDown = false;
+
+
+                routeTable.addEventListener('mousedown', function(e) {
+                    isDown = true;
+                    offset = [
+                    routeTable.offsetLeft - e.clientX,
+                    routeTable.offsetTop - e.clientY
+                    ];
+                }, true);
+
+                document.addEventListener('mouseup', function() {
+                    isDown = false;
+                }, true);
+
+                document.addEventListener('mousemove', function(event) {
+                    event.preventDefault();
+                    if (isDown) {
+                        mousePosition = {
+                    
+                            x : event.clientX,
+                            y : event.clientY
+                    
+                        };
+                        routeTable.style.left = (mousePosition.x + offset[0]) + 'px';
+                        routeTable.style.top  = (mousePosition.y + offset[1]) + 'px';
+                    }
+                }, true);
+              }
+              
             // end require - - -        
-            });          
+            });      
         </script>
     </head>
     <body class="main">
@@ -3646,15 +4084,19 @@
             </div>
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
-                <select id="querySelectionFilter" class="spmDropDown">
-                  <option name="RoadInventory" value="RoadInventory">Roadway Query</option>
-                  <option name="Bridges" value="Bridges">Bridge Query</option>
-                </select>
-                Choose Output Fields<br><br>
-                <select id="outputFields" multiple size="10" class="spmDropDown"></select>
+                <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
+                  <p style="position: relative; top: 0rem;">Select a layer to query:</p>
+                  <div style="position: relative; bottom: .5rem; right: .4rem">
+                    <input type="radio" id="ri" class="noDisabled" name="featQuery" value="RoadInventory">
+                    <label for="ri">Roadway Query</label>
+                    <input id="bridge" class="noDisabled" type="radio" name="featQuery" value="Bridges">
+                    <label for="bridge">Bridge Query</label>
+                  </div>
+                </div>
                 Build Query<br><br>
-                <select id="field" class="spmDropDown"></select>
-                <select id="operator" class="spmDropDown">
+                <select id="field" class="spmDropDown noDisabled1"></select>
+                <select id="operator" class="spmDropDown noDisabled1">
+                    <option value="" selected>Select an Operator</option>
                     <option value="=">Equals</option>
                     <option value="<>">Does not equal</option>
                     <option value="<">Less than</option>
@@ -3663,20 +4105,23 @@
                     <option value=">=">Greater than or equal to</option>
                     <!--<option value="LIKE">LIKE (use % as a wildcard)</option>-->
                 </select>
-                <input type="text" id="value" placeholder="Enter a value to query">
-                <button class="queryButtonClass" id="btnAddCondition">Add Condition</button>
-                <ul id="conditions">
+                <input type="text" id="value" class="noDisabled1" placeholder="Enter a value to query" disabled>
+                <button class="queryButtonClass noDisabled1 spmMainBtn" id="btnAddCondition">Add Condition</button>
+                <!-- <section><p id="fieldBuilder" class="queryBuilder">i.e EMP</p><p id="operatorBuilder" class="queryBuilder">i.e ></p><p id="valueBuilder" class="queryBuilder">i.e 1244</p></section> -->
+                <ul id="conditions" class="noDisabled1">
                   <li>Conditions listed here</li>
                 </ul><br>
-                <button class="queryButtonClass" id="btnRunQuery" >Run Query</button>
-                <button class="queryButtonClass" id="btnClearConditions">Clear</button>
-                <button class="queryButtonClass" id="btnToggleTableView">Show/Hide Table</button>              
-                <button class="queryButtonClass" id="btnExportToCSV">Export CSV</button>
-                <button id="btnQueryGenerateURL" class="queryButtonClass">Share URL</button>
+                Choose Output Fields<br><br>
+                <select id="outputFields" multiple size="10" class="spmDropDown noDisabled1" disabled></select>
+                <button class="queryButtonClass tableBtn spmMainBtn" id="btnRunQuery">Run Query</button>
+                <button class="queryButtonClass tableBtn spmSecondaryBtn" id="btnClearConditions">Clear</button>
+                <button class="queryButtonClass spmSecondaryBtn" id="btnToggleTableView" disabled>Show/Hide Table</button>              
+                <button class="queryButtonClass tableBtn spmSecondaryBtn" id="btnExportToCSV">Export CSV</button>
+                <button id="btnQueryGenerateURL" class="queryButtonClass tableBtn spmSecondaryBtn">Share URL</button>
                 
                 <template id="queryTemplate">
                   <div id="queryStatus">
-                    <h1 style="position:relative; color:white; background-color: #14375A; height: 2rem; bottom: 1.7rem; width: 22.1rem; right:0.6rem; text-align: left; padding-top: .4rem; padding-left: 1rem;">Query Message</h1>
+                    <!-- <h1 style="position:relative; color:white; background-color: #14375A; height: 2rem; bottom: 1.7rem; width: 22.1rem; right:0.6rem; text-align: left; padding-top: .4rem; padding-left: 1rem;">Query Message</h1> -->
                   </div>
                 </template>  
               </form>          
@@ -3685,13 +4130,12 @@
               <form onsubmit="return false">
                 Roadway<br><br>
                 <input id="inpSRDRouteID" type="text" value="" placeholder="Route ID - Example: US0290-KG">
-                <input id="inpSRDFromDFO" type="text" value="" placeholder="Begin Measure - Example: 15">
-                <input id="inpSRDToDFO" type="text" value="" placeholder="End Measure - Example: 20">
-                <button id="btnUpdateLRM" class="queryButtonClass">Add to Diagram</button>
-                <br>
-                <br>
-                Inventory<br><br>
-                <select id="riAttributes" name="riAttribute" class="spmDropDown">
+                <input id="inpSRDFromDFO" type="text" class="noDisabled1" value="" placeholder="Begin Measure - Example: 15" disabled>
+                <input id="inpSRDToDFO" type="text" class="noDisabled1" value="" placeholder="End Measure - Example: 20" disabled>
+                <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
+
+                Inventory
+                <select id="riAttributes" name="riAttribute" class="spmDropDown noDisabled1" disabled>
                     TxDOT_Base_Thickness
                     <option value="TxDOT_AADT_SRD,AADT_CUR,AADT" selected>Select an Option</option>
                     <option value="TxDOT_AADT_SRD,AADT_CUR,AADT">Annual Average Daily Traffic 2021</option>
@@ -3712,22 +4156,22 @@
                     <option value="TxDOT_Speed_Limits_SRD,SPD_LMT,Speed Limit">Speed Limit</option>
                     <option value="TxDOT_Roadbed_Surface_SRD,SRFC_TYPE,Surface Type">Surface Type</option>                    
                 </select> 
-                <button id="btnInventoryUpdateLRM" class="queryButtonClass">Add to Diagram</button>
-                <button id="btnToggleDiagramView" class="queryButtonClass">Show/Hide Diagram</button>                
-                <button id="btnClearDiagramView" class="queryButtonClass">Clear</button>
-                <button id="btnExportPNG" class="queryButtonClass">Export PNG</button>
-                <button id="btnExportJPEG" class="queryButtonClass">Export JPEG</button> 
-                <button id="btnDiagramGenerateURL" class="queryButtonClass">Share URL</button>
+                <button id="btnInventoryUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
+                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Show/Hide Diagram</button>                
+                <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Clear</button>
+                <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export PNG</button>
+                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export JPEG</button> 
+                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Share URL</button>
               </form>                
             </div>
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
                 Add Events to the Map<br><br>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
-                <input type="number" step="0.001" id="eventBeginDFO" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000"/>
-                <input type="number" step="0.001" id="eventEndDFO" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
-                <select id="eventColors" name="Color" class="spmDropDown">
-                    <option value="#000000" selected>Select a Color</option>
+                <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
+                <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1"name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
+                <select id="eventColors" name="Color" class="spmDropDown noDisabled1" disabled>
+                    <option value="" selected>Select a Color</option>
                     <option value="#000000">Black</option>
                     <option value="#cc6600">Brown</option>
                     <option value="#009933">Green</option>
@@ -3738,14 +4182,14 @@
                     <option value="#14375a">TxDOT Blue</option>
                     <option value="#ffff00">Yellow</option>
                   </select>
-                <input type="number" id="eventWidth" name="Width" placeholder="Line Width - Example: 4" min="1" max="8"/>
-                <input type="text" id="eventDescription" placeholder="Description for the Pop-Up" name="Desc"/>
-                <br>
-                <button id="btnEventMap" class="queryButtonClass">Add to Map</button>  
-                <button id="btnRemoveLast" class="queryButtonClass">Remove Last</button>
-                <button id="btnRemoveAll" class="queryButtonClass">Clear</button>
-                <button id="btnExportToKML" class="queryButtonClass">Export KML</button>                 
-                <button id="btnGenerateURL" class="queryButtonClass">Share URL</button>
+                <input type="number" id="eventWidth" class="noDisabled1" name="Width" placeholder="Line Width - Example: 4" min="1" max="8" disabled/>
+                <input type="text" id="eventDescription" class="noDisabled1" placeholder="Description for the Pop-Up" name="Desc" disabled/>
+                
+                <button id="btnEventMap" class="queryButtonClass spmMainBtn">Add to Map</button>  
+                <button id="btnRemoveLast" class="queryButtonClass eventBtn spmSecondaryBtn">Remove Last</button>
+                <button id="btnRemoveAll" class="queryButtonClass eventBtn spmSecondaryBtn">Clear</button>
+                <button id="btnExportToKML" class="queryButtonClass eventBtn spmSecondaryBtn">Export KML</button>                 
+                <button id="btnGenerateURL" class="queryButtonClass eventBtn spmSecondaryBtn">Share URL</button>
                 <span class="error" id="error"></span>
               </form>                 
             </div>            
@@ -3784,8 +4228,8 @@
     						<br>
     						<input type="number" id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
     						<br>
-    						<button id="btnCalcCost" class="queryButtonClass" title="Estimate Project Cost">Calculate Cost</button>
-    						<button id="btnClearProject" class="queryButtonClass" title="Clear Project">Clear</button>
+    						<button id="btnCalcCost" class="queryButtonClass spmMainBtn" title="Estimate Project Cost">Calculate Cost</button>
+    						<button id="btnClearProject" class="queryButtonClass spmSecondaryBtn" title="Clear Project">Clear</button>
     						<div id="deCostResult"></div>      					
               </div>
             </div>            
@@ -3808,13 +4252,13 @@
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild"></div>
             <div id="searchBox"></div>
             <div id="resetMap" title="Clear and reset map">&#x21BB;</div>
-            <div id="results">Build a query and view the results here...</div>
+            <div id="results" class="resizeTable">Build a query and view the results here...</div>
             <div id="parentCanvas">
     			      <canvas id="myCanvas">
                     <!--custom graphics here-->
                 </canvas>
             </div>  
-            <div id="modal" class="modal">
+            <!-- <div id="modal" class="modal">
           		<div class="modal-content">
                 <h2 style="color:white; background-color: #14375A; position:relative; bottom: 2rem; padding-left: 1rem; padding-right: 1rem; padding-top:.6rem; height: 2rem;">
                   Share URL
@@ -3824,13 +4268,12 @@
                     <textarea id="previewUrl" disabled></textarea>
                     <button class="spmMainBtn" id="spnClose">CLOSE</button>
           		</div>
-          	</div>
+          	</div> -->
             <template id="serviceDown">
-              
               <div class="esri-icon-notice-triangle" >
                 <div id="serviceDownDiv"></div>
               </div>
-            </template>            
+            </template>           
         </div>
     </body>
 </html>
