@@ -32,8 +32,9 @@
             @media (max-width: 480px){
               #left-div{
                 display: none;
-                /* background-color: red !important; */
+                background-color: red !important;
                 z-index: 2 !important;
+
               }
               .hamburgler{
                 display: block !important;
@@ -45,29 +46,41 @@
               #queryMessageBtn{
                 margin-left:  16.6rem !important;
               }
+              #diagramTab, #roadwayDiagram{
+                display: none !important;
+              }
+              /* .basemapHeader{
+                width: 
+              } */
             }
             /*Tablets*/
             @media (min-width: 481px) and (max-width: 767px){
               #left-div{
-                display: block;
-                /* background-color: yellow !important; */
+                display: block !important;
+                background-color: yellow !important;
+              }
+              #diagramTab, #roadwayDiagram{
+                display: none !important;
               }
             }
             /* Tablets portrait mode */
             @media (min-width: 768px) and (max-width: 1024px){
               #left-div{
-                display: block;
-                /* background-color: blueviolet !important; */
+                display: block !important;
+                background-color: blueviolet !important;
               }
               #queryMessageBtn{
                 margin-left:  15.6rem !important;
+              }
+              #diagramTab, #roadwayDiagram{
+                display: none !important;
               }
             }
             /* Laptops, Desktops, tablets landscape mode */
             @media (min-width: 1025px) and (max-width: 1280px){
               #left-div{
-                display: block;
-                /* background-color: blue !important; */
+                display: block !important;
+                background-color: blue !important;
               }
             }
             /* Large screens */
@@ -76,9 +89,9 @@
                 display: block;
                 /* background-color: green !important; */
               }
-              #queryMessageBtn{
-                margin-left:  22.9rem !important;
-              }
+              /* #queryMessageBtn{
+                margin-left:  calc(24vw - 6.1rem) !important;
+              } */
             }
            /* //END Media Queries */
             #printWidget{
@@ -97,6 +110,7 @@
               min-width: 23rem;
               overflow-y: auto;
               max-height: calc(100vh - 6rem);
+              align-items: flex-start;
             }
             #closeAbout{
               font-size: small;
@@ -115,18 +129,19 @@
               padding: .5rem;
             }
 
-            #queryMessageBtn{
+            .queryStatus #queryMessageBtn{
               /* position: inherit; */
               /* bottom: .7rem;
               right: 1.4rem; */
               z-index: 1;
               margin-top: 1.3rem;
               margin-bottom: 1rem;
-              margin-left: 21.6rem;
+              margin-left: calc(24vw - 6.1rem);
             }
             .esri-icon-notice-triangle{
               font-size: 1rem;
             }
+
             #queryMessagePara{
               /* position: inherit; */
               /* top: 3rem;
@@ -211,11 +226,7 @@
             a:hover{
               cursor: pointer;
             }
-            /* #layerSearch{
-              position: relative;
-              width: 90%;
-              left: .2rem;
-            } */
+
             #left-div {
                 position: absolute;
                 left: 0px;
@@ -252,7 +263,7 @@
             }
             #previewUrl{
               /* position: inherit; */
-              width: calc(100vw - 20rem);
+              width: calc(24vw - 4rem);
               /* right: 2.35rem;
               bottom: 4rem; */
               height: fit-content;
@@ -398,7 +409,7 @@
             .tabsContainer {
               position: relative;
               top: 8px;
-              right: 12px;
+              right: 0px;
               width: 300px;
               display: flex;
               justify-content: center;
@@ -408,7 +419,6 @@
             .tabsChild {
               position: relative;
               bottom: 1rem;
-              background-color: inherit;
               margin-left: 1px;
               margin-right: 5px;
               padding: 5px;
@@ -439,19 +449,12 @@
             #resetMap {
               position: absolute;
               top: 134px;
-              left: 13px;
-              background-color: white;
-              margin-left: 3px;
-              margin-right: 3px;
-              padding: 8px;
-              border-radius: 0px;
-              box-shadow: 0px 0px 5px rgba(0, 0, 0, 0.2);
-              cursor: pointer;
+              left: 16px;
             }
             .hamburgler{
               position: absolute;
               top: 180px;
-              left: 13px;
+              left: 16px;
               display: none;
               border: none;
             }
@@ -556,6 +559,9 @@
                 padding: 0.5rem;
                 margin-bottom: 10px;
             }
+            select:focus{
+              outline: 1px #204e70 solid;
+            }
             input[type=text], select, textarea {
               width: 97%;
               padding: 10px;
@@ -580,7 +586,9 @@
               border: 1px solid #888;
               color: #888;
             }
-
+            input:focus{
+              outline: 1px #204e70 solid;
+            }
             tr:hover{
               background-color: rgba(32, 78, 112, .4);
               cursor: pointer;
@@ -628,10 +636,10 @@
             }
             #results {
                 position: absolute;
-                top: 315px;
+                /* top: 315px; */
                 left: 70px;
                 right: 55px;
-                bottom: 95px;
+                bottom: calc(13vh - 0rem);
                 background-color: #F8F8F8;
                 display: none;
                 overflow: auto;
@@ -810,7 +818,7 @@
             ];
 
             let mainTOCLayers = ["AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
-                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "National Highway System", "Alt Fuels - Electric", "Hurricane Evacuation Routes", "Metropolitan Planning Organizations (MPO)"]
+                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "National Highway System", "Alt Fuels - Electric", "Hurricane Evacuation Routes", "Metropolitan Planning Organizations (MPO)", "Live Traffic"]
 
             let displayPopupInfo = [{}]
             
@@ -869,7 +877,7 @@
               let popupArcadeDefinition = {
                 "sum numbers" : "SUM([$feature.ev_dc_fast_num, $feature.ev_level1_evse_num, $feature.ev_level2_evse_num])",
                 "outsideShoulderText": `DECODE($feature.S_TYPE_O, 2, "Paved", "Unpaved")`,
-                "costTruck": "ROUND(($feature.COST_TRK/1000000),2) Million",
+                "costTruck": "Text(ROUND(($feature.COST_TRK/1000000),2), '$###.### Million')",
                 "surfTypeText": `DECODE($feature.SRF_TYPE, 1, "Unpaved", 99, "Unknown", "Paved")`,
                 "pedBorderBool": `DECODE($feature.PED, 1, "Yes", 0, "No", "NA")`,
                 "commBorderBool": `DECODE($feature.VEH_COML, 1, "Yes", 0, "No", "NA")`,
@@ -946,10 +954,12 @@
               
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
               function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
+                document.getElementById("btnEventMap").textContent = "Loading...."
                 var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0";
                 var paraMeters = "/query?f=json&where=RTE_NM='" + rteID + "'&returnGeometry=true&returnM=true";
-							
+                
                 request(url+paraMeters).then(function(response) {
+                  document.getElementById("btnEventMap").textContent = "Add to Map"
                     walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
                 });                
               }
@@ -1227,7 +1237,7 @@
               //     return
               //   } 
                 
-              //   displayFeatOnZoom(breakP, "Texas Roadways Unsegmented")
+              // displayFeatOnZoom(breakP, "Texas Roadways Unsegmented")
               // })
               //Scale Bar-------------------------------------------------------
               var scaleBar = new ScaleBar({
@@ -1347,9 +1357,41 @@
               //End Search--------------------------------------------------------------------
 
               //Load Roadway Inventory forms------------------------------------
+              function queryCheckOnLoad(){
+                let field = document.getElementById("field")
+                let operator = document.getElementById("operator")
+                let value = document.getElementById("value")
+                // field.value.length > 0 ? operator.disabled = false : operator.disabled = false
+                // operator.value.length > 0 ? operator.disabled = false : operator.disabled = true
+                value.value.length > 0 ? value.disabled = false : value.disabled = true
+                console.log(field.value)
+              }
+
+              function eventCheckOnLoad(){
+                let eventBeginDFO = document.getElementById("eventBeginDFO")
+                let eventEndDFO = document.getElementById("eventEndDFO")
+                let eventColors = document.getElementById("eventColors")
+                let eventWidth = document.getElementById("eventWidth")
+                let eventDesc = document.getElementById("eventDescription")
+              
+                eventBeginDFO.value.length > 0 ? eventBeginDFO.disabled = false : eventBeginDFO.disabled = true
+                eventEndDFO.value.length > 0 ? eventEndDFO.disabled = false : eventEndDFO.disabled = true
+                eventColors.value.length > 0 ? eventColors.disabled = false : eventColors.disabled = true
+                eventWidth.value.length > 0 ? eventWidth.disabled = false : eventWidth.disabled = true
+                eventDesc.value.length > 0 ? eventDesc.disabled = false : eventDesc.disabled = true
+              }
+
+              function SRDCheckOnLoad(){
+                let inpSRDFromDFO = document.getElementById("inpSRDFromDFO")
+                let inpSRDToDFO = document.getElementById("inpSRDToDFO")
+                let riAttributes = document.getElementById("riAttributes")
+                console.log(inpSRDFromDFO.value)
+                inpSRDFromDFO.value.length > 0 ? inpSRDFromDFO.disabled = false : inpSRDFromDFO.disabled = true
+                inpSRDToDFO.value.length > 0 ? inpSRDToDFO.disabled = false : inpSRDToDFO.disabled = true
+                riAttributes.value.length > 0 ? riAttributes.disabled = false : riAttributes.disabled = true
+              }
 
               const getCurrentQuerySelection = () => document.querySelector(`input[name="featQuery"]:checked`).value
-
 
               function disableQuery(){
                 let isChecked = document.querySelector(`input[name="featQuery"]:checked`)
@@ -1367,7 +1409,7 @@
                 return false
               }
 
-              function addEventListener(tabname, isAllDisabled){
+              function checkFieldStatus(tabname, isAllDisabled){
                 let getItems = document.querySelector(tabname)
                 let inputFields = getItems.querySelectorAll(".noDisabled1")
                 initValueCheck(inputFields, getItems)
@@ -1380,9 +1422,9 @@
                   }
                 })
               }
-              document.getElementById("ri").addEventListener("change", () => document.getElementById("field").disabled = false)
+              document.getElementById("RoadInventory").addEventListener("change", () => document.getElementById("field").disabled = false)
 
-              document.getElementById("bridge").addEventListener("change", () => document.getElementById("field").disabled = false)
+              document.getElementById("Bridges").addEventListener("change", () => document.getElementById("field").disabled = false)
 
               function selectEventListner(id){
                 document.getElementById(id).addEventListener("change", (event)=>{
@@ -1405,7 +1447,9 @@
               }
 
               function inputEventListner(id){
+                console.log(id)
                 document.getElementById(id).addEventListener("input", (event)=>{
+                  console.log(event)
                   displayErrorMsg(event.target.validity)
                   if(event.target.value != ""){
                     if(event.target.nextElementSibling.tagName === 'BR'){
@@ -1414,6 +1458,7 @@
                     event.target.nextElementSibling.disabled = false
                   }
                   else{
+                    console.log(event)
                     event.target.nextElementSibling.disabled = true
                   }
                 })
@@ -1431,6 +1476,7 @@
                 for(let i =0; i < tab.children[0].length; i++){
                   if(tab.children[0][i].value === "" && tab.children[0][i].tagName != "BUTTON"){
                     a++
+                    //
                   }
                 }
                 let btns = tab.getElementsByTagName("button")
@@ -1530,7 +1576,7 @@
                 for(let z=0; z < document.getElementsByTagName("INPUT").length; z++){
                   if(document.getElementsByTagName("INPUT")[z].type != "radio"){
                     document.getElementsByTagName("INPUT")[z].textContent = ""
-                    //document.getElementsByTagName("INPUT")[z].value = ""
+                    document.getElementsByTagName("INPUT")[z].value = ""
                   }
                   
                 }
@@ -1590,10 +1636,13 @@
                   //Puts the RIA_RTE_ID, DFO, CS, and MPT columns first
                   let returnRdwyInventoryArr = type === "RoadInventory" ? setRoadwayQuery() : setBridgeQuery() 
                   
+
                   for (var i = 0; i < returnRdwyInventoryArr.length; i++) {
                     var field = returnRdwyInventoryArr[i];
                     var optionField = document.createElement("option");
                     var optionSelect = document.createElement("option");
+                    
+                    optionSelect = document.createElement("option");
                     optionField.text = field.toUpperCase();
                     optionField.value = field;
                     optionSelect.text = field.toUpperCase();
@@ -1648,7 +1697,8 @@
                     //Populate LRS Readout
                     request(url).then(function(response) {
                         processLRSResponse(response);
-                    });                    
+                    }
+                    );                    
                  } 
                  //get overlays that are visible
                  let visibleLayer = []
@@ -1668,7 +1718,7 @@
                     }
                     
                     let overlayUrl = visibleLayer.length ? `overlays=${visibleLayer.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
-                    let rightClickURL = `${window.location.href}?${overlayUrl}`
+                    let rightClickURL = `${window.location.origin}${window.location.pathname}?${overlayUrl}`
                     //var rightClickURL = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map="+mapForURL+"&location="+point.latitude.toFixed(8)+","+point.longitude.toFixed(8)+","+view.zoom;
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
                     
@@ -1766,7 +1816,9 @@
                   document.getElementById("marginal").innerHTML = "Level: " + view.zoom + ", " + point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6);
               });
               //End Lat Long Coordinates----------------------------------------
-              
+              view.watch("zoom", (b,a)=>{
+                displayFeatOnZoom(a)
+              })
               //Listeners-------------------------------------------------------
               //Jump to Google listener
               const jumpGoogleListener = document.querySelector('#googleMaps');
@@ -1908,7 +1960,7 @@
                 let isAllDisabled = disableQuery()
                 activateButton("dataQuery");
                 pageBtnDisable("queryTab")
-                addEventListener("#queryTab", isAllDisabled)
+                checkFieldStatus("#queryTab", isAllDisabled)
                 document.getElementById("queryTab").style.display = "block";
                 document.getElementById("viewDiv").style.cursor = "default"               
               });   
@@ -1917,11 +1969,12 @@
               const roadwayDiagramListener = document.querySelector('#roadwayDiagram');
               roadwayDiagramListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                inputEventListner("inpSRDRouteID")
                 console.log(event)
                 let isAllDisabled = disableQuery()
                 activateButton("roadwayDiagram");
                 pageBtnDisable("eventTab");
-                addEventListener("#diagramTab", isAllDisabled)
+                checkFieldStatus("#diagramTab", isAllDisabled)
                 document.getElementById("diagramTab").style.display = "block";
                 document.getElementById("viewDiv").style.cursor = "default"           
               });    
@@ -1930,10 +1983,11 @@
               const eventTabListener = document.querySelector('#eventForm');
               eventTabListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                inputEventListner("eventRoute")
                 let isAllDisabled = disableQuery()
                 activateButton("eventForm");
                 pageBtnDisable("eventTab")
-                addEventListener("#eventTab", isAllDisabled)
+                checkFieldStatus("#eventTab", isAllDisabled)
                 document.getElementById("eventTab").style.display = "block";       
                 document.getElementById("viewDiv").style.cursor = "default"        
               });               
@@ -2033,9 +2087,7 @@
               //Run Query listener
               const runQueryListener = document.querySelector('#btnRunQuery');
               runQueryListener.addEventListener('click', (event) => {
-                console.log(document.querySelector(`input[name="featQuery"]:checked`))
                 let getQueryFeatLayer = retrieveFeatureLayer(document.querySelector(`input[name="featQuery"]:checked`).value)
-                console.log(getQueryFeatLayer)
                 setLayerDefinitionExpression(getQueryFeatLayer[0]);  
               });    
               
@@ -2144,7 +2196,6 @@
               // }); 
               
               document.getElementById("querySelectionFilter").addEventListener("change", (event) =>{
-                console.log(event)
                 selectQuery(event.target.value)
               })
 
@@ -2259,6 +2310,7 @@
               }
               
               function activateBaseMapItem(theElement) {
+                console.log(theElement)
                 document.getElementById(theElement).style.borderLeft = "6px solid #14375A"
                 document.getElementById(theElement).style.paddingLeft = ".6rem"
                 document.getElementById(theElement).style.backgroundColor = "rgba(20,55,90,.2)"
@@ -2326,6 +2378,9 @@
                 return
               }
               
+              function fillInForm(tabName, formInfo){
+
+              }
               //Example: http://example.com/?map=txdot&overlay=AADT&tab=maps&location=31.123,-97.123,10&event=IH0035-KG,15,30,Red,6,Expand to 6 lanes
               function readUrlParams() {
                 //Graphics Layer User Lines and Points
@@ -2338,6 +2393,9 @@
                 
                 let url = window.location.search
                 if(!url.length){
+                  queryCheckOnLoad()
+                  eventCheckOnLoad()
+                  SRDCheckOnLoad()
                   //may need to replace
                   resetAllBaseMapItems()
                   activateButton("baseMaps");
@@ -2347,6 +2405,7 @@
                 }
 
                 urlParams = getURLParams(url);
+                console.log(urlParams)
                 basemapParam = urlParams.get("map") ?? "lightgray";
                 overlayParam = urlParams.get("overlays");
                 tabParam = urlParams.get("tab");
@@ -2387,13 +2446,18 @@
                 
                 //Add the event if provided
                 if (eventParam) {
+                  
+                  inputEventListner("eventRoute")
                   var eventParam = eventParam.replace(/%23/g, "#");
                   const eventArray = eventParam.split('|');
                   // Output the individual arrays
                   for (let i = 0; i < eventArray.length; i++) {
                     const individualArray = eventArray[i].split(',');
                     getLineworkWithM(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4],individualArray[5]);
-                  }                  
+                  }
+                  eventCheckOnLoad()
+                  let isAllDisabled = disableQuery()
+                  checkFieldStatus("#eventTab", isAllDisabled)                      
                 }
                 
                 //Add the event if provided
@@ -2407,6 +2471,7 @@
                 }       
                 
                 if (queryParam) {
+                  
                   document.getElementById('conditions').innerHTML = "";
                   const queryArray = queryParam.split('|');
                   const queryFields = queryArray[0].split(',');
@@ -2434,10 +2499,11 @@
                     }                    
                   }
                   
+
                   let returnFeatureLayer = retrieveFeatureLayer(queryType)
                   console.log(returnFeatureLayer)
-                  let querySelection = document.getElementById("querySelectionFilter").children.namedItem(queryType)
-                  querySelection.selected
+                  let querySelection = document.getElementById("querySelectionFilter").children[1].children.namedItem(queryType)
+                  querySelection.checked = true
 
                   view.whenLayerView(returnFeatureLayer[0]).then(function(layerView) {
                       var selectElement = document.getElementById("outputFields");
@@ -2448,10 +2514,14 @@
                         }
                       }
                       setLayerDefinitionExpression(returnFeatureLayer[0]);
-                  });                   
+                  });
+                  queryCheckOnLoad()
+                  let isAllDisabled = disableQuery()
+                  checkFieldStatus("#queryTab", isAllDisabled)                    
                 }
                 
                 if (diagramParam) {
+                  
                   const diagramFullArray = diagramParam.split('|');
                   const diagramInputs = diagramFullArray[0].split(',');
                   document.getElementById("inpSRDRouteID").value = diagramInputs[0];
@@ -2474,7 +2544,10 @@
                   }
                   
                   //Start the build diagram process
-                  checkLRMInputs();                  
+                  checkLRMInputs();
+                  SRDCheckOnLoad();
+                  let isAllDisabled = disableQuery()
+                  checkFieldStatus("#diagramTab", isAllDisabled)                
                 }
 
                 //Activate tab if provided
@@ -2482,6 +2555,7 @@
                   activateButton("baseMaps");
                   document.getElementById("mapTab").style.display = "block";
                 } else if (tabParam=="query") {
+                  console.log(tabParam)
                   activateButton("dataQuery");
                   document.getElementById("queryTab").style.display = "block";                  
                 } else if (tabParam=="event") {
@@ -2768,10 +2842,10 @@
               
                   // Create a table to display the data
                     var table = document.createElement('table');
-                    let searchBox = document.createElement("input")
-                    searchBox.id = "tableSearch"
-                    searchBox.oninput = () => {typeAhead()}
-                    table.appendChild(searchBox)
+                    // let searchBox = document.createElement("input")
+                    // searchBox.id = "tableSearch"
+                    // searchBox.oninput = () => {typeAhead()}
+                    // table.appendChild(searchBox)
                     table.classList.add("queryTableResults"); 
                     table.setAttribute("id", "queryResultTable");
                   
@@ -3610,7 +3684,7 @@
                 var queryWhere = conditions.map(condition => `${condition.field}${condition.operator}${condition.value}`).join(' AND ');                
                 let arrayString = `?queryType=${queryType}&tab=query&query=${outputFieldList}|${queryWhere}`
                
-                var fullString = `${window.location.href}${arrayString}`;
+                var fullString = `${window.location.origin}${window.location.pathname}${arrayString}`;
 
                 queryToUrl(fullString)
                 return
@@ -3621,7 +3695,7 @@
               function exportDiagramToURL () {
                 var diagramAttributes = inventoryDiagramLog.join(',');
                 var arrayString = "?tab=diagram&diagram=" + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO;
-                let fullString = `${window.location.href}${arrayString}|${diagramAttributes}`
+                let fullString = `${window.location.origin}${window.location.pathname}${arrayString}|${diagramAttributes}`
                 
                 queryToUrl(fullString)
                 return
@@ -3644,7 +3718,8 @@
                 
                 arrayString = "?tab=event&event=" + arrayString;
                 var replacedString = arrayString.replace(/#/g, "%23");
-                replacedString = `${window.location.href}${replacedString}`
+                
+                replacedString = `${window.location.origin}${window.location.pathname}${replacedString}`
                 
                 queryToUrl(replacedString)
               }  
@@ -3678,7 +3753,7 @@
                   <tbody id="featRow"> 
                   </tbody>
                   <tr><th class="basemapHeader">Additional Overlays</th></tr>
-                  <small style="position:relative; left: .3rem;">Select a Feature Layer to add to map:</small>
+                  <small style="position:relative; left: .3rem;">Select a Feature Layer to add to map (Max 5 Overlays):</small>
                   <div class="dropDown">
                   <select name="dropDown" id="layerSearch" placeholder="Search for Layer"></select>
                   </div>
@@ -3709,6 +3784,16 @@
                 option.value = name
                 option.appendChild(document.createTextNode(name))
                 dropdown.appendChild(option)
+              }
+              let count = 0;
+              function checkAdditionalOverlayCount(element){
+                console.log(element.children)
+                if(count === 5){
+                  document.getElementById("layerSearch").disabled = true
+                  return
+                }
+                document.getElementById("layerSearch").disabled = false
+                return
               }
 
               function appendChildToOverlayList(layerItem, layerType, initBuild, documentFrag){
@@ -3755,6 +3840,9 @@
                   itemArr.find(y => y.name === x.name).visible = 0
                 })
                 document.getElementById(idRight).remove()
+                count -= 1
+                checkAdditionalOverlayCount(document.getElementById("addFeatRow"))
+                return
               }
 
               function addFeatureLayerToMap(featLayer, popupInfo){
@@ -3894,6 +3982,8 @@
 
               function searchOverlays(){
                 document.getElementById("layerSearch").addEventListener("change", (event)=>{
+                  count += 1
+                  checkAdditionalOverlayCount(document.getElementById("addFeatRow"))
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
                 })
@@ -4020,7 +4110,6 @@
               
               function displayFeatOnZoom(zoom){
                 let zoomLvl = Math.round(zoom)
-                let scaleFeatLayer = ["Texas Roadways Unsegmented", "AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Section", "Speed Limits", "Future Traffic & Percent Truck", "Top 100 Congested Roadways", "Roadway Inventory - On-System Roadbeds", "Cemeteries"]
                 
                 let roadLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")
                 let aadtLayer = retrieveFeatureLayer("AADT")
@@ -4124,7 +4213,7 @@
                   return
                 }
                 if(zoomLvl === 12){
-                  roadLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                  roadLayer[0].definitionExpression = ''
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
                   fcLayer[0].definitionExpression = "RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
@@ -4311,10 +4400,10 @@
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
                   <p style="position: relative; top: 0rem;">Select a layer to query:</p>
                   <div style="position: relative; bottom: .5rem; right: .4rem">
-                    <input type="radio" id="ri" class="noDisabled" name="featQuery" value="RoadInventory">
-                    <label for="ri">Roadway Query</label>
-                    <input id="bridge" class="noDisabled" type="radio" name="featQuery" value="Bridges">
-                    <label for="bridge">Bridge Query</label>
+                    <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory">
+                    <label for="RoadInventory">Roadway Query</label>
+                    <input id="Bridges" class="noDisabled" type="radio" name="featQuery" value="Bridges">
+                    <label for="Bridges">Bridge Query</label>
                   </div>
                 </div>
                 Build Query<br><br>
@@ -4353,9 +4442,9 @@
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
                 Roadway<br><br>
-                <input id="inpSRDRouteID" type="text" value="" placeholder="Route ID - Example: US0290-KG">
-                <input id="inpSRDFromDFO" type="text" class="noDisabled1" value="" placeholder="Begin Measure - Example: 15" disabled>
-                <input id="inpSRDToDFO" type="text" class="noDisabled1" value="" placeholder="End Measure - Example: 20" disabled>
+                <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
+                <input id="inpSRDFromDFO" type="text" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
+                <input id="inpSRDToDFO" type="text" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
                 <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
 
                 Inventory
@@ -4475,7 +4564,7 @@
             </div>     
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild"></div>
             <div id="searchBox"></div>
-            <div id="resetMap" title="Clear and reset map">&#x21BB;</div>
+            <div id="resetMap" class="toolsChild" title="Clear and reset map">&#x21BB;</div>
             <button class="hamburgler toolsChild esri-icon-drag-horizontal"></button>
             <div id="results" class="resizeTable">Build a query and view the results here...</div>
             <div id="parentCanvas">
