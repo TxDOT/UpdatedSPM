@@ -955,11 +955,13 @@
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
               function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
                 document.getElementById("btnEventMap").textContent = "Loading...."
+                document.getElementById("btnEventMap").disabled = true
                 var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0";
                 var paraMeters = "/query?f=json&where=RTE_NM='" + rteID + "'&returnGeometry=true&returnM=true";
                 
                 request(url+paraMeters).then(function(response) {
                   document.getElementById("btnEventMap").textContent = "Add to Map"
+                  document.getElementById("btnEventMap").disabled = false
                     walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
                 });                
               }
@@ -1006,7 +1008,15 @@
                 //Loop through the results extend the events and add to the map
                 for (var z = 0; z < result.length; z++) {
                   //For the first point on the segment
-                  indexOne = result[z][0][0];
+                  if(result[z].includes(undefined)){
+                    document.getElementById("error").textContent = "Incorrect Request. Try Again";
+                    setTimeout(()=>{
+                      document.getElementById("error").textContent = "";
+                    },3000)
+                    return
+                  }
+                  console.log(result[z][0])
+                  indexOne = result[z][0][0]
                   indexTwo = result[z][0][1];
                   indexThree = result[z][0][2];   
                   
@@ -1422,9 +1432,15 @@
                   }
                 })
               }
-              document.getElementById("RoadInventory").addEventListener("change", () => document.getElementById("field").disabled = false)
+              document.getElementById("RoadInventory").addEventListener("change", () => {
+                document.getElementById("field").disabled = false
+                document.getElementById("operator").disabled = false
+              })
 
-              document.getElementById("Bridges").addEventListener("change", () => document.getElementById("field").disabled = false)
+              document.getElementById("Bridges").addEventListener("change", () => {
+                document.getElementById("field").disabled = false
+                document.getElementById("operator").disabled = false
+              })
 
               function selectEventListner(id){
                 document.getElementById(id).addEventListener("change", (event)=>{
@@ -1449,16 +1465,15 @@
               function inputEventListner(id){
                 console.log(id)
                 document.getElementById(id).addEventListener("input", (event)=>{
-                  console.log(event)
                   displayErrorMsg(event.target.validity)
                   if(event.target.value != ""){
                     if(event.target.nextElementSibling.tagName === 'BR'){
                       event.target.nextElementSibling.disabled = false
                     }
                     event.target.nextElementSibling.disabled = false
+                    
                   }
                   else{
-                    console.log(event)
                     event.target.nextElementSibling.disabled = true
                   }
                 })
@@ -1498,6 +1513,7 @@
               }
 
               function displayErrorMsg(validity){
+          
                 let errorMsg = {"badInput": "Check type required for input", "rangeOverflow": "A number between 1-8 is required", "rangeUnderflow": "A number between 1-8 is required", 
                                 "typeMismatch": "An invalid type has been detected. Try again.", "valueMissing":"Value is Missing.", "stepMismatch":"Field requires 3 decimal places."}
                 
@@ -3738,7 +3754,7 @@
                 let returnToc = await tocFeatureLayer.queryFeatures()
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress,visible: 0})
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, visible: 0, addToTOC: 0})
                 })
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
@@ -3785,10 +3801,10 @@
                 option.appendChild(document.createTextNode(name))
                 dropdown.appendChild(option)
               }
-              let count = 0;
+
               function checkAdditionalOverlayCount(element){
-                console.log(element.children)
-                if(count === 5){
+                let num = itemArr.filter(y => y.addToTOC === 1)
+                if(num.length === 5){
                   document.getElementById("layerSearch").disabled = true
                   return
                 }
@@ -3840,8 +3856,8 @@
                   itemArr.find(y => y.name === x.name).visible = 0
                 })
                 document.getElementById(idRight).remove()
-                count -= 1
-                checkAdditionalOverlayCount(document.getElementById("addFeatRow"))
+                itemArr.find(z => z.name === idRight).addToTOC = 0
+                checkAdditionalOverlayCount()
                 return
               }
 
@@ -3982,8 +3998,8 @@
 
               function searchOverlays(){
                 document.getElementById("layerSearch").addEventListener("change", (event)=>{
-                  count += 1
-                  checkAdditionalOverlayCount(document.getElementById("addFeatRow"))
+                  itemArr.find(x => x.name === event.target.value).addToTOC = 1
+                  checkAdditionalOverlayCount()
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
                 })
