@@ -236,7 +236,9 @@
                 background-color: white;
                 overflow-y: auto;
                 overflow-x: hidden;
+                scrollbar-width: thin;
             }
+
             #left-div::-webkit-scrollbar {
               width: 1px;
             }       
@@ -263,7 +265,7 @@
             }
             #previewUrl{
               /* position: inherit; */
-              width: calc(24vw - 4rem);
+              width: calc(24vw - 4.1rem);
               /* right: 2.35rem;
               bottom: 4rem; */
               height: fit-content;
@@ -561,6 +563,10 @@
             }
             select:focus{
               outline: 1px #204e70 solid;
+            }
+            select:disabled{
+              cursor: default;
+              border:1px solid gray;
             }
             input[type=text], select, textarea {
               width: 97%;
@@ -1371,6 +1377,8 @@
                 let field = document.getElementById("field")
                 let operator = document.getElementById("operator")
                 let value = document.getElementById("value")
+                operator.value = ""
+                
                 // field.value.length > 0 ? operator.disabled = false : operator.disabled = false
                 // operator.value.length > 0 ? operator.disabled = false : operator.disabled = true
                 value.value.length > 0 ? value.disabled = false : value.disabled = true
@@ -1570,16 +1578,12 @@
                 // })
               }
               
+
               function onViewLoad(){
                 let url = getURLParams(window.location.search)
-                let getQueryType = window.location.search ? url.get("queryType") ?? "RoadInventory" : "RoadInventory"
-                // for(let q of document.getElementById("querySelectionFilter").input){
-                //   console.log(q)
-                //   if(q.value === getQueryType){
-                //     q.selected = true
-                //   }
-                // }
-                
+                console.log(url.get("queryType"))
+                let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
+
                 let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
                 view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
                   featureLayerView = layerView;
@@ -1888,7 +1892,7 @@
                 activateBaseMapItem(id)
                 returnId.visible = 1
                 //legend.visible = true
-                activateButton("legend")
+                //activateButton("legend")
               }
 
               function initBasemapOverlayToggle(){
@@ -2760,7 +2764,9 @@
               }              
               
               async function runAssetQuery(where, outFields, featLayer){
-                queryResponseUI({para: "Hey, Query is doing its thing.", header:"Query Message"}, 0, height="250px", width="350px")
+                // queryResponseUI({para: "Hey, Query is doing its thing.", header:"Query Message"}, 0, height="250px", width="350px")
+                document.getElementById("btnRunQuery").textContent = "Loading..."
+                document.getElementById("btnRunQuery").disabled = true
                 var query = new Query();
                 query.where = where;
                 query.outFields = [outFields];
@@ -2770,22 +2776,26 @@
                   featLayer.definitionExpression = where;
                   let returnQuery = await featLayer.queryFeatures(query)
                   if(!returnQuery.features.length){
-                    removeQueryResponseUI()
+                    // removeQueryResponseUI()
                     queryResponseUI({para: `Welp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null,  height="250px", width="350px")
+                    document.getElementById("btnRunQuery").textContent = "Run Query"
+                    document.getElementById("btnRunQuery").disabled = false
                     return
                   }
-                  console.log(returnQuery)
+                  //removeQueryResponseUI()
                   queryTableResults = returnQuery
                   document.getElementById("btnToggleTableView").disabled = false
                   makeTableFromService(returnQuery);
-                  console.log(featLayer)
-                  featLayer.visible = true;
-                  removeQueryResponseUI()
+                  featLayer.visible = true
+                  document.getElementById("btnRunQuery").textContent = "Run Query"
+                  document.getElementById("btnRunQuery").disabled = false
                 }
                 catch(err){
                   console.log(err)
                   removeQueryResponseUI()
                   queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, "button",  height="250px", width="350px") 
+                  document.getElementById("btnRunQuery").textContent = "Run Query"
+                  document.getElementById("btnRunQuery").disabled = false
                 }
               }
 
@@ -3817,6 +3827,8 @@
                   let tr = document.createElement("tr")
                   let td = document.createElement("td")
                   td.id = layerItem
+                  // tr.id = layerItem
+                  // tr.className = "baseMapList"
                   td.className = "baseMapList"
                   let div = document.createElement("div")
                   div.id = layerItem
@@ -3855,7 +3867,13 @@
                   x.visible = false
                   itemArr.find(y => y.name === x.name).visible = 0
                 })
-                document.getElementById(idRight).remove()
+                console.log(document.getElementById("addFeatRow"))
+                //document.getElementById(idRight).remove()
+                document.getElementById("addFeatRow").childNodes.forEach((i,x) => {
+                  if(i.textContent === idRight){
+                    i.remove()
+                  }
+                })
                 itemArr.find(z => z.name === idRight).addToTOC = 0
                 checkAdditionalOverlayCount()
                 return
@@ -3998,10 +4016,14 @@
 
               function searchOverlays(){
                 document.getElementById("layerSearch").addEventListener("change", (event)=>{
-                  itemArr.find(x => x.name === event.target.value).addToTOC = 1
+                  let itemInArr = itemArr.find(x => x.name === event.target.value)
+                  console.log(itemInArr)
+                  if(itemInArr.addToTOC === 1) {return}
+                  itemInArr.addToTOC = 1
                   checkAdditionalOverlayCount()
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
+                  console.log("hey")
                 })
               }
 
