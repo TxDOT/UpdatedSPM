@@ -202,6 +202,10 @@
               top: 20rem;
               left: 15rem;
             }
+            #expandPopup{
+              position: absolute;
+              right: 3rem;
+            }
             #header {
                 height: 40px;
                 width: 100%;
@@ -434,7 +438,7 @@
             }
             
             .tabsChild:active{
-              background-color: rgba(32, 78, 112, .5) !important;
+              background-color: rgba(32, 78, 112, .5);
             }
             .tabsChild:hover{
               background-color: rgba(32, 78, 112, .1);
@@ -502,8 +506,6 @@
               left: 3rem;
             }
             #searchBox input{
-
-              border-radius: 5px;
               width: 100% !important;
               padding: 0px !important;
               border: 0px solid #ccc !important;
@@ -704,10 +706,10 @@
               top: 0%;
               width: fit-content;
             }
-            section{
+            /* section{
               position: relative;
               height: 4rem;
-            }
+            } */
             .modal {
         			display: none;
         			position: fixed;
@@ -865,10 +867,11 @@
               "esri/layers/WMTSLayer",
               "esri/widgets/Print",
               "esri/widgets/Print/PrintViewModel",
-              "esri/widgets/Expand"
+              "esri/widgets/Expand",
+              "esri/widgets/Popup"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup) {
               
               var map = new Map({
                   //map content added below
@@ -903,7 +906,7 @@
                 window.onload = async () => {
                   
                   await loadTOCContent()
-                  addSoloLayers()
+                  //addSoloLayers()
                   initBasemapOverlayToggle()
                   onViewLoad()
                   readUrlParams()
@@ -1085,6 +1088,7 @@
                     popupTemplate: new PopupTemplate({
                       title: rteID,
                       content: theDescription
+
                     })                  
                   });
                   //Add line to map
@@ -1403,7 +1407,7 @@
                 let inpSRDFromDFO = document.getElementById("inpSRDFromDFO")
                 let inpSRDToDFO = document.getElementById("inpSRDToDFO")
                 let riAttributes = document.getElementById("riAttributes")
-                console.log(inpSRDFromDFO.value)
+
                 inpSRDFromDFO.value.length > 0 ? inpSRDFromDFO.disabled = false : inpSRDFromDFO.disabled = true
                 inpSRDToDFO.value.length > 0 ? inpSRDToDFO.disabled = false : inpSRDToDFO.disabled = true
                 riAttributes.value.length > 0 ? riAttributes.disabled = false : riAttributes.disabled = true
@@ -1412,6 +1416,7 @@
               const getCurrentQuerySelection = () => document.querySelector(`input[name="featQuery"]:checked`).value
 
               function disableQuery(){
+                console.log(new FormData().entries())
                 let isChecked = document.querySelector(`input[name="featQuery"]:checked`)
                 if(!isChecked){
                   for(let i in document.querySelector('#queryTab').childNodes[1]){
@@ -1430,7 +1435,7 @@
               function checkFieldStatus(tabname, isAllDisabled){
                 let getItems = document.querySelector(tabname)
                 let inputFields = getItems.querySelectorAll(".noDisabled1")
-                initValueCheck(inputFields, getItems)
+                //initValueCheck(inputFields, getItems)
                 inputFields.forEach((x,i) =>{
                   if(x.tagName === "SELECT"){
                     selectEventListner(x.id)
@@ -1494,31 +1499,31 @@
                 }
               }
 
-              function initValueCheck(values, tab){
-                let a = 0;
-                for(let i =0; i < tab.children[0].length; i++){
-                  if(tab.children[0][i].value === "" && tab.children[0][i].tagName != "BUTTON"){
-                    a++
-                    //
-                  }
-                }
-                let btns = tab.getElementsByTagName("button")
+              // function initValueCheck(values, tab){
+              //   let a = 0;
+              //   for(let i =0; i < tab.children[0].length; i++){
+              //     if(tab.children[0][i].value === "" && tab.children[0][i].tagName != "BUTTON"){
+              //       a++
+              //       //
+              //     }
+              //   }
+              //   let btns = tab.getElementsByTagName("button")
                 
-                if(a > 0 ){
-                  for(let b in btns){
-                    if(btns[b].tagName === "BUTTON"){
-                      document.getElementById(btns[b].id).disabled = true
-                    }
-                    return
-                  }
-                }
-                for(let b in btns){
-                  if(btns[b].tagName === "BUTTON"){
-                    document.getElementById(btns[b].id).disabled = false;
-                  }
-                }
+              //   if(a > 0 ){
+              //     for(let b in btns){
+              //       if(btns[b].tagName === "BUTTON"){
+              //         document.getElementById(btns[b].id).disabled = true
+              //       }
+              //       return
+              //     }
+              //   }
+              //   for(let b in btns){
+              //     if(btns[b].tagName === "BUTTON"){
+              //       document.getElementById(btns[b].id).disabled = false;
+              //     }
+              //   }
 
-              }
+              // }
 
               function displayErrorMsg(validity){
           
@@ -1588,7 +1593,14 @@
                 view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
                   featureLayerView = layerView;
                   populateQueryForm(getQueryType);
+
                 });
+                  view.popup = new Popup({
+                    dockOptions: {
+                      position: "top-right",
+                    },
+                    container: expandPopup
+                  })
                 if(conditions.length < 1){
                   document.getElementById("outputFields").disabled = true
                   clearConditions()
@@ -1868,10 +1880,13 @@
 
                 let isVisible = itemArr.find(x => x.visible)
                 isVisible ? resetBaseMapItem("CLEAR") : activateBaseMapItem("CLEAR")
+                map.reorder(layerId[0], itemArr.length+1)
               }
 
               function retrieveFeatureLayer(name){
                 let layerId = map.layers.items.filter((lyrId) => {
+                  //get index of value
+                  
                   if(lyrId.name === name){
                     return lyrId
                   }
@@ -1905,7 +1920,7 @@
 
               function toggleBaseMap(idName){
                 resetAllBaseMapItems();
-                activateBaseMapItem(`${idName}`);
+                activateBaseMapItem(idName);
                 let basemap = basemapAll.find(x => x.name === idName)
                 basemap.featLayer.visible = true
                 return
@@ -2330,7 +2345,6 @@
               }
               
               function activateBaseMapItem(theElement) {
-                console.log(theElement)
                 document.getElementById(theElement).style.borderLeft = "6px solid #14375A"
                 document.getElementById(theElement).style.paddingLeft = ".6rem"
                 document.getElementById(theElement).style.backgroundColor = "rgba(20,55,90,.2)"
@@ -3760,11 +3774,12 @@
 
               //load Table of Contents items
               async function loadTOCContent(){
+                addSoloLayers()
                 const docFrag = document.createDocumentFragment()
                 let returnToc = await tocFeatureLayer.queryFeatures()
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, visible: 0, addToTOC: 0})
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, visible: false, addToTOC: 0})
                 })
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
@@ -3867,7 +3882,6 @@
                   x.visible = false
                   itemArr.find(y => y.name === x.name).visible = 0
                 })
-                console.log(document.getElementById("addFeatRow"))
                 //document.getElementById(idRight).remove()
                 document.getElementById("addFeatRow").childNodes.forEach((i,x) => {
                   if(i.textContent === idRight){
@@ -3880,7 +3894,6 @@
               }
 
               function addFeatureLayerToMap(featLayer, popupInfo){
-       
                 // featLayer.url.forEach((url)=>{
                   let addFeatureLayer = new FeatureLayer({
                     url: featLayer.url,
@@ -3889,22 +3902,26 @@
                     name: featLayer.name,
                     popupEnabled: true,
                     popupTemplate: popupInfo,
+                    dockOptions:{
+                      position: "bottom-right"
+                    },
                     definitionExpression: featLayer.defExpress ?? ""
                   })
 
                   addFeatureLayer.when((layer)=>{
-                  //need to add TxDOT_Top_100_Congested_Roadways, TxDOT_Districts, Texas_County_Boundaries_Detailed, TxDOT_Roadways_Search 
-                  if(layer.title === "TxDOT Bridges"){
-                    bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
-                  }
-  
-                  if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
-                    addFeatureLayer.visible = true
-                    addFeatureLayer.opacity = 0
-                    addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
-                    return
-                  }
-                  createSourcesArr(layer)
+
+                    //need to add TxDOT_Top_100_Congested_Roadways, TxDOT_Districts, Texas_County_Boundaries_Detailed, TxDOT_Roadways_Search 
+                    if(layer.title === "TxDOT Bridges"){
+                      bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
+                    }
+    
+                    if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
+                      addFeatureLayer.visible = true
+                      addFeatureLayer.opacity = 0
+                      addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                      return
+                    }
+                    createSourcesArr(layer)
                    
                   })
                       //}
@@ -3929,6 +3946,7 @@
                     
                   }
                   res("complete")
+                  rej("error")
                 })
 
                 let returnToken = await getInrixToken()
@@ -4017,20 +4035,18 @@
               function searchOverlays(){
                 document.getElementById("layerSearch").addEventListener("change", (event)=>{
                   let itemInArr = itemArr.find(x => x.name === event.target.value)
-                  console.log(itemInArr)
                   if(itemInArr.addToTOC === 1) {return}
                   itemInArr.addToTOC = 1
                   checkAdditionalOverlayCount()
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
-                  console.log("hey")
                 })
               }
 
               async function getInrixToken(){
                 let urlRequest = `https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/inrix_token_view/FeatureServer/0/query?f=json&orderByFields=token ASC&returnGeometry=false&where=OBJECTID>=0&outFields=*`
                 let request = await fetch(urlRequest)
-                let returnedItem = await request.json()
+                let returnedItem = await request.json() 
                 return returnedItem.features[0].attributes.token
               }
 
@@ -4336,6 +4352,7 @@
                     }
                 }, true);
               }
+
               document.getElementById("about").addEventListener("click", ()=>{
                 aboutModal()
                 document.getElementById("closeAbout").addEventListener("click", ()=>{
@@ -4481,8 +4498,8 @@
               <form onsubmit="return false">
                 Roadway<br><br>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
-                <input id="inpSRDFromDFO" type="text" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
-                <input id="inpSRDToDFO" type="text" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
+                <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
+                <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
                 <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
 
                 Inventory
@@ -4513,6 +4530,7 @@
                 <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export PNG</button>
                 <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export JPEG</button> 
                 <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Share URL</button>
+                <span class="error" id="error"></span>
               </form>                
             </div>
             <div class="tocTabsEvent" id="eventTab">
@@ -4625,7 +4643,8 @@
               <div class="esri-icon-notice-triangle" >
                 <div id="serviceDownDiv"></div>
               </div>
-            </template>           
+            </template>
+            <div id="expandPopup"></div>          
         </div>
     </body>
 </html>
