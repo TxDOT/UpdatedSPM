@@ -32,7 +32,7 @@
             @media (max-width: 480px){
               #left-div{
                 display: none;
-                background-color: red !important;
+                /* background-color: red !important; */
                 z-index: 2 !important;
 
               }
@@ -57,7 +57,7 @@
             @media (min-width: 481px) and (max-width: 767px){
               #left-div{
                 display: block !important;
-                background-color: yellow !important;
+                /* background-color: yellow !important; */
               }
               #diagramTab, #roadwayDiagram{
                 display: none !important;
@@ -67,7 +67,7 @@
             @media (min-width: 768px) and (max-width: 1024px){
               #left-div{
                 display: block !important;
-                background-color: blueviolet !important;
+                /* background-color: blueviolet !important; */
               }
               #queryMessageBtn{
                 margin-left:  15.6rem !important;
@@ -80,13 +80,13 @@
             @media (min-width: 1025px) and (max-width: 1280px){
               #left-div{
                 display: block !important;
-                background-color: blue !important;
+                /* background-color: blue !important; */
               }
             }
             /* Large screens */
             @media (min-width: 1281px){
               #left-div{
-                display: block;
+                display: block !important;
                 /* background-color: green !important; */
               }
               /* #queryMessageBtn{
@@ -448,9 +448,9 @@
                 padding: 0;
             }
             nav {
-                position: absolute;
+                position: relative;
                 right: 0px;
-                top: 5px;
+                bottom: 6px;
             }
             #resetMap {
               position: absolute;
@@ -477,7 +477,7 @@
 
             .removeOverlay{
               position: relative;
-              bottom: 0rem;
+              top: 0.02rem;
               left: 83%;
               background: none;
               background-color: none;
@@ -910,6 +910,9 @@
                   initBasemapOverlayToggle()
                   onViewLoad()
                   readUrlParams()
+                  view.watch("zoom", (b,a)=>{
+                    displayFeatOnZoom(a)
+                  })
                   //moveTable()
                   //queryPageBtnDisable()
                 }
@@ -962,21 +965,29 @@
               }
               
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
-              function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
+              async function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
                 document.getElementById("btnEventMap").textContent = "Loading...."
                 document.getElementById("btnEventMap").disabled = true
                 var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0";
                 var paraMeters = "/query?f=json&where=RTE_NM='" + rteID + "'&returnGeometry=true&returnM=true";
-                
-                request(url+paraMeters).then(function(response) {
-                  document.getElementById("btnEventMap").textContent = "Add to Map"
-                  document.getElementById("btnEventMap").disabled = false
-                    walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
-                });                
+                let resp = await request(url+paraMeters)
+                document.getElementById("btnEventMap").textContent = "Add to Map"
+                document.getElementById("btnEventMap").disabled = false
+                let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                // request(url+paraMeters).then(function(response) {
+                //   document.getElementById("btnEventMap").textContent = "Add to Map"
+                //   document.getElementById("btnEventMap").disabled = false
+                //   walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                // });
+                return isWalkGeom      
               }
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
-                // console.log(theGeom);
+                console.log(theGeom)
+                if(!theGeom.data.features.length){
+                  queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, "button",  height="250px", width="350px")
+                  return true 
+                }
                 var theGeomPart;
                 var coordX;
                 var coordY;
@@ -1017,14 +1028,6 @@
                 //Loop through the results extend the events and add to the map
                 for (var z = 0; z < result.length; z++) {
                   //For the first point on the segment
-                  if(result[z].includes(undefined)){
-                    document.getElementById("error").textContent = "Incorrect Request. Try Again";
-                    setTimeout(()=>{
-                      document.getElementById("error").textContent = "";
-                    },3000)
-                    return
-                  }
-                  console.log(result[z][0])
                   indexOne = result[z][0][0]
                   indexTwo = result[z][0][1];
                   indexThree = result[z][0][2];   
@@ -1377,6 +1380,18 @@
               //End Search--------------------------------------------------------------------
 
               //Load Roadway Inventory forms------------------------------------
+              function resetTabInput(tabname){
+                let inputs = document.getElementById(tabname).getElementsByTagName("input")
+                let selects = document.getElementById(tabname).getElementsByTagName("select")
+
+                for(i in inputs){
+                  inputs[i].value = ""
+                }
+                for(i in selects){
+                  selects[i].value = ""
+                }
+              }
+
               function queryCheckOnLoad(){
                 let field = document.getElementById("field")
                 let operator = document.getElementById("operator")
@@ -1410,13 +1425,11 @@
 
                 inpSRDFromDFO.value.length > 0 ? inpSRDFromDFO.disabled = false : inpSRDFromDFO.disabled = true
                 inpSRDToDFO.value.length > 0 ? inpSRDToDFO.disabled = false : inpSRDToDFO.disabled = true
-                riAttributes.value.length > 0 ? riAttributes.disabled = false : riAttributes.disabled = true
               }
 
               const getCurrentQuerySelection = () => document.querySelector(`input[name="featQuery"]:checked`).value
 
               function disableQuery(){
-                console.log(new FormData().entries())
                 let isChecked = document.querySelector(`input[name="featQuery"]:checked`)
                 if(!isChecked){
                   for(let i in document.querySelector('#queryTab').childNodes[1]){
@@ -1848,9 +1861,7 @@
                   document.getElementById("marginal").innerHTML = "Level: " + view.zoom + ", " + point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6);
               });
               //End Lat Long Coordinates----------------------------------------
-              view.watch("zoom", (b,a)=>{
-                displayFeatOnZoom(a)
-              })
+
               //Listeners-------------------------------------------------------
               //Jump to Google listener
               const jumpGoogleListener = document.querySelector('#googleMaps');
@@ -2043,7 +2054,6 @@
               const lrmInputsListener = document.querySelector('#btnUpdateLRM');
               lrmInputsListener.addEventListener('click', (event) => {
                 checkLRMInputs();
-                document.querySelectorAll(".srdBtn").forEach(y => y.disabled = false)
               })
               
               //Add Inventory Attribute listener
@@ -2274,7 +2284,9 @@
                 graphicsLayer.removeAll();
                 resetLRSIdentify();
                 linePoints.length = 0;
-                document.getElementById("deCostResult").innerHTML = "";                
+                document.getElementById("deCostResult").innerHTML = "";
+                
+                
               }
               
               function resetAllTools() {
@@ -2427,6 +2439,9 @@
                 
                 let url = window.location.search
                 if(!url.length){
+                  //resetTabInput("queryTab")
+                  resetTabInput("eventTab")
+                  resetTabInput("diagramTab")
                   queryCheckOnLoad()
                   eventCheckOnLoad()
                   SRDCheckOnLoad()
@@ -2485,10 +2500,25 @@
                   var eventParam = eventParam.replace(/%23/g, "#");
                   const eventArray = eventParam.split('|');
                   // Output the individual arrays
-                  for (let i = 0; i < eventArray.length; i++) {
-                    const individualArray = eventArray[i].split(',');
-                    getLineworkWithM(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4],individualArray[5]);
-                  }
+                  let [route, bDfo, eDfo, color, width, desc] = eventArray[0].split(",")
+                  document.getElementById("eventRoute").value = route
+                  document.getElementById("eventBeginDFO").value = bDfo
+                  document.getElementById("eventEndDFO").value = eDfo
+                  document.getElementById("eventColors").value = color
+                  document.getElementById("eventWidth").value = width
+                  document.getElementById("eventDescription").value = desc
+
+                  getLineworkWithM(route,bDfo,eDfo,color,width,desc);
+                  // for (let i = 0; i < eventArray.length; i++) {
+                  //   const individualArray = eventArray[i].split(',');
+                  //   getLineworkWithM(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4],individualArray[5]);
+                  //   document.getElementById("eventRoute").value = individualArray[0]
+                  //   document.getElementById("eventBeginDFO").value = ""
+                  //   document.getElementById("eventEndDFO").value = ""
+                  //   document.getElementById("eventColors").value = ""
+                  //   document.getElementById("eventWidth").value = ""
+                  //   document.getElementById("eventDescription").value = ""
+                  // }
                   eventCheckOnLoad()
                   let isAllDisabled = disableQuery()
                   checkFieldStatus("#eventTab", isAllDisabled)                      
@@ -2912,9 +2942,9 @@
                             td = document.createElement('td');
                             td.textContent = dataArray.features[i].attributes[x];
                             td.classList.add("queryTblData");
-                            if(x===0){
-                              td.classList.add("esri-icon-zoom-in-magnifying-glass")
-                            }
+                            // if(x===0){
+                            //   td.classList.add("esri-icon-zoom-in-magnifying-glass")
+                            // }
                             row.appendChild(td);                        
                         }
                         table.appendChild(row);
@@ -3158,7 +3188,7 @@
               //End KML Export--------------------------------------------------
               
               //Check diagram fields--------------------------------------------
-              function checkLRMInputs() {
+              async function checkLRMInputs() {
                 diagramTitle = document.getElementById("inpSRDRouteID").value;
                 diagramBeginDFO = Number(document.getElementById("inpSRDFromDFO").value);
                 diagramEndDFO = Number(document.getElementById("inpSRDToDFO").value);
@@ -3214,14 +3244,19 @@
                 graphicsLayer.removeAll();
                 // inventoryDiagramLog = [];
                 // inventoryDiagramLogAllValues = [];                 
-                
+                let lineworkResp = await getLineworkWithM(diagramTitle,diagramBeginDFO,diagramEndDFO,"#000000",6,"Route: "+diagramTitle+"<br>From DFO: "+diagramBeginDFO+"<br>To DFO: "+diagramEndDFO);
                 //Building the Diagram
+                if(lineworkResp){
+                  return
+                }
                 buildDiagram(diagramTitle,diagramBeginDFO,diagramEndDFO);
+                return
                 //Adding the event to the map
-                getLineworkWithM(diagramTitle,diagramBeginDFO,diagramEndDFO,"#000000",6,"Route: "+diagramTitle+"<br>From DFO: "+diagramBeginDFO+"<br>To DFO: "+diagramEndDFO);
+                
               }         
                 
               function buildDiagram(diagramTitle,diagramBeginDFO,diagramEndDFO) {
+                console.log("hey there")
                 var canvasParentDiv = document.getElementById("parentCanvas");
                 canvasParentDiv.style.display = "block";
                 
@@ -3345,7 +3380,7 @@
                     });                                 
                   })
                   .catch((err) =>{
-                    console.log(err)
+                    console.log("cs error:", err)
                   });
 
               }              
@@ -3365,6 +3400,7 @@
                 }                 
                 
                 //Adding a dash
+                console.log(csNBR)
                 csNBR = csNBR.substring(0, 4) + "-" + csNBR.substring(4);
                 //Draw white box to clear loading message
                 drawRectangle(labelPositions[2]-125,labelY+105,250,20,"#FFFFFF");                
@@ -3876,6 +3912,7 @@
               function removeOverlay(id){
                 if(!id) return
                 let [idLeft, idRight] = id.split("removeOverlay")
+                if(!idRight){return}
                 let url = itemArr.find(name => name.name === idRight)
                 let returnfeatLayer = retrieveFeatureLayer(url.name)
                 returnfeatLayer.forEach(x => {
@@ -4164,7 +4201,7 @@
               
               function displayFeatOnZoom(zoom){
                 let zoomLvl = Math.round(zoom)
-                
+                if(zoomLvl === -1){return}
                 let roadLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")
                 let aadtLayer = retrieveFeatureLayer("AADT")
                 let fcLayer = retrieveFeatureLayer("Functional Classification & Urban Areas")
@@ -4425,6 +4462,7 @@
             </nav>        
         </div>
         <div id="left-div">
+            <div id="close"></div>
             <div id="tabsParent" class="tabsContainer">
                 <div class="tabsChild" id="baseMaps" title="Base Maps and Overlays">Map</div>
                 <div class="tabsChild" id="dataQuery" title="View Inventory Data">Query</div>
@@ -4491,7 +4529,7 @@
                   <div>
                     <!-- <h1 style="position:relative; color:white; background-color: #14375A; height: 2rem; bottom: 1.7rem; width: 22.1rem; right:0.6rem; text-align: left; padding-top: .4rem; padding-left: 1rem;">Query Message</h1> -->
                   </div>
-                </template>  
+                </template> 
               </form>          
             </div>
             <div class="tocTabsDiagram" id="diagramTab">
@@ -4500,12 +4538,12 @@
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
-                <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
+                <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn">Add to Diagram</button>
 
                 Inventory
-                <select id="riAttributes" name="riAttribute" class="spmDropDown noDisabled1" disabled>
+                <select id="riAttributes" name="riAttribute" class="spmDropDown noDisabled1">
                     TxDOT_Base_Thickness
-                    <option value="TxDOT_AADT_SRD,AADT_CUR,AADT" selected>Select an Option</option>
+                    <option value="" selected>Select an Option</option>
                     <option value="TxDOT_AADT_SRD,AADT_CUR,AADT">Annual Average Daily Traffic 2021</option>
                     <option value="TxDOT_Route_City_SRD,CITY_NM,City Limit">City</option>                    
                     <option value="TxDOT_Route_County_SRD,CNTY_NM,County">County</option>
@@ -4524,12 +4562,12 @@
                     <option value="TxDOT_Speed_Limits_SRD,SPD_LMT,Speed Limit">Speed Limit</option>
                     <option value="TxDOT_Roadbed_Surface_SRD,SRFC_TYPE,Surface Type">Surface Type</option>                    
                 </select> 
-                <button id="btnInventoryUpdateLRM" class="queryButtonClass spmMainBtn" disabled>Add to Diagram</button>
-                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Show/Hide Diagram</button>                
-                <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Clear</button>
-                <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export PNG</button>
-                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Export JPEG</button> 
-                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn" disabled>Share URL</button>
+                <button id="btnInventoryUpdateLRM" class="queryButtonClass spmMainBtn">Add to Diagram</button>
+                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn">Show/Hide Diagram</button>                
+                <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn">Clear</button>
+                <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn" >Export PNG</button>
+                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn">Export JPEG</button> 
+                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn">Share URL</button>
                 <span class="error" id="error"></span>
               </form>                
             </div>
