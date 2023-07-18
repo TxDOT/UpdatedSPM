@@ -123,7 +123,7 @@
               background-color: white;
               color: black;
               padding-left: .5rem;
-              font-size: .9rem;
+              font-size: 15px;
               width: 18rem;
               right: 1rem;
             }
@@ -156,7 +156,7 @@
               display: flex;
             }
             #graphics{
-              bottom: 1.3rem;
+              top: 0rem;
               position: relative;
               max-height: 7rem;
               overflow-y: auto;
@@ -367,7 +367,7 @@
               color: white;
               cursor: pointer;
               background-color: rgba(32, 78, 112, 0.8);
-              border: 2px #14375A solid;
+              border: none;
               height: 2rem;
               width: fit-content;
               /* text-decoration: underline;
@@ -404,7 +404,7 @@
             .spmSecondaryBtn{ 
               background: none;
               cursor: pointer;
-              border: none;
+              border: 1px #14375A solid;
               background-color: none;
               height: 2rem;
               /* text-decoration: underline;
@@ -438,8 +438,8 @@
               background: rgba(20,55,90,.5);
             }
             .spmSecondaryBtn:hover{
-              border: 2px rgb(20, 55, 90) solid;
-              
+              /* border: 2px rgb(20, 55, 90) solid; */
+              background-color: rgba(32, 78, 112, 0.8)
             }
             .spmDropDown{
               border: 1px solid #14375A;
@@ -586,6 +586,16 @@
               border: none;
               margin-right: -1rem
             }
+            .popupDivPosition{
+              position:absolute;
+              width: 6rem;
+              height: 1.5rem;
+              background-color: rgba(20, 55, 90, .8);
+              color: white;
+              visibility: hidden;
+              left: 10.5rem;
+              padding-left: .2rem;
+            }
 
             .rmvQueryBtn:hover{
               color: red;
@@ -664,10 +674,10 @@
             #mapTab,#queryTab,#diagramTab,#eventTab,#sketchTab {
               display: none;
             }
-            .queryButtonClass {
-                /* padding: 0.5rem; */
+            /* .queryButtonClass {
+                padding: 0.5rem;
                 margin-bottom: 10px;
-            }
+            } */
             select:focus{
               outline: 1px #204e70 solid;
             }
@@ -711,6 +721,9 @@
               font-size: 12px;
               display:flex;
               width: 87%;
+              padding-left: .3rem;
+              padding-right: 1rem;
+              background-color: #ccc;
             }
             #graphDiv{
               position: relative;
@@ -780,18 +793,37 @@
             }
             .btnClearConditions{
               position: relative;
-              left: 12.3rem;
-              width: 4rem;
+              left: 0rem;
+              
             }
             #btnClearDiagramView{
-              top:3.2rem;
+              left: 8.5rem !important;
+              width: 7.9rem;
             }
             #btnToggleTableView{
               position: relative;
-              bottom: 2.6rem;
+              bottom: 1.96rem;
               right: 7rem;
               margin-left: 7rem;
-              width: 6rem;
+              width: 8rem;
+            }
+            #btnClearConditions{
+              width: 7.7rem;
+              left: 8.6rem !important;
+              top: .04rem;
+            }
+            #btnExportToKML{
+              position: relative;
+              left: 8.5rem;
+            }
+            #btnGenerateURL{
+              position: relative;
+              bottom:2rem;
+            }
+            #btnExportJPEG{
+              position: relative;
+              bottom: 2rem;
+              left: 8.5rem;
             }
             #btnRemoveLast{
               position: relative;
@@ -800,35 +832,57 @@
             }
             #btnRemoveAll{
               margin-bottom: 1.2rem;
-              top: 2.5rem;
+              top: 2.7rem;
+              width: 16.4rem;
             }
             #btnInventoryUpdateLRM{
-              margin-top: .5rem;
+              top: 0rem;
             }
-            .btnQueryGenerateURL{
+            /* .btnQueryGenerateURL{
               position: relative;
               left: .9rem;
+              top: .3rem;
+            } */
+            #btnQueryGenerateURL{
+              width: 7.6rem !important;
+              left: 8.6rem !important;
+              bottom: 2rem;
+              position:relative;
+            }
+            .classRowDiv{
+              top:.4rem;
+              position: relative;
+              height: 3rem;
             }
             #btnExportToCSV{
               position: relative;
-              right: .1rem;
+              right: 0rem;
+              width: 8rem !important;
             }
             .exportBtn{
-              width: 7rem !important;
+              width: 7.9rem !important;
             }
             #btnDiagramGenerateURL{
-              width: 90% !important;
-              left: 0rem;
+              width: 87% !important;
+              position: relative;
+              bottom: 1.4rem;
+              left: .8rem;
             }
             #btnToggleDiagramView{
               position: relative;
               right: 7rem;
-              bottom: 2.7rem;
+              bottom: 2rem;
               margin-left: 7rem;
+              width:7.9rem;
             }
             #btnUpdateLRM{
               position: relative;
+              margin-bottom: 0.3rem !important;
               top: 0rem !important;
+              margin-top: -1rem !important;
+            }
+            #txtPrjLanes{
+              margin-top: 9px;
             }
             #results {
                 position: absolute;
@@ -882,7 +936,7 @@
               background-color: #ccc;
               padding-left: 1rem;
               font-size: 13px;
-              right: 1rem;
+              right: 1.6rem;
               margin-bottom: .2rem;
             }
             #operatorBuilder{
@@ -952,10 +1006,15 @@
             }
             #btnClearProject{
               position: relative;
-              left: 13.1rem;
-              bottom: .5rem;
+              left: 0rem;
+              top: 1.5rem;
+              width: 97%;
             }
-            
+            #deCostResult{
+              font-size: 13px;
+              position: relative;
+              top: 1rem;
+            }
         </style>
         <script>
             var view;
@@ -1536,6 +1595,7 @@
               let legend = new Legend({
                 view: view,
                 visible: false,
+                hideLayersNotInCurrentView: true,
               })
 
               view.ui.add(legend,{
@@ -3015,8 +3075,8 @@
               //Add startup message to conditions element
               function addStartUpCondition() {
                   const li = document.createElement('li');
-                  li.textContent = "Conditions listed here";
-                  document.getElementById('conditions').appendChild(li); 
+                  // li.textContent = "Conditions listed here";
+                  // document.getElementById('conditions').appendChild(li); 
                   document.getElementById("outputFields").disabled = true
                   // let btns = document.querySelectorAll(".tableBtn")
                   // for(let i in btns){
@@ -3453,7 +3513,7 @@
         				var theOutputArea = document.getElementById("deCostResult");
         				var totalProjectCost = totalRoadTypeCost + totalFrontageRoadCost;
         				totalProjectCost = Math.round(totalProjectCost / 1000) * 1000;
-        				theOutputArea.innerHTML =	"Project Length: <br>" + deProjectLength + " miles<br><br>Estimated Construction Cost: <br>$" +	totalProjectCost.toLocaleString();
+        				theOutputArea.innerHTML =	"<u>Project Length</u>: <br>" + "<b>" + deProjectLength + "</b>" + " miles<br><br><u>Estimated Construction Cost</u>: <br>$" +	"<b>" + totalProjectCost.toLocaleString() + "</b>";
         			}  
         			//End Sketch Cost-------------------------------------------------
               
@@ -4242,9 +4302,14 @@
                   // tr.className = "baseMapList"
                   td.className = "baseMapList"
                   let div = document.createElement("div")
+                  let popupDiv = document.createElement("div")
+                  popupDiv.className = "popupDivPosition"
                   div.id = layerItem
+                  popupDiv.id = `dwnloadBtn${layerItem}`
                   let dwnloadBtn = document.createElement("button")
+                  
                   dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-download noDwnloadBtn" : "esri-icon-download dwnloadBtn"
+                  popupDiv.innerHTML = noDownload.includes(layerItem) ? "<span style='font-size: 10px'>No Download</span>" : "<span style='font-size: 10px'>Download Overlay</span>"
                   noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
                   dwnloadBtn.onclick = () => downloadOverlay(layerItem)
                   if(initBuild === false){
@@ -4256,13 +4321,21 @@
                     rmvButton.id = `removeOverlay${layerItem}`
                     td.appendChild(btnDiv)
                   }
+
+                  dwnloadBtn.onpointerenter = () =>{
+                    document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "visible"
+                  }
+
+                  dwnloadBtn.onpointerleave = () =>{
+                    document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "hidden"
+                  }
+                  td.appendChild(popupDiv)
                   td.appendChild(dwnloadBtn)
                   div.appendChild(document.createTextNode(layerItem))
                   div.style.width = "80%"
                   td.appendChild(div)
 
                   tr.appendChild(td)
-       
                   if(layerType === "FeatureLayer"){
                     initBuild === false ? document.getElementById("addFeatRow").appendChild(tr) : documentFrag.appendChild(tr)
                     return
@@ -4319,6 +4392,7 @@
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
+                      addFeatureLayer.legendEnabled = false
                       addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
                       return
                     }
@@ -4873,15 +4947,15 @@
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
-                  <span class="stepClass underline" style="position: relative; top: 0.7rem;">Step 1: Select Layer</span>
-                  <div style="position: relative; top: .8rem; right: .4rem; font-size: 13px;">
+                  <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
+                  <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
                     <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory">
                     <label for="RoadInventory">Roadway Query</label>
                     <input id="Bridges" class="noDisabled" type="radio" name="featQuery" value="Bridges">
                     <label for="Bridges">Bridge Query</label>
                   </div>
                 </div>
-                <span class="stepClass underline" style="position: relative; top: 0rem;">Step 2: Build Query</span>
+                <span class="stepClass underline" style="position: relative; top: 0rem;">Build Query</span>
                 <select id="field" class="spmDropDown noDisabled1"></select>
                 <select id="operator" class="spmDropDown noDisabled1">
                     <option value="" selected>Select an Operator</option>
@@ -4897,20 +4971,25 @@
                 <button class="queryButtonClass noDisabled1 spmMainBtn btnAddCondition" id="btnAddCondition">Add Condition</button>
                 <!-- <section><p id="fieldBuilder" class="queryBuilder">i.e EMP</p><p id="operatorBuilder" class="queryBuilder">i.e ></p><p id="valueBuilder" class="queryBuilder">i.e 1244</p></section> -->
                 <ul id="conditions" class="noDisabled1 tableBtn">
-                  <li>Conditions listed here</li>
+                  <!-- <li>Conditions listed here</li> -->
                 </ul><br>
                 <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 3: Select Output Fields</span>
                 <select id="outputFields" multiple size="10" class="spmDropDown noDisabled1" disabled></select>
                 
                 <button class="queryButtonClass tableBtn spmMainBtn" id="btnRunQuery">Run Query</button>
-                <button class="queryButtonClass tableBtn spmSecondaryBtn btnClearConditions clearBtn" id="btnClearConditions">Clear</button>
+
+                <div class="classRowDiv">
+                  <button class="queryButtonClass tableBtn spmSecondaryBtn btnClearConditions clearBtn" id="btnClearConditions">Clear</button>  
+                  <button class="queryButtonClass spmSecondaryBtn" id="btnToggleTableView" disabled>Show Table</button>
+                </div>
+
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Options</span>
                 
+                <div class="classRowDiv">
+                  <button class="queryButtonClass tableBtn spmSecondaryBtn exportBtn" id="btnExportToCSV"><span class="esri-icon-link-external esriIcons" ></span>Export CSV</button>
+                  <button id="btnQueryGenerateURL" class=" queryButtonClass tableBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                </div>
                 
-                <button class="queryButtonClass spmSecondaryBtn" id="btnToggleTableView" disabled>Show Table</button>
-                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Export Options</span>
-                             
-                <button class="queryButtonClass tableBtn spmSecondaryBtn exportBtn" id="btnExportToCSV"><span class="esri-icon-link-external esriIcons" ></span>Export CSV</button>
-                <button id="btnQueryGenerateURL" class=" queryButtonClass tableBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
                 
                 
                 <template id="queryTemplate">
@@ -4922,16 +5001,16 @@
             </div>
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
-                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
+                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
                 <!-- <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 2: Add Control Sections to Diagram</span> -->
                 <button id="btnUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnAddCondition">Create Diagram</button>
-                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 2: Add Additional Assets to Diagram</span>
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Add Additional Attributes</span>
                 <select id="riAttributes" name="riAttribute" class="spmDropDown noDisabled1">
                     TxDOT_Base_Thickness
-                    <option value="" selected>Select an Asset</option>
+                    <option value="" selected>Select an Attribute</option>
                     <option value="TxDOT_AADT_SRD,AADT_CUR,AADT">Annual Average Daily Traffic 2021</option>
                     <option value="TxDOT_Route_City_SRD,CITY_NM,City Limit">City</option>                    
                     <option value="TxDOT_Route_County_SRD,CNTY_NM,County">County</option>
@@ -4951,25 +5030,32 @@
                     <option value="TxDOT_Roadbed_Surface_SRD,SRFC_TYPE,Surface Type">Surface Type</option>                    
                 </select>
 
-                <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnClearConditions clearBtn">Clear</button> 
-                <button id="btnInventoryUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnRunOpt">Add Asset</button>
+                 
+                <button id="btnInventoryUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnRunOpt">Add Attribute</button>
 
-                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnToggleTableView">Show Diagram</button>                
+                <div class="classRowDiv">
+                  <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnClearConditions clearBtn">Clear</button>
+                  <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnToggleTableView">Show Diagram</button>
+                </div>
+                                
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Options</span>
+
+                <div class="classRowDiv">
+                  <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export PNG</button>
+                  <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export JPEG</button> 
+                  <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn btnQueryGenerateURL"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                </div>
                 
-                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
-                <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export PNG</button>
-                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export JPEG</button> 
-                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn btnQueryGenerateURL"><span class="esri-icon-share esriIcons"></span>Share URL</button>
                 <span class="error" id="error"></span>
               </form>                
             </div>
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
-                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
+                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1"name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
-                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Step 2: Add Color, Width and Description</span>
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Customize</span>
                 <select id="eventColors" name="Color" class="spmDropDown noDisabled1" disabled>
                     <option value="">Select a Color</option>
                     <option value="#000000" selected>Black</option>
@@ -4990,9 +5076,12 @@
                 <!-- <button id="btnRemoveLast" class="queryButtonClass eventBtn spmSecondaryBtn btnToggleTableView">Remove Last</button> -->
                 <!-- <span style="font-size: 14px; justify-content: left; position: relative; display: flex; bottom: 1rem;">Graphics Added to Map:</span> -->
                 <div id="graphics"></div>
-                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
-                <button id="btnExportToKML" class="queryButtonClass eventBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons" ></span>Export KML</button>                 
-                <button id="btnGenerateURL" class="queryButtonClass eventBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem; margin-top:1rem;">Options</span>
+                <div class="classRowDiv">
+                  <button id="btnExportToKML" class="queryButtonClass eventBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons" ></span>Export KML</button>                 
+                  <button id="btnGenerateURL" class="queryButtonClass eventBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                </div>
+                
                 <span class="error" id="error"></span>
               </form>                 
             </div>            
@@ -5000,9 +5089,9 @@
               
               <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
               <div id="sketchContents">
-                <p style="font-size: 13px;">This tool is for planning purposes.  
-                  It is not a tool for roadway design or engineering purposes.<br> 
-                  Construction cost estimates are calculated using average project cost by type from August 2003 to August 2013 in 2013 dollars.<br>
+                <p style="font-size: 13px;">* This tool is for planning purposes.  
+                  It is not a tool for roadway design or engineering purposes.<br><br>
+                  Construction cost estimates are calculated using average project cost by type from August 2003 to August 2013 in 2013 dollars.<br><br>
                   Frontage roads assumed two lanes per direction when selected.</p>
       					<br><br>
                 <span class="stepClass underline" style="position: relative; top: -3rem; margin-bottom: -1.6rem;">Step 1: Adjust Form</span>
@@ -5035,9 +5124,9 @@
     						<br>
                 <!-- <button id="startDrawing" class="spmMainBtn">Start Drawing</button> -->
     						<!-- <span class="stepClass" style="position: relative; top: 0.7rem; margin-bottom: .4rem;">Step 2: Draw on Map</span> -->
-    						<br>
                 <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
                 <br>
+                <span class="stepClass underline">Results:</span>
     						<div id="deCostResult"></div>
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project">Clear</button>      					
               </div>
