@@ -4659,7 +4659,7 @@
                 if(zoomLvl === -1){return}
                 let roadLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")
                 let aadtLayer = retrieveFeatureLayer("AADT")
-                let fcLayer = retrieveFeatureLayer("Functional Classification & Urban Areas")
+                let [fcLayer, urbanArea] = retrieveFeatureLayer("Functional Classification & Urban Areas")
                 let refMarkLayer = retrieveFeatureLayer("Reference Markers")
                 let controlLayer = retrieveFeatureLayer("Control Sections")
                 let speedLayer = retrieveFeatureLayer("Speed Limits")
@@ -4667,13 +4667,12 @@
                 // let top100Layer = retrieveFeatureLayer("Top 100 Congested Roadways")
                 let roadInvOnSysLayer = retrieveFeatureLayer("Roadway Inventory - On-System Roadbeds")
                 let cemeteryLayer = retrieveFeatureLayer("Cemeteries")
-
                 let buildQuery;
 
                 if(zoomLvl === 5){
                   roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                   controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
                   speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
@@ -4686,7 +4685,7 @@
                 if(zoomLvl === 6){
                   roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                   controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
                   speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
@@ -4699,7 +4698,7 @@
                 if(zoomLvl === 7){
                   roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                   controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
                   speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
@@ -4712,7 +4711,7 @@
                 if(zoomLvl === 8){
                   roadLayer[0].definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                   controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
                   speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
@@ -4725,7 +4724,7 @@
                 if(zoomLvl === 9){
                   roadLayer[0].definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
                   controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
                   speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
@@ -4737,7 +4736,7 @@
                 if(zoomLvl === 10){
                   roadLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
                   controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
                   speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
@@ -4749,7 +4748,7 @@
                 if(zoomLvl === 11){
                   roadLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                   controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
                   speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
@@ -4761,7 +4760,7 @@
                 if(zoomLvl === 12){
                   roadLayer[0].definitionExpression = ''
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = "RDBD_TYPE = 'KG'"
+                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RDBD_TYPE = 'KG'"
                   refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                   controlLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
                   speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
@@ -4773,7 +4772,7 @@
                 if(zoomLvl === 13){
                   roadLayer[0].definitionExpression = ''
                   aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer[1].definitionExpression = ''
+                  fcLayer.definitionExpression = ''
                   refMarkLayer[0].definitionExpression = ''
                   controlLayer[0].definitionExpression = "RTE_PRFX <> 'CS'"
                   speedLayer[0].definitionExpression = ''
