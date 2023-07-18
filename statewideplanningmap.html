@@ -4358,6 +4358,7 @@
               }
 
               function removeOverlay(id){
+                console.log(id)
                 if(!id) return
                 let [idLeft, idRight] = id.split("removeOverlay")
                 if(!idRight){return}
@@ -4369,7 +4370,8 @@
                 })
                 //document.getElementById(idRight).remove()
                 document.getElementById("addFeatRow").childNodes.forEach((i,x) => {
-                  if(i.textContent === idRight){
+                  if(i.textContent.includes(idRight)){
+                    console.log("hey")
                     i.remove()
                   }
                 })
@@ -4962,7 +4964,7 @@
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Query and view inventory data in tabular format</span>
+                <span class="tabDesc">Query and view inventory data in tabular format.</span>
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
                   <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
                   <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
@@ -5019,7 +5021,7 @@
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Display roadway attributes on a simplified diagram</span>
+                <span class="tabDesc">Display roadway attributes on a simplified diagram.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
@@ -5071,7 +5073,7 @@
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Create roadway segments on the map</span>
+                <span class="tabDesc">Create roadway segments on the map.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
