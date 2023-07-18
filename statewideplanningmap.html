@@ -126,6 +126,8 @@
               font-size: 15px;
               width: 18rem;
               right: 1rem;
+              padding-top: .5rem;
+              padding-bottom: .5rem;
             }
             .underline::after{
               content: "";
@@ -160,6 +162,10 @@
               position: relative;
               max-height: 7rem;
               overflow-y: auto;
+              scrollbar-width: none;
+            }
+            #graphics::-webkit-scrollbar{
+              display: none;
             }
             .queryStatus #queryMessageBtn{
               /* position: inherit; */
@@ -863,10 +869,10 @@
               width: 7.9rem !important;
             }
             #btnDiagramGenerateURL{
-              width: 87% !important;
+              width: 97% !important;
               position: relative;
               bottom: 1.4rem;
-              left: .8rem;
+              left: 0rem;
             }
             #btnToggleDiagramView{
               position: relative;
@@ -1007,13 +1013,13 @@
             #btnClearProject{
               position: relative;
               left: 0rem;
-              top: 1.5rem;
+              top: .3rem;
               width: 97%;
             }
             #deCostResult{
               font-size: 13px;
               position: relative;
-              top: 1rem;
+              top: .5rem;
             }
         </style>
         <script>
@@ -1292,7 +1298,7 @@
               }
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
-                console.log(theGeom)
+                console.log(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription)
                 if(!theGeom.data.features.length){
                   queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, "button",  height="250px", width="350px")
                   return true 
@@ -1333,7 +1339,7 @@
                 var indexTwo;
                 var indexThree;
                 var segmentArrayLength;
-                
+                console.log()
                 //Loop through the results extend the events and add to the map
                 for (var z = 0; z < result.length; z++) {
                   //For the first point on the segment
@@ -1958,16 +1964,6 @@
                 populateQueryForm(event)
               }
 
-              function typeAhead(){
-                ///
-                document.getElementById("tableSearch").addEventListener("input", (event)=>{
-                  let regex = new RegExp(`${event.target.value}`)
-
-                  console.log(queryTableResults)
-                })
-                
-              }
-
               async function populateQueryForm(type) {
                 //On startup, roadway inventory should display
                 //On selection of either option, fields should auto load
@@ -2538,6 +2534,7 @@
                 graphicsLayer.removeAll();
                 linePoints.length = 0;
                 document.getElementById("deCostResult").innerHTML = "";
+                event.target.disabled = true
               });                
               
               //Add Event Button
@@ -2656,6 +2653,7 @@
                 inventoryDiagramLogAllValues = [];
                 removeDrawEvent()
                 retrieveFeatureLayer("RoadInventory")[0].visible = false;
+                retrieveFeatureLayer("Bridges")[0].visible = false;
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
                 resetLRSIdentify();
@@ -3263,6 +3261,7 @@
                   var extent = results.extent;
                   // var expandedExtent = extent.expand(1.15); // Expand the extent by 15%          
                   view.goTo(results.extent);
+                  document.getElementById("btnToggleTableView").textContent = "Hide Table"
                 });                
               }
 
@@ -3404,9 +3403,7 @@
               function sketchDraw(){
                  draw = view.on("click", function(event) {
                   var testSketchDiv = document.getElementById("sketchTab");
-                  if(testSketchDiv.display === "block"){
-                    
-                  }
+                  document.getElementById("btnClearProject").disabled = false
                   let point = view.toMap({x: event.x, y: event.y});
 
                   //add graphic to map
@@ -3436,6 +3433,7 @@
               function removeDrawEvent(){
                 draw?.remove()
                 draw = null
+                document.getElementById("btnClearProject").disabled = true
               }
               //end view event--------------------------------------------------
               
@@ -4973,7 +4971,7 @@
                 <ul id="conditions" class="noDisabled1 tableBtn">
                   <!-- <li>Conditions listed here</li> -->
                 </ul><br>
-                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 3: Select Output Fields</span>
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Select Output Fields</span>
                 <select id="outputFields" multiple size="10" class="spmDropDown noDisabled1" disabled></select>
                 
                 <button class="queryButtonClass tableBtn spmMainBtn" id="btnRunQuery">Run Query</button>
@@ -5089,12 +5087,13 @@
               
               <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
               <div id="sketchContents">
-                <p style="font-size: 13px;">* This tool is for planning purposes.  
+                <p style="font-size: 13px; position: relative; bottom: 1rem; ">* This tool is for planning purposes.  
                   It is not a tool for roadway design or engineering purposes.<br><br>
                   Construction cost estimates are calculated using average project cost by type from August 2003 to August 2013 in 2013 dollars.<br><br>
                   Frontage roads assumed two lanes per direction when selected.</p>
       					<br><br>
-                <span class="stepClass underline" style="position: relative; top: -3rem; margin-bottom: -1.6rem;">Step 1: Adjust Form</span>
+                <span style="position: relative; bottom: 4.3rem; font-size: 14px; font-weight: bold; margin-bottom: 0px">Click on the map to start drawing.</span>
+                <span class="stepClass underline" style="position: relative; top: -4rem; margin-bottom: -3.8rem;">Adjust Design</span>
                 
     						<select id="selPrjType" name="selPrjType" class="spmDropDown">
     							<option value="A">New Roadway</option>
@@ -5126,9 +5125,9 @@
     						<!-- <span class="stepClass" style="position: relative; top: 0.7rem; margin-bottom: .4rem;">Step 2: Draw on Map</span> -->
                 <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
                 <br>
-                <span class="stepClass underline">Results:</span>
-    						<div id="deCostResult"></div>
-                <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project">Clear</button>      					
+                <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project" disabled>Clear</button>
+                <span class="stepClass underline" style="padding-top:0px;">Results:</span>
+    						<div id="deCostResult"></div>      					
               </div>
             </div>            
         </div>
