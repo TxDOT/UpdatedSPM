@@ -445,6 +445,7 @@
             }
             .spmSecondaryBtn:hover{
               /* border: 2px rgb(20, 55, 90) solid; */
+              color: white;
               background-color: rgba(32, 78, 112, 0.8)
             }
             .spmDropDown{
@@ -883,7 +884,7 @@
             }
             #btnUpdateLRM{
               position: relative;
-              margin-bottom: 0.3rem !important;
+              margin-bottom: 0.1rem !important;
               top: 0rem !important;
               margin-top: -1rem !important;
             }
@@ -911,7 +912,21 @@
                 background-color: #F8F8F8;
                 display: none;
                 overflow: hidden;
-            }             
+            }   
+            .tabDesc{
+              font-size: 13px;
+              position: relative;
+              bottom: .3rem;
+            }
+            .borderLine{
+              content: "";
+              width:18.1rem;
+              padding-top: 21px;
+              border-top: 1px solid grey;
+              position: absolute;
+              top: -1.5rem;
+              right: -0.16rem;
+            }    
             .queryTblData {
                 border: 1px solid #F8F8F8;
                 padding: 8px;
@@ -1339,7 +1354,7 @@
                 var indexTwo;
                 var indexThree;
                 var segmentArrayLength;
-                console.log()
+                console.log(result)
                 //Loop through the results extend the events and add to the map
                 for (var z = 0; z < result.length; z++) {
                   //For the first point on the segment
@@ -2483,7 +2498,9 @@
               //Clear condition listener
               const clearConditionListener = document.querySelector('#btnClearConditions');
               clearConditionListener.addEventListener('click', (event) => {
-                clearConditions();              
+                clearConditions();
+                let querySelectedItem = getCurrentQuerySelection()
+                retrieveFeatureLayer(querySelectedItem)[0].visible = false             
               });  
               
               
@@ -4892,11 +4909,11 @@
               function appDetailsModal(){
                 
                 let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface"]
-                let releaseNotesList = ""
+                let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
                       <ul>
-                        <li>${releaseNotesList}</li>
+                        ${releaseNotesList}
                       </ul>
                   `, header: "Release Notes"}, "button", height="300px", width="473px")
                   // expandNotes()
@@ -4944,6 +4961,8 @@
             </div>
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
+                <p class="borderLine"></p>
+                <span class="tabDesc">Query and view inventory data in tabular format</span>
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
                   <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
                   <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
@@ -4999,6 +5018,8 @@
             </div>
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
+                <p class="borderLine"></p>
+                <span class="tabDesc">Display roadway attributes on a simplified diagram</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
@@ -5049,6 +5070,8 @@
             </div>
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
+                <p class="borderLine"></p>
+                <span class="tabDesc">Create roadway segments on the map</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
@@ -5084,7 +5107,8 @@
               </form>                 
             </div>            
             <div class="tocTabsSketch" id="sketchTab">
-              
+              <p class="borderLine"></p>
+              <span class="tabDesc">Sketch a proposed road to estimate construction costs.</span>
               <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
               <div id="sketchContents">
                 <p style="font-size: 13px; position: relative; bottom: 1rem; ">* This tool is for planning purposes.  
@@ -5126,7 +5150,7 @@
                 <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
                 <br>
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project" disabled>Clear</button>
-                <span class="stepClass underline" style="padding-top:0px;">Results:</span>
+                <span class="stepClass underline">Results</span>
     						<div id="deCostResult"></div>      					
               </div>
             </div>            
