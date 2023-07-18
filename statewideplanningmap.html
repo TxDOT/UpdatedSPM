@@ -59,9 +59,9 @@
                 display: block !important;
                 /* background-color: yellow !important; */
               }
-              #diagramTab, #roadwayDiagram{
+              /* #diagramTab, #roadwayDiagram{
                 display: none !important;
-              }
+              } */
               #serviceDownDiv{
                 transform: translate(-4rem, 50%) !important;
               }
@@ -75,9 +75,9 @@
               #queryMessageBtn{
                 margin-left:  15.6rem !important;
               }
-              #diagramTab, #roadwayDiagram{
+              /* #diagramTab, #roadwayDiagram{
                 display: none !important;
-              }
+              } */
             }
             /* Laptops, Desktops, tablets landscape mode */
             @media (min-width: 1025px) and (max-width: 1280px){
@@ -120,13 +120,21 @@
               display: flex;
               position:relative;
               top:.6rem;
-              background-color: #204e70;
-              color: white;
+              background-color: white;
+              color: black;
               padding-left: .5rem;
-              font-size: 13px;
+              font-size: .9rem;
               width: 18rem;
               right: 1rem;
             }
+            .underline::after{
+              content: "";
+              width:44px;
+              padding-top: 21px;
+              border-bottom: 3px solid #14375A;
+              position: absolute
+            }
+
             #closeAbout{
               font-size: small;
               text-decoration: underline;
@@ -150,6 +158,8 @@
             #graphics{
               bottom: 1.3rem;
               position: relative;
+              max-height: 7rem;
+              overflow-y: auto;
             }
             .queryStatus #queryMessageBtn{
               /* position: inherit; */
@@ -179,6 +189,7 @@
               letter-spacing: .0008em;
               font-weight: 400;
               line-height: 1.375rem;
+              user-select: none;
             }
             .dwnloadBtn{
               position: absolute;
@@ -202,7 +213,7 @@
               color: grey;
               
             }
-            .noDwnloadBtn:after{
+            /* .noDwnloadBtn:after{
               content: "";
               position: absolute;
               border: .1px solid grey;
@@ -210,7 +221,7 @@
               margin-top: 3px;
               width: 80%;
               left: 2px;
-            }
+            } */
             .dwnloadBtn:hover{
               color: green;
             }
@@ -248,7 +259,8 @@
                 color: white;
             }
             .logo {
-                font-size: 15px;
+                font-size: 16px;
+                font-weight: 600;
             }      
             a[class="links"]{
               position: relative;
@@ -351,34 +363,34 @@
 
             .spmMainBtn{
               outline: #14375A;
-              background-color: none;
               background: none;
-              color: #204e70;
+              color: white;
               cursor: pointer;
+              background-color: rgba(32, 78, 112, 0.8);
               border: 2px #14375A solid;
               height: 2rem;
               width: fit-content;
-              text-decoration: underline;
+              /* text-decoration: underline;
               text-underline-position: under;
               text-decoration-thickness: .1rem;
-              text-decoration-color: #204e70;
+              text-decoration-color: #204e70; */
               margin-right: 1rem;
               padding-left: .5rem;
               padding-right: .5rem;
             }
             .spmMainBtn:disabled{
-              background-color: none;
-              background: none;
+              background-color: lightgray;
+              /* background: none; */
               cursor: default;
-              color: #888;
-              border: 2px #888 solid;
+              color: gray;
+              border: 2px lightgray solid;
               height: 2rem;
               width: fit-content;
-              text-decoration: underline;
+              /* text-decoration: underline; */
               pointer-events: none;
-              text-underline-position: under;
+              /* text-underline-position: under;
               text-decoration-thickness: .1rem;
-              text-decoration-color: #888;
+              text-decoration-color: #888; */
               /* margin-right: 1rem;
               padding-left: 1rem;
               padding-right: 1rem; */
@@ -387,42 +399,47 @@
               background: rgba(20,55,90,.5);
             }
             .spmMainBtn:hover{
-              background: rgba(20,55,90,.5);
+              background: rgb(20, 55, 90);
             }
             .spmSecondaryBtn{ 
               background: none;
               cursor: pointer;
               border: none;
+              background-color: none;
               height: 2rem;
-              width: fit-content;
-              text-decoration: underline;
+              /* text-decoration: underline;
               text-underline-position: under;
               text-decoration-thickness: .1rem;
-              text-decoration-color: #204e70;
-              color:#204e70;
+              text-decoration-color: #204e70; */
+              color: #204e70;
               margin-right: .9rem;
               padding-left: .5rem;
               padding-right: .5rem;
             }
-
+                
+            #lrsOutputTable{
+              border: 1px solid #204e70;
+              border-radius: 0px;
+              font-size: 13px;
+            }
             .spmSecondaryBtn:disabled{
               outline: #888;
-              background: none;
-              border: none;
+              background-color: lightgray;
+              border: 2px solid lightgray;
               cursor: default;
               height: 2rem;
-              width: fit-content;
               pointer-events: none;
-              text-decoration: underline;
+              color: gray
+              /* text-decoration: underline;
               text-underline-position: under;
-              text-decoration-thickness:.1rem;
-              color: #888;
+              text-decoration-thickness:.1rem; */
             }
             .spmSecondaryBtn:active{
               background: rgba(20,55,90,.5);
             }
             .spmSecondaryBtn:hover{
-              background: rgba(20,55,90,.5);
+              border: 2px rgb(20, 55, 90) solid;
+              
             }
             .spmDropDown{
               border: 1px solid #14375A;
@@ -600,9 +617,11 @@
             tr:nth-child(odd) {background-color: #ffffff;}
             tr:nth-child(even) {background-color: #f2f2f2;}
             th {text-align: left;}    
+
             #exportSpan {
               cursor: pointer;
               color: blue;
+              font-size: 13px;
             }
             .tocTabs {
               position: absolute;
@@ -635,6 +654,7 @@
               text-align: left;
               padding-left: .3rem;
               font-size: 15px;
+              font-weight: normal;
             }
             .baseMapList {
               color: black;
@@ -693,12 +713,14 @@
               width: 87%;
             }
             #graphDiv{
-              position: fixed;
-              left: 17rem;
-              padding-top: .1rem;
+              position: relative;
+              left: 4rem;
+              top:0.2rem;
+              margin-right: 2.46rem;
             }
             #graphDiv:hover{
               color: red;
+              cursor: pointer;
             }
             /* button:hover{
               background-color: rgba(32, 78, 112, .4);
@@ -731,39 +753,45 @@
               position: relative;
               top: 0.4rem;
             }
-            /* #btnAddCondition,#btnUpdateLRM,#btnToggleTableView,#btnToggleDiagramView,#btnDiagramGenerateURL,#btnClearProject {
+            #btnAddCondition,#btnUpdateLRM,#btnDiagramGenerateURL, #btnRunQuery,#btnEventMap, #btnInventoryUpdateLRM {
                 width: 97%;
             }   
-            #btnRunQuery,#btnEventMap,#btnInventoryUpdateLRM,#btnClearDiagramView,#btnClearConditions,#btnRemoveLast,#btnRemoveAll,#btnCalcCost,#btnExportJPEG,#btnExportPNG,#btnExportToCSV,#btnQueryGenerateURL,#btnExportToKML,#btnGenerateURL {
+            /*#btnRunQuery,#btnEventMap,#btnInventoryUpdateLRM,#btnClearDiagramView,#btnClearConditions,#btnRemoveLast,#btnRemoveAll,#btnCalcCost,#btnExportJPEG,#btnExportPNG,#btnExportToCSV,#btnQueryGenerateURL,#btnExportToKML,#btnGenerateURL {
               width: 48%;
             } */
-            .clearBtn{
-              border: none !important;
-            }
             .esriIcons{
               right: .4rem;
               position: relative;
             }
             .btnRunOpt{
               position:relative;
-              left:7rem;
+              right: 0rem;
+              bottom:3rem;
             }
+
             #btnRunQuery:disabled{
               pointer-events: none;
             }
             .btnAddCondition{
               position: relative;
               top: 0.4rem;
-              left: 10.1rem;
+              left: 0rem;
+              width: 1rem
             }
             .btnClearConditions{
               position: relative;
-              left: 8rem;
+              left: 12.3rem;
+              width: 4rem;
+            }
+            #btnClearDiagramView{
+              top:3.2rem;
             }
             #btnToggleTableView{
-              position: absolute;
-              bottom: 4.4rem;
-              left: 1.5rem;
+              position: relative;
+              bottom: 2.6rem;
+              right: 7rem;
+              margin-left: 7rem;
+              width: 6rem;
             }
             #btnRemoveLast{
               position: relative;
@@ -771,7 +799,11 @@
               left: .55rem
             }
             #btnRemoveAll{
-              margin-bottom: 1.1rem;
+              margin-bottom: 1.2rem;
+              top: 2.5rem;
+            }
+            #btnInventoryUpdateLRM{
+              margin-top: .5rem;
             }
             .btnQueryGenerateURL{
               position: relative;
@@ -790,8 +822,9 @@
             }
             #btnToggleDiagramView{
               position: relative;
-              right: .5rem;
+              right: 7rem;
               bottom: 2.7rem;
+              margin-left: 7rem;
             }
             #btnUpdateLRM{
               position: relative;
@@ -947,6 +980,7 @@
             //let searchSources = []
             let basemapAll;
             let queryTableResults;
+            let draw;
             
             // URL Parameters
             var urlParams;
@@ -1001,7 +1035,7 @@
             ];
 
             let mainTOCLayers = ["AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
-                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "National Highway System", "Alt Fuels - Electric", "Hurricane Evacuation Routes", "Metropolitan Planning Organizations (MPO)", "Live Traffic"]
+                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "National Highway System", "Alt Fuels - Electric", "Hurricane Evacuation Routes", "Metropolitan Planning Organizations", "Live Traffic"]
 
             let displayPopupInfo = [{}]
             
@@ -1137,12 +1171,13 @@
                 }
               }
               
+              const getGraphic = (id) => graphicsLayer.graphics.items.find(x => Object.values(x.attributes).toString() === id)
+
               function removeEventGraphic(id){
                 let index = Number(id)
-                console.log(graphicsLayer.graphics.items)
-                let getGraphic = graphicsLayer.graphics.items.find(x => Object.values(x.attributes).toString() === id)
+                let getGraphics = getGraphic(id)
                 //let getGraphic = graphicsLayer.graphics.items.at(index)
-                graphicsLayer.remove(getGraphic)
+                graphicsLayer.remove(getGraphics)
               }
 
               function addGraphicToEventDisplay(){
@@ -1164,10 +1199,21 @@
                   removeEventGraphic(element.id)
                   element.remove()
                 }
+                // graphSpan.onmouseenter = () =>{
+                //   console.log(document.getElementById(id).id)
+                //   highlightGraphic(document.getElementById(id).id)
+                // }
                 graphSpan.textContent = `Route: ${gItem.attributes[0]} DFO: ${gItem.attributes[1]} - ${gItem.attributes[2]}`
                 graphSpan.appendChild(graphDiv)
                 document.getElementById("graphics").appendChild(graphSpan)
               }
+
+              // function highlightGraphic(id){
+              //   let graphic = getGraphic(id)
+              //   console.log(graphic)
+              //   return
+              // }
+
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
               async function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
                 document.getElementById("btnEventMap").textContent = "Loading...."
@@ -1411,16 +1457,16 @@
               //End basemap tile layers-----------------------------------------
         
               //Add roadway inventory layer
-              function addSoloLayers(){
-                var roadwayInventoryLayerUrl = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadway_Inventory/FeatureServer/0";
-                roadwayInventoryfeatureLayer = new FeatureLayer({
-                  url: roadwayInventoryLayerUrl,
-                  visible: false,
-                  outFields: ["*"],
-                  name: "RoadInventory"
-                });   
-                map.add(roadwayInventoryfeatureLayer);
-              }
+              // function addSoloLayers(){
+              //   var roadwayInventoryLayerUrl = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadway_Inventory/FeatureServer/0";
+              //   roadwayInventoryfeatureLayer = new FeatureLayer({
+              //     url: roadwayInventoryLayerUrl,
+              //     visible: false,
+              //     outFields: ["*"],
+              //     name: "RoadInventory"
+              //   });   
+              //   map.add(roadwayInventoryfeatureLayer);
+              // }
 
               
               view = new MapView({
@@ -1614,9 +1660,16 @@
                 let selects = document.getElementById(tabname).getElementsByTagName("select")
 
                 for(i in inputs){
+                  console.log(inputs[i])
+                  if(inputs[i].id === "eventWidth" || inputs[i].id === "RoadInventory" || inputs[i].id === "Bridges"){
+                    continue
+                  }
                   inputs[i].value = ""
                 }
                 for(i in selects){
+                  if(selects[i].id === "eventColors" || selects[i].id === "field"){
+                    continue
+                  }
                   selects[i].value = ""
                 }
               }
@@ -1701,8 +1754,9 @@
                 document.getElementById(id).addEventListener("change", (event)=>{
                   if(event.target.value != ""){
                     event.target.nextElementSibling.disabled = false
-                    if(event.target.type === "select-multiple"){
+                    if(event.target.type.includes("select")){
                       let classBtn = event.target.nextElementSibling.className.split(" ")
+                      console.log(classBtn)
                       document.querySelectorAll(`.${classBtn[1]}`).forEach(x => x.disabled = false)
                     }
                     
@@ -1726,7 +1780,12 @@
                       event.target.nextElementSibling.nextElementSibling.disabled = false
                     }
                     console.log(event.target)
-                    if(event.target.id === 'eventDescription'){
+                    if(event.target.id === 'eventEndDFO'){
+                      document.getElementById("eventColors").disabled = false
+                      document.getElementById("eventColors").value = "#000000"
+                      document.getElementById("eventWidth").disabled = false
+                      document.getElementById("eventWidth").value = "4"
+                      document.getElementById("eventDescription").disabled = false
                       document.getElementById("btnRemoveAll").disabled = false
                       document.getElementById("btnEventMap").disabled = false
                       // document.getElementById("btnRemoveLast").disabled = false
@@ -1749,32 +1808,6 @@
                 }
               }
 
-              // function initValueCheck(values, tab){
-              //   let a = 0;
-              //   for(let i =0; i < tab.children[0].length; i++){
-              //     if(tab.children[0][i].value === "" && tab.children[0][i].tagName != "BUTTON"){
-              //       a++
-              //       //
-              //     }
-              //   }
-              //   let btns = tab.getElementsByTagName("button")
-                
-              //   if(a > 0 ){
-              //     for(let b in btns){
-              //       if(btns[b].tagName === "BUTTON"){
-              //         document.getElementById(btns[b].id).disabled = true
-              //       }
-              //       return
-              //     }
-              //   }
-              //   for(let b in btns){
-              //     if(btns[b].tagName === "BUTTON"){
-              //       document.getElementById(btns[b].id).disabled = false;
-              //     }
-              //   }
-
-              // }
-
               function displayErrorMsg(validity){
           
                 let errorMsg = {"badInput": "Check type required for input", "rangeOverflow": "A number between 1-8 is required", "rangeUnderflow": "A number between 1-8 is required", 
@@ -1795,42 +1828,6 @@
                   toggleQueryBtns(id, true)
                 }
                 
-                //let btns = document.getElementById(id).getElementsByTagName("button")
-
-                // ["change", "input"].forEach((x) => {
-                //   document.getElementById(id).addEventListener(x, (event) => {
-                    
-                //     if(event.target.tagName === "SELECT"){
-                //       let input = document.getElementById(id).getElementsByTagName("input")
-                //       for(let i in input){
-                //         if(!input[i].value) continue
-                //         displayErrorMsg(input[i].validity)
-                //         if(input[i].value.length < 1){
-                //           toggleQueryBtns(id, true)
-                //           continue
-                //         }
-                //         toggleQueryBtns(id, false)
-                //         continue
-                //       }   
-                //     }
-                //     if(event.target.tagName === "INPUT"){
-                //       displayErrorMsg(event.target.validity)
-                //       let select = document.getElementById(id).getElementsByTagName("select")
-                //       console.log(event.target)
-                //       for(let i in select){
-                //         if(select[i].value|| event.target.value.length < 1){
-                //           toggleQueryBtns(id, true)
-                //           continue
-                //         }
-                //         toggleQueryBtns(id, false)
-                //         continue
-                //       }   
-                //     }
-                //     // let selectOutput = document.getElementById("outputFields")
-                //     // event.target.value.length && selectOutput.value.length ? toggleQueryBtns(id, false) : toggleQueryBtns(id, true)
-
-                //   })
-                // })
               }
               
 
@@ -1840,8 +1837,9 @@
                 let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
 
                 let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
+                console.log(getCurrentFeatLayer)
                 view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
-                  featureLayerView = layerView;
+                  // featureLayerView = layerView;
                   populateQueryForm(getQueryType);
 
                 });
@@ -1875,7 +1873,8 @@
 
               function setRoadwayQuery(){
                 //clear current contents in outputFields first
-                var roadwayInventoryFieldsArray = featureLayerView.availableFields;
+                var roadwayInventoryFieldsArray = featureLayerView;
+                console.log(featureLayerView)
                 let arrToMove = ["RIA_RTE_ID", "FRM_DFO", "TO_DFO", "C_SEC", "BMP", "EMP"]
                 let returnRdwyInventoryArr = sendItemToFront(roadwayInventoryFieldsArray,arrToMove)
                 return returnRdwyInventoryArr
@@ -1964,6 +1963,7 @@
               }
 
               view.on("click",function(event){
+               
                  if (lrsButtonStatus==true) {
                     graphicsLayerLRSIdentify.removeAll();
                     let point = view.toMap({x: event.x, y: event.y});
@@ -1986,12 +1986,12 @@
                     request(url).then(function(response) {
                         processLRSResponse(response);
                     }
-                    );                    
+                    
+                    );
+                    event.stopPropagation()                  
                  } 
                  //get overlays that are visible
-                 let visibleLayer = []
-                 let getVisibleLayers = itemArr.filter(x => x.visible === 1)
-                 getVisibleLayers.forEach(y => visibleLayer.push(y.name))
+                 let isVisibleLayers = returnVisibleLayers()
                  if (event.button === 2) {
                     let point = view.toMap({x: event.x, y: event.y});
                     var mapForURL = "";
@@ -2005,7 +2005,7 @@
                       mapForURL = "esristreets";
                     }
                     
-                    let overlayUrl = visibleLayer.length ? `overlays=${visibleLayer.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
+                    let overlayUrl = visibleLayer.length ? `overlays=${isVisibleLayers.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
                     let rightClickURL = `${window.location.origin}${window.location.pathname}?${overlayUrl}`
                     //var rightClickURL = "https://www.txdot.gov/apps/statewide_mapping/StatewidePlanningMap.html?map="+mapForURL+"&location="+point.latitude.toFixed(8)+","+point.longitude.toFixed(8)+","+view.zoom;
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
@@ -2015,6 +2015,13 @@
                  }
               });
               
+              function returnVisibleLayers(){
+                let visibleLayer = []
+                let getVisibleLayers = itemArr.filter(x => x.visible === 1)
+                getVisibleLayers.forEach(y => visibleLayer.push(y.name))
+                return visibleLayer
+              }
+
               function processLRSResponse(theResponse) {
                 var numbers = theResponse.data;
                 var lowestNumber = numbers[0].distance;
@@ -2028,7 +2035,7 @@
                 }     
                 
                 var lrsReadoutData=[];
-                lrsReadoutData.push(["Conrol Section",theResponse.data[lowestIndex].CTRL_SECT_LN_NBR]);
+                lrsReadoutData.push(["Control Section",theResponse.data[lowestIndex].CTRL_SECT_LN_NBR]);
                 lrsReadoutData.push(["Mile Point",theResponse.data[lowestIndex].CTRL_SECT_MPT]); 
                 lrsReadoutData.push(["Reference Marker",theResponse.data[lowestIndex].RMRKR_PNT_NBR]);
                 lrsReadoutData.push(["Displacement",theResponse.data[lowestIndex].RMRKR_DISPLACEMENT]);                 
@@ -2041,16 +2048,17 @@
                   document.getElementById("inpSRDRouteID").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
 		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM; 
                   var startingDFO = Number(theResponse.data[lowestIndex].RTE_DFO.toFixed(3));
+                  console.log(startingDFO)
                  if ((startingDFO-1)<0) {
-                    document.getElementById("inpSRDFromDFO").value = startingDFO;
-                    document.getElementById("inpSRDToDFO").value = startingDFO+1;
-                    document.getElementById("eventBeginDFO").value = startingDFO;
-                    document.getElementById("eventEndDFO").value = startingDFO+1;
+                    document.getElementById("inpSRDFromDFO").value = Number(startingDFO.toFixed(3));
+                    document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3));
+                    document.getElementById("eventBeginDFO").value = Number(startingDFO.toFixed(3));
+                    document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));
                   } else {
-                    document.getElementById("inpSRDFromDFO").value = startingDFO-1;
-                    document.getElementById("inpSRDToDFO").value = startingDFO+1; 
-                    document.getElementById("eventBeginDFO").value = startingDFO-1;
-                    document.getElementById("eventEndDFO").value = startingDFO+1;                 
+                    document.getElementById("inpSRDFromDFO").value = Number((startingDFO-1).toFixed(3));
+                    document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3)); 
+                    document.getElementById("eventBeginDFO").value = Number((startingDFO-1).toFixed(3));
+                    document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));                 
                   }
                   
                   ["#diagramTab","#eventTab"].forEach((x) =>{
@@ -2061,6 +2069,11 @@
                             getField[0].children[0][a].disabled = false
                             if(getField[0].children[0][a].nextElementSibling.tagName === "SPAN"){
                               getField[0].children[0][a].nextElementSibling.nextElementSibling.disabled = false
+                              if(getField[0].children[0][a].nextElementSibling.nextElementSibling.id === "eventColors"){
+                                 getField[0].children[0][a].nextElementSibling.nextElementSibling.value = "#000000"
+                                 getField[0].children[0][a].nextElementSibling.nextElementSibling.nextElementSibling.value = "4"
+                                 document.getElementById("btnEventMap").disabled = false;
+                              }
                             }
                             getField[0].children[0][a].nextElementSibling.disabled = false
                             
@@ -2105,8 +2118,8 @@
               view.when((v) => {
                 if(v.zoom === -1){
                   console.log(v)
+                 
                 }
-                console.log(v.zoom)
                 document.getElementById("zoom").textContent =`Level: ${v.zoom},`
                 v.watch("zoom", (b,a)=>{
                   document.getElementById("zoom").textContent =`Level: ${Math.round(a)},`
@@ -2206,14 +2219,9 @@
                 overlayVisible.forEach(x => toggleLayer(x.name))
               }
 
-              document.getElementById("startDrawing").addEventListener("click", ()=>{
-                document.getElementById("viewDiv").style.cursor = "crosshair"
-                sketchDraw()
-                createServiceDown("Click to draw line", "#204e70")
-                setTimeout(()=>{
-                  document.getElementById("serviceDownDiv").remove()
-                },2000)        
-              })
+              // document.getElementById("startDrawing").addEventListener("click", ()=>{
+                
+              // })
 
               //TxDOT map listener
               // const lstTxDOTListener = document.querySelector('#lstTxDOT');
@@ -2275,6 +2283,7 @@
               const queryListener = document.querySelector('#dataQuery');
               queryListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                resetTabInput("queryTab")
                 let isAllDisabled = disableQuery()
                 activateButton("dataQuery");
                 pageBtnDisable("queryTab")
@@ -2287,27 +2296,37 @@
               const roadwayDiagramListener = document.querySelector('#roadwayDiagram');
               roadwayDiagramListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                resetTabInput("diagramTab")
                 inputEventListner("inpSRDRouteID")
                 console.log(event)
                 let isAllDisabled = disableQuery()
                 activateButton("roadwayDiagram");
-                pageBtnDisable("eventTab");
+                pageBtnDisable("diagramTab");
                 checkFieldStatus("#diagramTab", isAllDisabled)
                 document.getElementById("diagramTab").style.display = "block";
-                document.getElementById("viewDiv").style.cursor = "default"           
+                document.getElementById("viewDiv").style.cursor = "default"   
+                document.getElementById("inpSRDFromDFO").disabled = true
+                document.getElementById("inpSRDToDFO").disabled = true
+                document.getElementById("riAttributes").disabled = true   
               });    
               
               //Event tab listener
               const eventTabListener = document.querySelector('#eventForm');
               eventTabListener.addEventListener('click', (event) => {
                 resetAllTabs();
+                resetTabInput("eventTab")
                 inputEventListner("eventRoute")
                 let isAllDisabled = disableQuery()
                 activateButton("eventForm");
                 pageBtnDisable("eventTab")
                 checkFieldStatus("#eventTab", isAllDisabled)
                 document.getElementById("eventTab").style.display = "block";       
-                document.getElementById("viewDiv").style.cursor = "default"        
+                document.getElementById("viewDiv").style.cursor = "default"
+                document.getElementById("eventBeginDFO").disabled = true
+                document.getElementById("eventEndDFO").disabled = true
+                document.getElementById("eventColors").disabled = true
+                document.getElementById("eventWidth").disabled = true
+                document.getElementById("eventDescription").disabled = true
               });               
               
               //Graphic sketch listener
@@ -2316,12 +2335,21 @@
                 resetAllTabs();
                 activateButton("graphicSketch");
                 document.getElementById("sketchTab").style.display = "block";
+                document.getElementById("viewDiv").style.cursor = "crosshair"
+                sketchDraw()
+                
+                // createServiceDown("Click to draw line", "#204e70")
+                // setTimeout(()=>{
+                //   document.getElementById("serviceDownDiv").remove()
+                // },2000)        
                 
               }); 
               
               //Check LRM Inputs listener
               const lrmInputsListener = document.querySelector('#btnUpdateLRM');
               lrmInputsListener.addEventListener('click', (event) => {
+                document.getElementById("btnToggleDiagramView").textContent = "Hide Diagram"
+                document.getElementById("riAttributes").disabled = false
                 checkLRMInputs();
               })
               
@@ -2363,6 +2391,11 @@
                 var buttonToggleDiagram = document.getElementById("parentCanvas");
                 var buttonText = document.getElementById("btnToggleDiagramView");
                 buttonToggleDiagram.style.display = "none"
+                document.querySelectorAll(`.srdBtn`).forEach((x) => {
+                  console.log(x)
+                  x.id === "btnClearDiagramView" ? x.disabled = false : x.disabled = true
+                })
+                
                 // if (buttonToggleDiagram.style.display === "none") {
                 //   buttonText.textContent = 'Show Diagram';
                 // } else {
@@ -2402,6 +2435,7 @@
               const runQueryListener = document.querySelector('#btnRunQuery');
               runQueryListener.addEventListener('click', (event) => {
                 let getQueryFeatLayer = retrieveFeatureLayer(document.querySelector(`input[name="featQuery"]:checked`).value)
+                console.log(getQueryFeatLayer)
                 setLayerDefinitionExpression(getQueryFeatLayer[0]);  
               });    
               
@@ -2490,11 +2524,14 @@
                 document.getElementById("eventRoute").value = "";
                 document.getElementById("eventBeginDFO").value = "";
                 document.getElementById("eventEndDFO").value = "";
-                document.getElementById("eventColors").value = "";
-                document.getElementById("eventWidth").value = "";
+                document.getElementById("eventColors").value = "#000000";
+                document.getElementById("eventWidth").value = "4";
                 document.getElementById("eventDescription").value = "";
-                // document.querySelectorAll(".")
+                document.getElementById("btnEventMap").disabled = true;
+                document.getElementById("btnExportToKML").disabled = true;
+                document.getElementById("btnGenerateURL").disabled = true;
                 graphicsLayer.removeAll();
+                document.getElementById("graphics").innerHTML = ""
               });         
               
               //Generate URL
@@ -2556,15 +2593,15 @@
                 document.getElementById("parentCanvas").style.display = "none";
                 numberOfAttributes=0;
                 inventoryDiagramLog = [];
-                inventoryDiagramLogAllValues = [];                 
-                roadwayInventoryfeatureLayer.visible = false;
+                inventoryDiagramLogAllValues = [];
+                removeDrawEvent()
+                retrieveFeatureLayer("RoadInventory")[0].visible = false;
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
                 resetLRSIdentify();
                 linePoints.length = 0;
                 document.getElementById("deCostResult").innerHTML = "";
-                
-                
+                document.getElementById("graphics").innerHTML = "";
               }
               
               function resetAllTools() {
@@ -2612,9 +2649,8 @@
               }              
               
               function activateButton(theElement) {
-                document.getElementById(theElement).style.backgroundColor = "rgba(32, 78, 112, .3)";
-                document.getElementById(theElement).style.color = "black";  
-                document.getElementById(theElement).style.borderBottom = "3px solid #204e70";         
+                document.getElementById(theElement).style.backgroundColor = "rgba(32, 78, 112, .8)";
+                document.getElementById(theElement).style.color = "white";         
                 return
               }
 
@@ -2717,7 +2753,7 @@
                 let url = window.location.search
                 if(!url.length){
                   //resetTabInput("queryTab")
-                  //resetTabInput("eventTab")
+                  resetTabInput("eventTab")
                   resetTabInput("diagramTab")
                   queryCheckOnLoad()
                   eventCheckOnLoad()
@@ -2754,6 +2790,7 @@
                     layerId.visible = true
                     layerId.forEach(featLayer => setIsVisible(featLayer, returnId, urlOverlay))
                     resetBaseMapItem("CLEAR")
+                    
                   })
                   
                 }
@@ -2777,15 +2814,18 @@
                   var eventParam = eventParam.replace(/%23/g, "#");
                   const eventArray = eventParam.split('|');
                   // Output the individual arrays
-                  let [route, bDfo, eDfo, color, width, desc] = eventArray[0].split(",")
-                  document.getElementById("eventRoute").value = route
-                  document.getElementById("eventBeginDFO").value = bDfo
-                  document.getElementById("eventEndDFO").value = eDfo
-                  document.getElementById("eventColors").value = color
-                  document.getElementById("eventWidth").value = width
-                  document.getElementById("eventDescription").value = desc
+                  eventArray.forEach((x) => {
+                    let [route, bDfo, eDfo, color, width, desc] = x.split(",")
+                    document.getElementById("eventRoute").value = route
+                    document.getElementById("eventBeginDFO").value = bDfo
+                    document.getElementById("eventEndDFO").value = eDfo
+                    document.getElementById("eventColors").value = color
+                    document.getElementById("eventWidth").value = width
+                    document.getElementById("eventDescription").value = desc
 
-                  getLineworkWithM(route,bDfo,eDfo,color,width,desc);
+                    getLineworkWithM(route,bDfo,eDfo,color,width,desc);
+                  })
+
                   // for (let i = 0; i < eventArray.length; i++) {
                   //   const individualArray = eventArray[i].split(',');
                   //   getLineworkWithM(individualArray[0],individualArray[1],individualArray[2],individualArray[3],individualArray[4],individualArray[5]);
@@ -3088,6 +3128,9 @@
                     span.appendChild(spanDiv)
                     document.getElementById('conditions').appendChild(span);
                     document.getElementById("outputFields").disabled = false
+                    // const li = document.createElement('li');
+                    // li.textContent = `${field} ${operator} ${value}`;
+                    // document.getElementById('conditions').appendChild(li);
                     return
                   }
                 return    
@@ -3100,6 +3143,9 @@
                   document.getElementById('results').innerHTML = '';
                   document.getElementById("results").style.display = "none";
                   document.getElementById("btnToggleTableView").disabled = true;
+                  document.getElementById("btnExportToCSV").disabled = true;
+                  document.getElementById("btnQueryGenerateURL").disabled = true;
+                  document.getElementById("btnRunQuery").disabled = true;
                   //roadwayInventoryfeatureLayer.visible = false;
                   addStartUpCondition();
               }              
@@ -3126,6 +3172,9 @@
                   //removeQueryResponseUI()
                   queryTableResults = returnQuery
                   document.getElementById("btnToggleTableView").disabled = false
+                  document.getElementById("btnClearConditions").disabled = false
+                  document.getElementById("btnExportToCSV").disabled = false
+                  document.getElementById("btnQueryGenerateURL").disabled = false
                   makeTableFromService(returnQuery);
                   featLayer.visible = true
                   document.getElementById("btnRunQuery").textContent = "Run Query"
@@ -3293,9 +3342,11 @@
               
               //view event to track drawing-------------------------------------
               function sketchDraw(){
-                view.on("click", function(event) {
+                 draw = view.on("click", function(event) {
                   var testSketchDiv = document.getElementById("sketchTab");
+                  if(testSketchDiv.display === "block"){
                     
+                  }
                   let point = view.toMap({x: event.x, y: event.y});
 
                   //add graphic to map
@@ -3317,10 +3368,15 @@
                   linePoints.push([point.longitude,point.latitude]);
                   if (linePoints.length > 1) {
                     addLine(linePoints);
-                  }                  
+                  }
+                  event.stopPropagation()                   
                 });  
               }
- 
+              
+              function removeDrawEvent(){
+                draw?.remove()
+                draw = null
+              }
               //end view event--------------------------------------------------
               
               //Adding user drawn lines to the map------------------------------
@@ -4052,11 +4108,12 @@
           
               //Export Query to URL---------------------------------------------
               function exportQueryToURL() { //bridge, roadway
+                let isVisibleLayers = returnVisibleLayers()
                 var outputFieldsSelect = document.getElementById("outputFields");
                 let queryType = getCurrentQuerySelection()
                 var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value).join(',');
                 var queryWhere = conditions.map(condition => `${condition.field}${condition.operator}${condition.value}`).join(' AND ');                
-                let arrayString = `?queryType=${queryType}&tab=query&query=${outputFieldList}|${queryWhere}`
+                let arrayString = isVisibleLayers.length ? `?overlays=${isVisibleLayers.toString()}&queryType=${queryType}&tab=query&query=${outputFieldList}|${queryWhere}` : `?queryType=${queryType}&tab=query&query=${outputFieldList}|${queryWhere}`
                
                 var fullString = `${window.location.origin}${window.location.pathname}${arrayString}`;
 
@@ -4067,8 +4124,9 @@
               
               //Export Diagram to URL-------------------------------------------
               function exportDiagramToURL () {
+                let isVisibleLayers = returnVisibleLayers()
                 var diagramAttributes = inventoryDiagramLog.join(',');
-                var arrayString = "?tab=diagram&diagram=" + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO;
+                var arrayString = isVisibleLayers.length ? `?overlays=${isVisibleLayers.toString()}&tab=diagram&diagram=` + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO : "?tab=diagram&diagram=" + diagramTitle + "," + diagramBeginDFO + "," + diagramEndDFO;
                 let fullString = `${window.location.origin}${window.location.pathname}${arrayString}|${diagramAttributes}`
                 
                 queryToUrl(fullString)
@@ -4078,6 +4136,7 @@
               
               //Export Graphics to URL------------------------------------------
               function exportGraphicsToURL() {
+                let isVisibleLayers = returnVisibleLayers()
                 var outputArray = [];
                 var graphics = graphicsLayer.graphics.items;
                 if (graphics.length > 0) {
@@ -4090,7 +4149,7 @@
                   return innerArray.join(",");
                 }).join("|");    
                 
-                arrayString = "?tab=event&event=" + arrayString;
+                arrayString = isVisibleLayers.length ? `?overlays=${isVisibleLayers.toString()}&tab=event&event=` + arrayString : "?tab=event&event=" + arrayString;
                 var replacedString = arrayString.replace(/#/g, "%23");
                 
                 replacedString = `${window.location.origin}${window.location.pathname}${replacedString}`
@@ -4108,9 +4167,13 @@
 
               //load Table of Contents items
               async function loadTOCContent(){
-                addSoloLayers()
+                // addSoloLayers()
                 const docFrag = document.createDocumentFragment()
-                let returnToc = await tocFeatureLayer.queryFeatures()
+                let returnToc = await tocFeatureLayer.queryFeatures({
+                  where: "1=1",
+                  orderByFields: ["name"],
+                  outFields: ["*"]
+                })
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
                   itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, visible: false, addToTOC: 0})
@@ -4128,7 +4191,7 @@
                   <tbody id="featRow"> 
                   </tbody>
                   <tr><th class="basemapHeader">Additional Overlays</th></tr>
-                  <small style="position:relative; left: .3rem;">Select a Feature Layer to add to map (Max 5 Overlays):</small>
+                  <small style="position:relative; left: .3rem;">Select a Feature Layer to Add (Max 5):</small>
                   <div class="dropDown">
                   <select name="dropDown" id="layerSearch" placeholder="Search for Layer"></select>
                   </div>
@@ -4139,8 +4202,7 @@
                 for(i=0; i < tocObj.length; i++){
                   if(tocObj[i].name === previousItem) continue
                   previousItem = tocObj[i].name
-                  if(mainTOCLayers.includes(tocObj[i].name) ){
-                    
+                  if(mainTOCLayers.includes(tocObj[i].name)){
                     appendChildToOverlayList(tocObj[i].name, tocObj[i].tocType, true, documentFrag)
                     continue
                   }
@@ -4244,10 +4306,14 @@
                   })
 
                   addFeatureLayer.when((layer)=>{
-
                     //need to add TxDOT_Top_100_Congested_Roadways, TxDOT_Districts, Texas_County_Boundaries_Detailed, TxDOT_Roadways_Search 
-                    if(layer.title === "TxDOT Bridges"){
-                      bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
+                    if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
+                      if(layer.title === "TxDOT Bridges"){
+                        bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
+                        return
+                      }
+                        featureLayerView = layer.fieldsIndex.uid.split(",")
+                        return
                     }
     
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
@@ -4807,15 +4873,15 @@
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
-                  <span class="stepClass" style="position: relative; top: 0.7rem;">Step 1: Select Layer</span>
-                  <div style="position: relative; top: .8rem; right: .4rem">
+                  <span class="stepClass underline" style="position: relative; top: 0.7rem;">Step 1: Select Layer</span>
+                  <div style="position: relative; top: .8rem; right: .4rem; font-size: 13px;">
                     <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory">
                     <label for="RoadInventory">Roadway Query</label>
                     <input id="Bridges" class="noDisabled" type="radio" name="featQuery" value="Bridges">
                     <label for="Bridges">Bridge Query</label>
                   </div>
                 </div>
-                <span class="stepClass" style="position: relative; top: 0rem;">Step 2: Build Query</span>
+                <span class="stepClass underline" style="position: relative; top: 0rem;">Step 2: Build Query</span>
                 <select id="field" class="spmDropDown noDisabled1"></select>
                 <select id="operator" class="spmDropDown noDisabled1">
                     <option value="" selected>Select an Operator</option>
@@ -4830,20 +4896,21 @@
                 <input type="text" id="value" class="noDisabled1" placeholder="Enter a value to query" disabled>
                 <button class="queryButtonClass noDisabled1 spmMainBtn btnAddCondition" id="btnAddCondition">Add Condition</button>
                 <!-- <section><p id="fieldBuilder" class="queryBuilder">i.e EMP</p><p id="operatorBuilder" class="queryBuilder">i.e ></p><p id="valueBuilder" class="queryBuilder">i.e 1244</p></section> -->
-                <ul id="conditions" class="noDisabled1">
+                <ul id="conditions" class="noDisabled1 tableBtn">
                   <li>Conditions listed here</li>
                 </ul><br>
-                <span class="stepClass" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 3: Select Output Fields</span>
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 3: Select Output Fields</span>
                 <select id="outputFields" multiple size="10" class="spmDropDown noDisabled1" disabled></select>
-              
-                <button class="queryButtonClass tableBtn spmSecondaryBtn btnClearConditions clearBtn" id="btnClearConditions">Clear</button>
-                <button class="queryButtonClass tableBtn spmMainBtn btnRunOpt" id="btnRunQuery">Run Query</button>
                 
-                <button class="queryButtonClass spmSecondaryBtn btnToggleTableView" id="btnToggleTableView" disabled>Show/Hide Table</button>
-                <span class="stepClass" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Export Options</span>
+                <button class="queryButtonClass tableBtn spmMainBtn" id="btnRunQuery">Run Query</button>
+                <button class="queryButtonClass tableBtn spmSecondaryBtn btnClearConditions clearBtn" id="btnClearConditions">Clear</button>
+                
+                
+                <button class="queryButtonClass spmSecondaryBtn" id="btnToggleTableView" disabled>Show Table</button>
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Export Options</span>
                              
-                <button class="queryButtonClass tableBtn spmMainBtn exportBtn" id="btnExportToCSV"><span class="esri-icon-link-external esriIcons" ></span>Export CSV</button>
-                <button id="btnQueryGenerateURL" class=" queryButtonClass tableBtn spmMainBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                <button class="queryButtonClass tableBtn spmSecondaryBtn exportBtn" id="btnExportToCSV"><span class="esri-icon-link-external esriIcons" ></span>Export CSV</button>
+                <button id="btnQueryGenerateURL" class=" queryButtonClass tableBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
                 
                 
                 <template id="queryTemplate">
@@ -4855,13 +4922,13 @@
             </div>
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
-                <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
+                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1" placeholder="End Measure - Example: 20" disabled>
                 <!-- <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 2: Add Control Sections to Diagram</span> -->
-                <button id="btnUpdateLRM" class="queryButtonClass spmMainBtn btnAddCondition">Add Diagram</button>
-                <span class="stepClass" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 2: Add Additional Assets to Diagram</span>
+                <button id="btnUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnAddCondition">Create Diagram</button>
+                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Step 2: Add Additional Assets to Diagram</span>
                 <select id="riAttributes" name="riAttribute" class="spmDropDown noDisabled1">
                     TxDOT_Base_Thickness
                     <option value="" selected>Select an Asset</option>
@@ -4885,24 +4952,24 @@
                 </select>
 
                 <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnClearConditions clearBtn">Clear</button> 
-                <button id="btnInventoryUpdateLRM" class="queryButtonClass spmMainBtn btnRunOpt">Add Asset</button>
+                <button id="btnInventoryUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnRunOpt">Add Asset</button>
 
-                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnToggleTableView">Show/Hide Diagram</button>                
+                <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnToggleTableView">Show Diagram</button>                
                 
-                <span class="stepClass" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
-                <button id="btnExportPNG" class="queryButtonClass srdBtn spmMainBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export PNG</button>
-                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmMainBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export JPEG</button> 
-                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmMainBtn exportBtn btnQueryGenerateURL"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
+                <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export PNG</button>
+                <button id="btnExportJPEG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export JPEG</button> 
+                <button id="btnDiagramGenerateURL" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn btnQueryGenerateURL"><span class="esri-icon-share esriIcons"></span>Share URL</button>
                 <span class="error" id="error"></span>
               </form>                
             </div>
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
-                <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
+                <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 1: Add Route Information or use LRS tool</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1"name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
-                <span class="stepClass" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Step 2: Add Color, Width and Description</span>
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Step 2: Add Color, Width and Description</span>
                 <select id="eventColors" name="Color" class="spmDropDown noDisabled1" disabled>
                     <option value="">Select a Color</option>
                     <option value="#000000" selected>Black</option>
@@ -4915,32 +4982,31 @@
                     <option value="#14375a">TxDOT Blue</option>
                     <option value="#ffff00">Yellow</option>
                   </select>
-                <input type="number" id="eventWidth" class="noDisabled1" name="Width" value=4 placeholder="Line Width - Example: 4" min="1" max="8" disabled/>
+                <input type="number" id="eventWidth" class="noDisabled1" name="Width" placeholder="Line Width - Example: 4" min="1" max="8" disabled/>
                 <input type="text" id="eventDescription" class="noDisabled1" placeholder="Description for the Pop-Up" name="Desc" disabled/>
                 
                 <button id="btnRemoveAll" class="queryButtonClass eventBtn spmSecondaryBtn btnClearConditions clearBtn">Clear</button>
                 <button id="btnEventMap" class="queryButtonClass eventBtn spmMainBtn btnRunOpt">Add to Map</button>  
                 <!-- <button id="btnRemoveLast" class="queryButtonClass eventBtn spmSecondaryBtn btnToggleTableView">Remove Last</button> -->
-                <span style="font-size: 14px; justify-content: left; position: relative; display: flex; bottom: 1rem;">Graphics Added to Map:</span>
+                <!-- <span style="font-size: 14px; justify-content: left; position: relative; display: flex; bottom: 1rem;">Graphics Added to Map:</span> -->
                 <div id="graphics"></div>
-                <span class="stepClass" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
-                <button id="btnExportToKML" class="queryButtonClass eventBtn spmMainBtn exportBtn"><span class="esri-icon-link-external esriIcons" ></span>Export KML</button>                 
-                <button id="btnGenerateURL" class="queryButtonClass eventBtn spmMainBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Export Options</span>
+                <button id="btnExportToKML" class="queryButtonClass eventBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons" ></span>Export KML</button>                 
+                <button id="btnGenerateURL" class="queryButtonClass eventBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
                 <span class="error" id="error"></span>
               </form>                 
             </div>            
             <div class="tocTabsSketch" id="sketchTab">
               
-              <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
+              <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
               <div id="sketchContents">
                 <p style="font-size: 13px;">This tool is for planning purposes.  
                   It is not a tool for roadway design or engineering purposes.<br> 
                   Construction cost estimates are calculated using average project cost by type from August 2003 to August 2013 in 2013 dollars.<br>
                   Frontage roads assumed two lanes per direction when selected.</p>
       					<br><br>
-                <span class="stepClass" style="position: relative; top: -3rem; margin-bottom: -1.6rem;">Step 1: Adjust Form</span>
-                <input type="number" id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
-                <br>
+                <span class="stepClass underline" style="position: relative; top: -3rem; margin-bottom: -1.6rem;">Step 1: Adjust Form</span>
+                
     						<select id="selPrjType" name="selPrjType" class="spmDropDown">
     							<option value="A">New Roadway</option>
     							<option value="B">Reconstruction</option>
@@ -4967,10 +5033,11 @@
     							<option value="2">Yes</option>
     						</select>
     						<br>
-                <button id="startDrawing" class="spmMainBtn">Start Drawing</button>
-    						<span class="stepClass" style="position: relative; top: 0.7rem; margin-bottom: .4rem;">Step 2: Draw on Map</span>
+                <!-- <button id="startDrawing" class="spmMainBtn">Start Drawing</button> -->
+    						<!-- <span class="stepClass" style="position: relative; top: 0.7rem; margin-bottom: .4rem;">Step 2: Draw on Map</span> -->
     						<br>
-                
+                <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
+                <br>
     						<div id="deCostResult"></div>
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project">Clear</button>      					
               </div>
