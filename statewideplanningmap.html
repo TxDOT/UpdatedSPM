@@ -732,9 +732,14 @@
               padding-right: 1rem;
               background-color: #ccc;
             }
+            .containerDiv{
+              display: flex;
+              margin-bottom: 3px;
+              width: 19.81rem;
+            }
             #graphDiv{
               position: relative;
-              left: 4rem;
+              right: 1.5rem;
               top:0.2rem;
               margin-right: 2.46rem;
             }
@@ -1266,13 +1271,14 @@
                 // console.log(gItem)
                 console.log(graphicsLayer)
                 let graphSpan = document.createElement("span")
+                let containerDiv = document.createElement("div")
                 let graphDiv = document.createElement("div")
                 graphSpan.className = "graphSpan"
                 graphDiv.width = "70%"
-                graphSpan.id = id
-                console.log(graphSpan.id)
+                containerDiv.id = id
                 graphDiv.id = "graphDiv"
                 graphDiv.className = "esri-icon-close-circled"
+                containerDiv.className = "containerDiv"
                 graphDiv.onclick = () => {
                   console.log(document.getElementById("graphics"))
                   let element = document.getElementById(id)
@@ -1284,8 +1290,9 @@
                 //   highlightGraphic(document.getElementById(id).id)
                 // }
                 graphSpan.textContent = `Route: ${gItem.attributes[0]} DFO: ${gItem.attributes[1]} - ${gItem.attributes[2]}`
-                graphSpan.appendChild(graphDiv)
-                document.getElementById("graphics").appendChild(graphSpan)
+                containerDiv.appendChild(graphSpan)
+                containerDiv.appendChild(graphDiv)
+                document.getElementById("graphics").appendChild(containerDiv)
               }
 
               // function highlightGraphic(id){
@@ -2051,7 +2058,8 @@
                     });      
                     
                     graphicsLayerLRSIdentify.add(pointGraphic);
-                    document.getElementById("mapClickResults").innerHTML = "Calculating LRMs...";
+                    setElementText("mapClickResults", "Calculating LRMs...")
+                    // document.getElementById("mapClickResults").innerHTML = "Calculating LRMs...";
                     
                     //Populate LRS Readout
                     request(url).then(function(response) {
@@ -2092,6 +2100,8 @@
                 getVisibleLayers.forEach(y => visibleLayer.push(y.name))
                 return visibleLayer
               }
+              
+              const setElementText = (elementName, setValue) => document.getElementById(elementName).innerHTML = setValue
 
               function processLRSResponse(theResponse) {
                 var numbers = theResponse.data;
@@ -2117,7 +2127,8 @@
                 
                 if (document.getElementById("diagramTab").style.display == "block"||document.getElementById("eventTab").style.display == "block") {
                   document.getElementById("inpSRDRouteID").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
-		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM; 
+		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
+                  theResponse.data[lowestIndex].RTE_DFO ?? setElementText("mapClickResults", "Road was not detected. Move Closer.")
                   var startingDFO = Number(theResponse.data[lowestIndex].RTE_DFO.toFixed(3));
                   console.log(startingDFO)
                  if ((startingDFO-1)<0) {
@@ -2198,7 +2209,8 @@
                 })
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
-                  document.getElementById("coords").innerHTML = point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6);
+                  setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
+                  // document.getElementById("coords").innerHTML = point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6);
                 });
               })
 
@@ -2550,7 +2562,8 @@
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
                 linePoints.length = 0;
-                document.getElementById("deCostResult").innerHTML = "";
+                setElementText("deCostResult", "")
+                // document.getElementById("deCostResult").innerHTML = "";
                 event.target.disabled = true
               });                
               
@@ -2605,7 +2618,8 @@
                 document.getElementById("btnExportToKML").disabled = true;
                 document.getElementById("btnGenerateURL").disabled = true;
                 graphicsLayer.removeAll();
-                document.getElementById("graphics").innerHTML = ""
+                setElementText("graphics", "")
+                // document.getElementById("graphics").innerHTML = ""
               });         
               
               //Generate URL
@@ -2675,8 +2689,10 @@
                 graphicsLayer.removeAll();
                 resetLRSIdentify();
                 linePoints.length = 0;
-                document.getElementById("deCostResult").innerHTML = "";
-                document.getElementById("graphics").innerHTML = "";
+                setElementText("deCostResult", "")
+                setElementText("graphics", "")
+                // document.getElementById("deCostResult").innerHTML = "";
+                // document.getElementById("graphics").innerHTML = "";
               }
               
               function resetAllTools() {
@@ -2927,8 +2943,8 @@
                 }       
                 
                 if (queryParam) {
-                  
-                  document.getElementById('conditions').innerHTML = "";
+                  setElementText("conditions", "")
+                  // document.getElementById('conditions').innerHTML = "";
                   const queryArray = queryParam.split('|');
                   const queryFields = queryArray[0].split(',');
                   const queryConditions = queryArray[1].split(' AND ');
@@ -3214,8 +3230,10 @@
               function clearConditions() {
                   conditions = [];
                   document.getElementById("value").value = ""
-                  document.getElementById('conditions').innerHTML = '';
-                  document.getElementById('results').innerHTML = '';
+                  setElementText("conditions", "")
+                  setElementText("results", "")
+                  // document.getElementById('conditions').innerHTML = '';
+                  // document.getElementById('results').innerHTML = '';
                   document.getElementById("results").style.display = "none";
                   document.getElementById("btnToggleTableView").disabled = true;
                   document.getElementById("btnExportToCSV").disabled = true;
@@ -3371,7 +3389,6 @@
                         }
                         table.appendChild(row);
                     }
-              
                     var results = document.getElementById('results');
                     results.innerHTML = ''; // Clear previous results
                     results.appendChild(table);
@@ -3525,10 +3542,11 @@
         				}
         
         				//Summing total project cost and writing to output
-        				var theOutputArea = document.getElementById("deCostResult");
+        				// var theOutputArea = document.getElementById("deCostResult");
         				var totalProjectCost = totalRoadTypeCost + totalFrontageRoadCost;
         				totalProjectCost = Math.round(totalProjectCost / 1000) * 1000;
-        				theOutputArea.innerHTML =	"<u>Project Length</u>: <br>" + "<b>" + deProjectLength + "</b>" + " miles<br><br><u>Estimated Construction Cost</u>: <br>$" +	"<b>" + totalProjectCost.toLocaleString() + "</b>";
+                setElementText("deCostResult", "<u>Project Length</u>: <br>" + "<b>" + deProjectLength + "</b>" + " miles<br><br><u>Estimated Construction Cost</u>: <br>$" +	"<b>" + totalProjectCost.toLocaleString() + "</b>")
+        				// theOutputArea.innerHTML =	"<u>Project Length</u>: <br>" + "<b>" + deProjectLength + "</b>" + " miles<br><br><u>Estimated Construction Cost</u>: <br>$" +	"<b>" + totalProjectCost.toLocaleString() + "</b>";
         			}  
         			//End Sketch Cost-------------------------------------------------
               
@@ -4251,7 +4269,8 @@
                 })
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, visible: false, addToTOC: 0})
+                  console.log(x.attributes.renderer)
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, visible: false, addToTOC: 0})
                 })
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
@@ -4259,7 +4278,6 @@
               }
 
               function createTOC(tocObj, documentFrag){
-                
                 const tocTable = document.getElementById("tocMaps")
                 tocTable.innerHTML += `
                   <tr><td id="CLEAR" style="border-left:6px solid #14375A; padding-left: .6rem; background-color:rgba(20,55,90,.2)">Clear Overlays</td></tr>
@@ -4394,7 +4412,8 @@
                     },
                     definitionExpression: featLayer.defExpress ?? ""
                   })
-
+                  
+                  featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
                   addFeatureLayer.when((layer)=>{
                     //need to add TxDOT_Top_100_Congested_Roadways, TxDOT_Districts, Texas_County_Boundaries_Detailed, TxDOT_Roadways_Search 
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
@@ -4405,7 +4424,7 @@
                         featureLayerView = layer.fieldsIndex.uid.split(",")
                         return
                     }
-    
+
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
@@ -4963,7 +4982,7 @@
             <div class="tocTabsQuery" id="queryTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Query and view inventory data in tabular format.</span>
+                <span class="tabDesc">Query and view inventory data.</span>
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
                   <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
                   <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
@@ -5020,7 +5039,7 @@
             <div class="tocTabsDiagram" id="diagramTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Display roadway attributes on a simplified diagram.</span>
+                <span class="tabDesc">Display roadway attributes on a diagram.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input id="inpSRDRouteID" type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1" placeholder="Begin Measure - Example: 15" disabled>
@@ -5072,7 +5091,7 @@
             <div class="tocTabsEvent" id="eventTab">
               <form onsubmit="return false">
                 <p class="borderLine"></p>
-                <span class="tabDesc">Create roadway segments on the map.</span>
+                <span class="tabDesc">Create and export roadway segments.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
@@ -5109,7 +5128,7 @@
             </div>            
             <div class="tocTabsSketch" id="sketchTab">
               <p class="borderLine"></p>
-              <span class="tabDesc">Sketch a proposed road to estimate construction costs.</span>
+              <span class="tabDesc">Sketch a road to estimate costs.</span>
               <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Note about the Planning form</span>
               <div id="sketchContents">
                 <p style="font-size: 13px; position: relative; bottom: 1rem; ">* This tool is for planning purposes.  
