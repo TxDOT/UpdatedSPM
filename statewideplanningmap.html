@@ -267,6 +267,7 @@
             .logo {
                 font-size: 17px;
                 font-weight: 600;
+                letter-spacing: .01rem;
             }      
             a[class="links"]{
               position: relative;
@@ -424,7 +425,7 @@
             }
                 
             #lrsOutputTable{
-              border: 1px solid #204e70;
+              /* border: 1px solid #204e70; */
               border-radius: 0px;
               font-size: 13px;
             }
@@ -452,7 +453,7 @@
               border: 1px solid #14375A;
               background: none;
               border-radius: 0px;
-              top: .4rem;
+              top: 0rem;
               position: relative;
             }
 
@@ -606,6 +607,9 @@
 
             .rmvQueryBtn:hover{
               color: red;
+            }
+            .planLabel{
+
             }
             #searchTool {
               position: absolute;
@@ -906,7 +910,7 @@
               margin-top: -1rem !important;
             }
             #txtPrjLanes{
-              margin-top: 9px;
+              margin-top: 0px;
             }
             #results {
                 position: absolute;
@@ -3713,7 +3717,7 @@
                 //Adding the event to the map
                 
               }         
-                
+
               async function buildDiagram(diagramTitle,diagramBeginDFO,diagramEndDFO) {
                 var canvasParentDiv = document.getElementById("parentCanvas");
                 canvasParentDiv.style.display = "block";
@@ -3892,6 +3896,7 @@
                 }
           
                 inventoryDiagramLog.push(inventoryAttribute[2]);
+                console.log(inventoryAttribute[2])
                 var inventoryService = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/" + inventoryAttribute[0] + "/FeatureServer/0";
                 
                 if (inventoryAttribute[2]=="Reference Markers") {
@@ -3901,9 +3906,14 @@
                   var theRequestURL = inventoryService + "/query?f=json&orderByFields=" + theOrder + "&returnGeometry=false&where=" + theQuery + "&outFields=" + theFields;                    
                   
                   //Request for Points
-                  request(theRequestURL).then(function(response) {
+                  request(theRequestURL)
+                    .then(function(response) {
+                      console.log(response)
                       processInventoryAttributePoint(response,inventoryAttribute[2]);
-                  });                  
+                    })
+                    .catch((err)=>{
+                      console.log(err)
+                    })       
                 } else {
                   var theFields = "RTE_NM,BEGIN_DFO,END_DFO," + inventoryAttribute[1];                 
                   var theQuery = "RTE_NM='" + diagramTitle + "'" + " AND (BEGIN_DFO < " + diagramEndDFO + " AND END_DFO > " + diagramBeginDFO + ")";
@@ -3914,20 +3924,36 @@
                   drawTextCenter("Loading " + inventoryAttribute[2],labelPositions[2],attributeStartY+(numberOfAttributes*spacePerAttribute)+15,"#000000","10");                  
                   
                   //Request for Lines
-                  request(theRequestURL).then(function(response) {
+                  request(theRequestURL)
+                    .then(function(response) {
+                      console.log(response)
                       processInventoryAttribute(response,inventoryAttribute[2]);
-                  });                  
+                    })
+                    .catch((err)=>{
+                      console.log(err)
+                    })                
                 }
               }
               
               function processInventoryAttributePoint(response,theInventoryLabel) {
+                console.log(response)
                 var returnedFeatures = response.data.features;
                 var attBeginDFO;
                 var attValueGroup;
                 var attValue=45;
                 var dfoValue;
                 var mptValue;
-                
+                if(!returnedFeatures.length){
+                  let beginPix = rulerMargin+(pixelsPerMile*(0-diagramBeginDFO))
+                  let widths = (pixelsPerMile*(0-diagramBeginDFO))
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,16,"#FFFFFF"); 
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,2,"#D3D3D3");
+                  drawRectangle((Math.round(1425/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
+                  drawTextCenter("No Records",35+(Math.round(1425/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
+                  drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
+                  numberOfAttributes+=1;
+                  return
+                }
                 for (var i = 0; i < returnedFeatures.length; i++) {
                   attBeginDFO = returnedFeatures[i].attributes.DFO;
                   attValueGroup = returnedFeatures[i].attributes;
@@ -3975,7 +4001,18 @@
                 var attValue;
                 var dfoValue;
                 var mptValue;
-                
+                if(!returnedFeatures.length){
+                  let beginPix = rulerMargin+(pixelsPerMile*(0-diagramBeginDFO))
+                  let widths = (pixelsPerMile*(0-diagramBeginDFO))
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,17,"#FFFFFF"); 
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,2,"#D3D3D3");
+                  drawRectangle((Math.round(1425/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
+                  drawTextCenter("No Records",35+(Math.round(1425/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
+                  drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
+                  numberOfAttributes+=1;
+                  return
+                }
+
                 for (var i = 0; i < returnedFeatures.length; i++) {
                   attBeginDFO = returnedFeatures[i].attributes.BEGIN_DFO;
                   attEndDFO = returnedFeatures[i].attributes.END_DFO;
@@ -4003,7 +4040,7 @@
                   //Selecting alternating colors
                   const [darkColor, lightColor] = diagramColors[numberOfAttributes];
                   const selectedColor = i % 2 === 0 ? lightColor : darkColor;                  
-                  
+                  console.log(attEndDFO,attBeginDFO)
                   var eventBeginPixelValue = rulerMargin+(pixelsPerMile*(attBeginDFO-diagramBeginDFO));
                   var eventEndPixelValue = (pixelsPerMile*(attEndDFO-attBeginDFO));
                   
@@ -4017,6 +4054,7 @@
 
                   if (txtWidth<eventEndPixelValue) {
                     //Draw label for event
+                    console.log(attValue)
                     drawTextCenter(attValue,eventBeginPixelValue+(Math.round(eventEndPixelValue/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+15,"#FFFFFF",13);                  
                   }
                   
@@ -4028,6 +4066,7 @@
                     if (txtWidth<eventEndPixelValue) {
                       //Draw DFO label
                       dfoValue = roundToDecimalPlace(((eventBeginPixelValue-rulerMargin)/pixelsPerMile)+diagramBeginDFO,3);
+                      console.log(dfoValue)
                       drawTextCenter(dfoValue,eventBeginPixelValue,attributeStartY+(numberOfAttributes*spacePerAttribute)-3,"#000000",11); 
                       
                       //Draw MPT label
@@ -4041,7 +4080,7 @@
                 drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
                 numberOfAttributes+=1;
               }
-              
+
               //Drawing functions-----------------------------------------------
               function drawCircle(begX,begY,theRadius,theColor) {
                   var canvas = document.getElementById("myCanvas");
@@ -4054,6 +4093,7 @@
               }              
               
               function drawRectangle(begX,begY,theWidth,theHeight,theColor) {
+                  console.log(begX,begY,theWidth,theHeight,theColor)
                   var canvas = document.getElementById("myCanvas");
                   var ctx = canvas.getContext("2d");
                   ctx.fillStyle = theColor;
@@ -4062,6 +4102,7 @@
               }       
               
               function drawPolygon(theCoords,theWidth,fillColor,outlineColor,theScale) {
+                  console.log(theCoords,theWidth,fillColor,outlineColor,theScale)
                   var canvas = document.getElementById("myCanvas");
                   var ctx = canvas.getContext("2d");
                   ctx.scale(theScale, theScale);
@@ -4098,6 +4139,7 @@
               }
               
               function drawLine(begX,begY,endX,endY,theWidth,theColor) {
+                  console.log(begX,begY,endX,endY,theWidth,theColor)
                   var canvas = document.getElementById("myCanvas");
                   var ctx = canvas.getContext("2d");
                   ctx.beginPath();
@@ -5010,10 +5052,10 @@
                 <div id="querySelectionFilter" style="position: relative; bottom: 1rem;">
                   <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
                   <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
-                    <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory">
-                    <label for="RoadInventory">Roadway Query</label>
+                    <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory" 
+                    <label for="RoadInventory" value="Roadway Query"><a href="https://gis-txdot.opendata.arcgis.com/datasets/txdot-roadway-inventory-specifications-2021" target="_blank" title="Roadway Inventory Data Dictionary">Roadway Query</a></label>
                     <input id="Bridges" class="noDisabled" type="radio" name="featQuery" value="Bridges">
-                    <label for="Bridges">Bridge Query</label>
+                    <label for="Bridges" value="Bridge Query"><a href='https://txdot.maps.arcgis.com/sharing/rest/content/items/e9d8d0e3a9794be19be6ecaf5a24c176/data' target='_blank' title="Bridge Data Dictionary">Bridge Query</a></label>
                   </div>
                 </div>
                 <span class="stepClass underline" style="position: relative; top: 0rem;">Build Query</span>
@@ -5165,32 +5207,32 @@
                   Frontage roads assumed two lanes per direction when selected.</p>
       					<br><br>
                 <span class="stepClass underline" style="position: relative; top: -4rem; margin-bottom: -3.8rem;">Adjust Design</span>
-                <label>Project Type</label>
+                <label style="font-size: 13px;">Project Type</label>
     						<select id="selPrjType" name="selPrjType" class="spmDropDown">
     							<option value="A">New Roadway</option>
     							<option value="B">Reconstruction</option>
     						</select>
     						<br>
-                <label>Area Type</label>
+                <label style="font-size: 13px;">Area Type</label>
     						<select id="selPrjAreaType" name="selPrjAreaType" class="spmDropDown">
     							<option value="C">Urban</option>
     							<option value="D">Rural</option>
     						</select>
     						<br>
-                <label>Route Type</label>
+                <label style="font-size: 13px;">Route Type</label>
     						<select id="selPrjRouteType" name="selPrjRouteType" class="spmDropDown">
     							<option value="E">Freeway</option>
     							<option value="F">Arterial</option>
     							<option value="G">Collector</option>
     						</select>
     						<br>
-                <label>Configuration</label>
+                <label style="font-size: 13px;">Configuration</label>
     						<select id="selPrjDividedType" name="selPrjDividedType" class="spmDropDown">
     							<option value="H">Divided</option>
     							<option value="I">Undivided</option>
     						</select>
     						<br>
-                <label>Frontage Roads</label>
+                <label style="font-size: 13px;">Frontage Roads</label>
     						<select id="selPrjFrontageRoads" name="selPrjFrontageRoads" class="spmDropDown">
     							<option value="1">No</option>
     							<option value="2">Yes</option>
@@ -5198,7 +5240,7 @@
     						<br>
                 <!-- <button id="startDrawing" class="spmMainBtn">Start Drawing</button> -->
     						<!-- <span class="stepClass" style="position: relative; top: 0.7rem; margin-bottom: .4rem;">Step 2: Draw on Map</span> -->
-                <label>Number of Main Laness</label>
+                <label style="font-size: 13px;">Number of Main Lanes</label>
                 <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
                 <br>
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project" disabled>Clear</button>
