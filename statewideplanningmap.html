@@ -369,6 +369,7 @@
             }
 
             .spmMainBtn{
+              font-family: inherit;
               outline: #14375A;
               background: none;
               color: white;
@@ -413,6 +414,7 @@
               cursor: pointer;
               border: 1px #14375A solid;
               background-color: none;
+              font-family: inherit;;
               height: 2rem;
               /* text-decoration: underline;
               text-underline-position: under;
@@ -1325,13 +1327,23 @@
                 let resp = await request(url+paraMeters)
                 document.getElementById("btnEventMap").textContent = "Add to Map"
                 document.getElementById("btnEventMap").disabled = false
-                let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
-                // request(url+paraMeters).then(function(response) {
-                //   document.getElementById("btnEventMap").textContent = "Add to Map"
-                //   document.getElementById("btnEventMap").disabled = false
-                //   walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
-                // });
-                return isWalkGeom      
+                try{
+                  let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                  // request(url+paraMeters).then(function(response) {
+                  //   document.getElementById("btnEventMap").textContent = "Add to Map"
+                  //   document.getElementById("btnEventMap").disabled = false
+                  //   walkGeom(response,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                  // });
+                  return isWalkGeom   
+                }
+                catch(err){
+                  console.log(err)
+                  queryResponseUI({para: "Incorrect Values. Try again.", header:"Error"}, "button",  height="250px", width="350px")
+                  document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
+                  document.getElementById("btnUpdateLRM").disabled = false
+                  document.getElementById("parentCanvas").style.display = "none";
+                  return true
+                }
               }
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
