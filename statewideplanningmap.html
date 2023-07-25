@@ -927,7 +927,13 @@
               position: relative;
               left: 0rem;
               top: .3rem;
-              width: 97%;
+              width: 7.6rem;
+            }
+            #btnRecalcProject{
+              position:relative;
+              left: 8.7rem;
+              width: 7.6rem;
+              bottom: 1.7rem;
             }
             #deCostResult{
               font-size: 13px;
@@ -2251,12 +2257,18 @@
               //Clear Sketch
               const sketchClearListener = document.querySelector('#btnClearProject');
               sketchClearListener.addEventListener('click', (event) => {
+                document.getElementById("btnRecalcProject").disabled = true
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
                 linePoints.length = 0;
                 setElementText("deCostResult", "")
                 event.target.disabled = true
-              });                
+              });
+              
+              //Recalculate Sketch
+              document.getElementById("btnRecalcProject").addEventListener("click",()=>{
+                deCalculateCost()
+              })
               
               //Add Event Button
               const addEventButtonListener = document.querySelector('#btnEventMap');
@@ -3061,6 +3073,7 @@
                   if(measurementWidget.visible === false){
                     var testSketchDiv = document.getElementById("sketchTab");
                     document.getElementById("btnClearProject").disabled = false
+                    document.getElementById("btnRecalcProject").disabled = false
                     let point = view.toMap({x: event.x, y: event.y});
 
                     //add graphic to map
@@ -4757,6 +4770,7 @@
                 <input type="number" value=4 id="txtPrjLanes" placeholder="Number of Lanes - Example: 4" name="txtPrjLanes">
                 <br>
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project" disabled>Clear</button>
+                <button id="btnRecalcProject" class="queryButtonClass spmMainBtn" title="Re-Calculate Project" disabled>Re-Calculate</button>
                 <span class="stepClass underline">Results</span>
     						<div id="deCostResult"></div>      					
               </div>
