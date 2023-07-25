@@ -3920,7 +3920,7 @@
                     appendChildToOverlayList(tocObj[i].name, tocObj[i].tocType, true, documentFrag)
                     continue
                   }
-                  if(tocObj[i].name === "Texas Roadways Unsegmented" || tocObj[i].tocType != "FeatureLayer") continue
+                  if(tocObj[i].name === "RoadInventory" || tocObj[i].name === "Texas Roadways Unsegmented" || tocObj[i].tocType != "FeatureLayer") continue
                   buildDropDown(tocObj[i].name)
                 }
 
@@ -4033,7 +4033,7 @@
                   })
                   
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                  addFeatureLayer.when((layer)=>{
+                  addFeatureLayer.when((layer)=>{               
                     layer.opacity = layer.geometryType === "polygon" ? 0.5 : 1
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
                       if(layer.title === "TxDOT Bridges"){
