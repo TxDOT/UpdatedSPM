@@ -4029,11 +4029,12 @@
                     dockOptions:{
                       position: "bottom-right"
                     },
-                    definitionExpression: featLayer.defExpress ?? ""
+                    definitionExpression: featLayer.defExpress ?? "", 
                   })
                   
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
                   addFeatureLayer.when((layer)=>{
+                    layer.opacity = layer.geometryType === "polygon" ? 0.5 : 1
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
                       if(layer.title === "TxDOT Bridges"){
                         bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
