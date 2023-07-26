@@ -2147,6 +2147,7 @@
                 document.getElementById("parentCanvas").style.display = "none"
                 graphicsLayer.removeAll();
                 checkLRMInputs();
+                resetSrdSelectOption()
               })
               
               //Add Inventory Attribute listener
@@ -2186,6 +2187,14 @@
                 }                
               });       
               
+              function resetSrdSelectOption(){
+                let select = document.getElementById("riAttributes")
+                let i=0;
+                for(i=0; i<select.length; i++){
+                  select.options[i].hidden = false
+                }
+                inventoryDiagramLog.length = 0
+              } 
               //Toggle diagram clear listener
               const toggleClearnDiagramListener = document.querySelector('#btnClearDiagramView');
               toggleClearnDiagramListener.addEventListener('click', (event) => {
@@ -2198,11 +2207,7 @@
                 document.querySelectorAll(".inputSRD").forEach (x => x.disabled = true)
                 document.getElementById("riAttributes").disabled = true
                 document.getElementById("riAttributes").value = ""
-                let select = document.getElementById("riAttributes")
-                let i=0;
-                for(i=0; i<select.length; i++){
-                  select.options[i].hidden = false
-                }
+                resetSrdSelectOption()
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
                 clearDrawings();
@@ -2667,7 +2672,7 @@
                 }
                 
                 if (diagramParam) {
-                  
+                  inputEventListner("inpSRDRouteID")
                   const diagramFullArray = diagramParam.split('|');
                   const diagramInputs = diagramFullArray[0].split(',');
                   document.getElementById("inpSRDRouteID").value = diagramInputs[0];
