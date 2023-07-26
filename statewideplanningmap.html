@@ -2151,9 +2151,15 @@
               //Add Inventory Attribute listener
               const addInventoryListener = document.querySelector('#btnInventoryUpdateLRM');
               addInventoryListener.addEventListener('click', (event) => {
-                addInventoryAttribute(document.getElementById("riAttributes").value.split(","));              
+                let selectedAttribute = document.getElementById("riAttributes").value.split(",")
+                addInventoryAttribute(selectedAttribute);
+                hideSelectedOption(selectedAttribute)             
+                document.getElementById("riAttributes").value = ""
               });  
               
+              const hideSelectedOption = (srdSelectArr) => {
+                document.querySelector(`option[value="${srdSelectArr.toString()}"]`).hidden = true
+              }
               //Export PNG listener
               const exportPNGListener = document.querySelector('#btnExportPNG');
               exportPNGListener.addEventListener('click', (event) => {
@@ -2191,7 +2197,11 @@
                 document.querySelectorAll(".inputSRD").forEach (x => x.disabled = true)
                 document.getElementById("riAttributes").disabled = true
                 document.getElementById("riAttributes").value = ""
-                
+                let select = document.getElementById("riAttributes")
+                let i=0;
+                for(i=0; i<select.length; i++){
+                  select.options[i].hidden = false
+                }
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
                 clearDrawings();
@@ -2287,7 +2297,7 @@
                 var eventColors = document.getElementById("eventColors").value;
                 var eventWidth = document.getElementById("eventWidth").value;
                 var eventDescription = document.getElementById("eventDescription").value;
-                if(eventEndDFO <= eventBeginDFO){
+                if(Number(eventBeginDFO) >= Number(eventEndDFO)){
                   queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, "button",  height="250px", width="350px")
                   return
                 }            
@@ -2674,6 +2684,7 @@
                     const lastValue = optionValuesArray[optionValuesArray.length - 1];
                   
                     if (diagramInventoryInputs.includes(lastValue)) {
+                      hideSelectedOption(optionValuesArray)
                       inventoryDiagramLogAllValues.push(optionValuesArray);
                     }
                   }
@@ -3504,7 +3515,7 @@
                   var theQuery = "RTE_NM='" + diagramTitle + "'" + " AND (BEGIN_DFO < " + diagramEndDFO + " AND END_DFO > " + diagramBeginDFO + ")";
                   var theOrder = "RTE_NM ASC, BEGIN_DFO ASC"; 
                   var theRequestURL = inventoryService + "/query?f=json&orderByFields=" + theOrder + "&returnGeometry=false&where=" + theQuery + "&outFields=" + theFields;                    
-                  
+                  if(!inventoryAttribute[2]){return}
                   //Loading status message that get effectively erased
                   drawTextCenter("Loading " + inventoryAttribute[2],labelPositions[2],attributeStartY+(numberOfAttributes*spacePerAttribute)+15,"#000000","10");                  
                   
@@ -3529,10 +3540,10 @@
                 if(!returnedFeatures.length){
                   let beginPix = rulerMargin+(pixelsPerMile*(0-diagramBeginDFO))
                   let widths = (pixelsPerMile*(0-diagramBeginDFO))
-                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,16,"#FFFFFF"); 
-                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,2,"#D3D3D3");
-                  drawRectangle((Math.round(1425/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
-                  drawTextCenter("No Records",35+(Math.round(1425/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),rulerWidth,16,"#FFFFFF"); 
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),rulerWidth,2,"#D3D3D3");
+                  drawRectangle((Math.round(rulerWidth/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
+                  drawTextCenter("No Records",35+(Math.round(rulerWidth/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
                   drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
                   numberOfAttributes+=1;
                   return
@@ -3587,10 +3598,10 @@
                 if(!returnedFeatures.length){
                   let beginPix = rulerMargin+(pixelsPerMile*(0-diagramBeginDFO))
                   let widths = (pixelsPerMile*(0-diagramBeginDFO))
-                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,17,"#FFFFFF"); 
-                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),1425,2,"#D3D3D3");
-                  drawRectangle((Math.round(1425/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
-                  drawTextCenter("No Records",35+(Math.round(1425/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),rulerWidth,17,"#FFFFFF"); 
+                  drawRectangle(35,attributeStartY+(numberOfAttributes*spacePerAttribute),rulerWidth,2,"#D3D3D3");
+                  drawRectangle((Math.round(rulerWidth/2))-9,attributeStartY+(numberOfAttributes*spacePerAttribute)-8,90,16,"#696969");  
+                  drawTextCenter("No Records",35+(Math.round(rulerWidth/2)),attributeStartY+(numberOfAttributes*spacePerAttribute)+5,"#FFFFFF",13)
                   drawText(theInventoryLabel,95,attributeStartY+(numberOfAttributes*spacePerAttribute)-15,"#000000","10");
                   numberOfAttributes+=1;
                   return
