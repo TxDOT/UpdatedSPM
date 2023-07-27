@@ -1060,9 +1060,10 @@
               "esri/widgets/Expand",
               "esri/widgets/Popup",
               "esri/layers/support/LabelClass",
+              "esri/core/reactiveUtils"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils) {
               
               var map = new Map({
                   //map content added below
@@ -1090,7 +1091,8 @@
               startup()
 
               function startup(){                
-                loadBaseMaps()
+                //loadBaseMaps()
+                basemapFeatureLayerActiveCheck(tileLayerTxDOT, "basemapLayer")
                 window.onload = async () => {
                   await loadTOCContent()
                   initBasemapOverlayToggle()
@@ -1184,8 +1186,13 @@
                 let resp = await request(url+paraMeters)
                 document.getElementById("btnEventMap").textContent = "Add to Map"
                 document.getElementById("btnEventMap").disabled = false
+
                 try{
                   let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
+                  if(!isWalkGeom){
+                    document.getElementById("btnExportToKML").disabled = false
+                    document.getElementById("btnGenerateURL").disabled = false
+                  }
                   return isWalkGeom   
                 }
                 catch(err){
@@ -1335,10 +1342,11 @@
               //End drag and drop-----------------------------------------------
               
               //Base map tile layers--------------------------------------------
-              async function loadBaseMaps(){
-                let returnUrl = await basemapFeatureLayerActiveCheck(tileLayerTxDOT)
+              function loadBaseMaps(txdotLayerUrl){
+                //let returnUrl = basemapFeatureLayerActiveCheck(tileLayerTxDOT)
+                //console.log(returnUrl)
                 txdotLayer = new VectorTileLayer({
-                  url: returnUrl,
+                  url: txdotLayerUrl,
                   visible: false,
                   name: "txdot"
                 }); 
@@ -1791,24 +1799,42 @@
               //LRS Identify----------------------------------------------------
               const lrsListener = document.querySelector('#lrsButton');
               lrsListener.addEventListener('click', (event) => {
-                if (lrsButtonStatus == true) {
-                  turnOffLRS()
-                } else {
-                    resetButton("measureButton");
-                    measurementWidget.visible = false;                    
-                    activateToolButton("lrsButton");
-                    lrsButtonStatus = true;
-                    clearInnerHTML("mapClickResults");
-                    resetToolButtons("lrsButton")
-                    setElementText("mapClickResults", "Click a spot on a roadway.")                 
-                }
+                lrsButtonStatus === true ?  turnOffLRS() : turnOnLRS()
+                // if(document.getElementById("sketchTab").style.display === "block"){
+                //   removeDrawEvent()
+                //   return
+                // }
+                // console.log(event)
+                // if(lrsButtonStatus == true) {
+                //   turnOffLRS()
+                // } else {
+                //   document.getElementById("sketchTab").style.display === "block" ?  : null
+                //   turnOnLRS()        
+                // }
               });
 
               function turnOffLRS(){
+                if(document.getElementById("sketchTab").style.display === "block"){
+                  sketchDraw()
+                }
                 resetButton("lrsButton");
                 lrsButtonStatus = false;
                 clearInnerHTML("mapClickResults");
                 graphicsLayerLRSIdentify.removeAll();
+              }
+
+              function turnOnLRS(){
+                if(document.getElementById("sketchTab").style.display === "block"){
+                  removeDrawEvent()
+                }
+                resetButton("measureButton");
+                measurementWidget.visible = false;                    
+                activateToolButton("lrsButton");
+                lrsButtonStatus = true;
+                clearInnerHTML("mapClickResults");
+                resetToolButtons("lrsButton")
+                setElementText("mapClickResults", "Click a spot on a roadway.")
+                return
               }
 
               function rightClickUrlDisplay(evt){
@@ -2130,7 +2156,7 @@
                 resetAllTabs();
                 activateButton("graphicSketch");
                 document.getElementById("sketchTab").style.display = "block";
-                document.getElementById("viewDiv").style.cursor = "crosshair"
+                
                 document.getElementById("btnRecalcProject").disabled = true
                 sketchDraw()   
               }); 
@@ -2291,8 +2317,7 @@
               const addEventButtonListener = document.querySelector('#btnEventMap');
               addEventButtonListener.addEventListener('click', (event) => {
                 document.getElementById("btnRemoveAll").disabled = false
-                document.getElementById("btnExportToKML").disabled = false
-                document.getElementById("btnGenerateURL").disabled = false
+
                 if (lrsButtonStatus==true) {
                   resetLRSIdentify();                  
                 }
@@ -2388,6 +2413,7 @@
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
                 removeDrawEvent()
+                document.getElementById("btnClearProject").disabled = true
                 retrieveFeatureLayer("RoadInventory")[0].visible = false;
                 retrieveFeatureLayer("Bridges")[0].visible = false;
                 userDrawnSketchLength=0;
@@ -2916,7 +2942,7 @@
               async function runAssetQuery(where, outFields, featLayer){
                 document.getElementById("btnRunQuery").textContent = "Loading..."
                 document.getElementById("btnRunQuery").disabled = true
-                var query = new Query();
+                query = new Query();
                 query.where = where;
                 query.outFields = [outFields];
                 query.returnGeometry = true;
@@ -2937,7 +2963,7 @@
                   document.getElementById("btnExportToCSV").disabled = false
                   document.getElementById("btnQueryGenerateURL").disabled = false
                   makeTableFromService(returnQuery);
-                  featLayer.visible = true
+                  
                   document.getElementById("btnRunQuery").textContent = "Run Query"
                   document.getElementById("btnRunQuery").disabled = false
                 }
@@ -2951,7 +2977,8 @@
 
               function runQuery(){
                 let getQueryFeatLayer = retrieveFeatureLayer(document.querySelector(`input[name="featQuery"]:checked`).value)
-                setLayerDefinitionExpression(getQueryFeatLayer[0]);  
+                setLayerDefinitionExpression(getQueryFeatLayer[0]);
+                return 
               }
 
               async function setLayerDefinitionExpression(featLayer) {
@@ -2963,15 +2990,39 @@
                 var queryWhere = conditions.map(condition => `${condition.field} ${condition.operator} '${condition.value}'`).join(' AND ')
                 await runAssetQuery(queryWhere, outputFieldList, featLayer)
 
-                featLayer.queryExtent(query).then(function(results){
+                let queryExtentComplete = await featLayer.queryExtent(query)
+                console.log(queryExtentComplete)
+                if(!queryExtentComplete.extent){
+                  return
+                }
+                featLayer.visible = true
+                goToQuery(queryExtentComplete, featLayer)
+                
                   //check extents
-                  var extent = results.extent;  
-                  view.goTo(results.extent);
-                  document.getElementById("btnToggleTableView").textContent = "Hide Table"
-                  document.getElementById("btnRunQuery").textContent = "Run Query"
-                  document.getElementById("btnRunQuery").disabled = false
-                  document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
-                });                
+                return
+              }
+
+              function goToQuery(queryReturnExtent, layer){
+                console.log(queryReturnExtent)
+                console.log(view)
+                view.whenLayerView(layer).then(layerView => {
+                  console.log(layerView)
+                  reactiveUtils.when(
+                    () => layerView.updating === false,
+                    () => {
+                      console.log("done")
+                      view.goTo(queryReturnExtent.extent)
+                        .then((x) => console.log(x))
+                        .catch(err => console.log(err))
+                      document.getElementById("btnToggleTableView").textContent = "Hide Table"
+                      document.getElementById("btnRunQuery").textContent = "Run Query"
+                      document.getElementById("btnRunQuery").disabled = false
+                      document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
+                    });
+                })
+                
+                
+                return 
               }
 
               function getRowInfo(event){
@@ -3087,7 +3138,8 @@
               
               //view event to track drawing-------------------------------------
               function sketchDraw(){
-                 draw = view.on("click", function(event) {
+                document.getElementById("viewDiv").style.cursor = "crosshair"
+                draw = view.on("click", function(event) {
                   if(measurementWidget.visible === false){
                     var testSketchDiv = document.getElementById("sketchTab");
                     document.getElementById("btnClearProject").disabled = false
@@ -3121,9 +3173,10 @@
               }
               
               function removeDrawEvent(){
+                document.getElementById("viewDiv").style.cursor = "default"
                 draw?.remove()
                 draw = null
-                document.getElementById("btnClearProject").disabled = true
+                
               }
               //end view event--------------------------------------------------
               
@@ -4076,6 +4129,7 @@
                     }
 
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
+                      basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
                       addFeatureLayer.legendEnabled = false
@@ -4430,17 +4484,50 @@
                 return
               }
 
-              async function basemapFeatureLayerActiveCheck(url){
-                let returnStatus = await fetch(url)
-                let status = await returnStatus.json()
-                if(!status.error) return tileLayerTxDOT
-                if(status.error.code >= 404 && status.error.code <= 499){
-                  let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
-                  createServiceDown(alertTxt, "red")
-                  //turn on service down div
-                  //backupTxdotLayer.visible = true
-                  return "https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap_BACKUP/VectorTileServer"
-                }
+              async function basemapFeatureLayerActiveCheck(url, layerType){
+                let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
+                let returnStatus = fetch(url)
+                returnStatus
+                  .then((x) => {
+                    if(layerType === "featureLayer"){
+                      return x.text()
+                    }
+                    let status = x.json()
+                    return status
+                    
+                  })
+                  .then((y) => {
+                    if(layerType === "featureLayer"){
+                      let status = false
+                      errorArr = ["was not found"]
+                      errorArr.forEach((errStr) =>{
+                        if(!status){
+                          status = y.includes(errStr) ? true : false 
+                        }
+                      })
+                      status ? createServiceDown(alertTxt, "red") : null
+                      return
+                    }
+                    if(!y.error){
+                      loadBaseMaps(tileLayerTxDOT)
+                      return 
+                    }
+                    if(y.error.code >= 404 && y.error.code <= 499){
+                      createServiceDown(alertTxt, "red")
+                      //turn on service down div
+                      //backupTxdotLayer.visible = true
+                      console.error("")
+                      loadBaseMaps("https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap_BACKUP/VectorTileServer")
+                      return 
+                    }
+                  })
+                // console.log(returnStatus)
+                // let status = layerType === "featureLayer" ? await returnStatus.text() : await returnStatus.json()
+                // if(layerType === "featureLayer"){
+                  
+                //   return
+                // }
+               
               }
               
               function createServiceDown(text, color, width){
@@ -4603,8 +4690,8 @@
                   </div>
                 </div>
                 <span class="stepClass underline" style="position: relative; top: 0rem;">Build Query</span>
-                <select id="field" class="spmDropDown noDisabled1"></select>
-                <select id="operator" class="spmDropDown noDisabled1">
+                <select id="field" class="spmDropDown a noDisabled1"></select>
+                <select id="operator" class="spmDropDown a noDisabled1">
                     <option value="" selected>Select an Operator</option>
                     <option value="=">Equals</option>
                     <option value="<>">Does not equal</option>
