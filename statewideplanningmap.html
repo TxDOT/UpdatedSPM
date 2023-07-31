@@ -55,7 +55,9 @@
                 display: block !important;
               }
             }
-
+            html{
+              scroll-behavior: smooth;
+            }
             #printWidget{
               position:relative;
               top: 5rem;
@@ -161,7 +163,9 @@
               cursor: pointer;
               border: none;
             }
-
+            .dwnloadBtn button{
+              display: "none";
+            }
             .noDwnloadBtn{
               position:absolute;
               left: 83%;
@@ -241,6 +245,7 @@
                 float: left;
                 background-color: white;
                 z-index: 1;
+                scroll-behavior: smooth;
             }
             .textArea{
               position: relative;
@@ -1800,17 +1805,6 @@
               const lrsListener = document.querySelector('#lrsButton');
               lrsListener.addEventListener('click', (event) => {
                 lrsButtonStatus === true ?  turnOffLRS() : turnOnLRS()
-                // if(document.getElementById("sketchTab").style.display === "block"){
-                //   removeDrawEvent()
-                //   return
-                // }
-                // console.log(event)
-                // if(lrsButtonStatus == true) {
-                //   turnOffLRS()
-                // } else {
-                //   document.getElementById("sketchTab").style.display === "block" ?  : null
-                //   turnOnLRS()        
-                // }
               });
 
               function turnOffLRS(){
@@ -1821,6 +1815,7 @@
                 lrsButtonStatus = false;
                 clearInnerHTML("mapClickResults");
                 graphicsLayerLRSIdentify.removeAll();
+                document.getElementById("viewDiv").style.cursor = "pointer"
               }
 
               function turnOnLRS(){
@@ -1833,6 +1828,7 @@
                 lrsButtonStatus = true;
                 clearInnerHTML("mapClickResults");
                 resetToolButtons("lrsButton")
+                document.getElementById("viewDiv").style.cursor = "crosshair"
                 setElementText("mapClickResults", "Click a spot on a roadway.")
                 return
               }
@@ -1990,14 +1986,27 @@
                 document.getElementById("mapClickResults").appendChild(newSpan); 
               }
               //End LRS Identify------------------------------------------------
-            
+
+              function controlZoomLevel(){
+                view.watch("zoom", (z)=>{
+                  //let z = view.zoom
+                  if(Number.isInteger(z)){
+                    document.getElementById("zoom").textContent =`Level: ${z},`
+                    getActiveLayers(z)
+                  }
+                })
+              }
+
               //Lat Long Coordinates on mouse move------------------------------
               view.when((v) => {
                 document.getElementById("zoom").textContent =`Level: ${v.zoom},`
-                v.watch("zoom", (b,a)=>{
-                  document.getElementById("zoom").textContent =`Level: ${Math.round(a)},`
-                  displayFeatOnZoom(Math.round(a))
+                view.watch("zoom", (z)=>{
+                  if(Number.isInteger(z)){
+                    document.getElementById("zoom").textContent =`Level: ${z},`
+                    getActiveLayers(z)
+                  }
                 })
+                //controlZoomLevel()
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
                   setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
@@ -2041,6 +2050,7 @@
                 let isVisible = itemArr.find(x => x.visible)
                 isVisible ? resetBaseMapItem("CLEAR") : activateBaseMapItem("CLEAR")
                 map.reorder(layerId[0], itemArr.length+1)
+                getActiveLayers(view.zoom)
               }
 
               function retrieveFeatureLayer(name){
@@ -2067,7 +2077,7 @@
 
               function initBasemapOverlayToggle(){
                 document.getElementById("tocMaps").addEventListener("click", (event)=>{
-                  if(event.target.id === "CLEAR") return clearOverlay(event.target.id)
+                  if(event.target.id === "CLEAR") return clearOverlay()
                   if(event.target.id === "layerSearch") return
                   return toggleLayer(event.target.id)
                 })
@@ -2081,9 +2091,13 @@
                 return
               }
 
-              function clearOverlay(id){
+              function clearOverlay(){
                 let overlayVisible = itemArr.filter(x => x.visible === 1)
-                overlayVisible.forEach(x => toggleLayer(x.name))
+                overlayVisible.forEach((x) => {
+                  toggleLayer(x.name)
+                  document.getElementById(`dwnloadBtn${x.name}`).style.display = "none"
+                })
+                
               }
 
               //Clear and Reset Map Listener
@@ -2409,6 +2423,7 @@
                 document.getElementById("sketchTab").style.display = "none";
                 document.getElementById("results").style.display = "none";
                 document.getElementById("parentCanvas").style.display = "none";
+                document.getElementById("viewDiv").style.cursor = "pointer"
                 numberOfAttributes=0;
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
@@ -3962,7 +3977,8 @@
                 graphicsLayerLRSIdentify.removeAll();
                 resetAllTools();
                 clearInnerHTML("mapClickResults");
-                lrsButtonStatus=false;                
+                lrsButtonStatus=false;  
+                document.getElementById("viewDiv").style.cursor = "default"              
               }
 
               //load Table of Contents items
@@ -4036,15 +4052,22 @@
                   let td = document.createElement("td")
                   td.id = layerItem
                   td.className = "baseMapList"
+                  td.onclick = (event) => {
+                    if(event.target.id.includes("dwnloadBtn")){return}
+                    document.getElementById(`dwnloadBtn${layerItem}`).style.display = document.getElementById(`dwnloadBtn${layerItem}`).style.display === "block" ? "none" : "block"
+                    return
+                  }
                   let div = document.createElement("div")
-                  let popupDiv = document.createElement("div")
-                  popupDiv.className = "popupDivPosition"
+                  //let popupDiv = document.createElement("div")
+                  //popupDiv.className = "popupDivPosition"
                   div.id = layerItem
-                  popupDiv.id = `dwnloadBtn${layerItem}`
+                  //popupDiv.id = `dwnloadBtn${layerItem}`
                   let dwnloadBtn = document.createElement("button")
-                  
+                  dwnloadBtn.style.display = "none"
+                  dwnloadBtn.id = `dwnloadBtn${layerItem}`
+                  dwnloadBtn.title = noDownload.includes(layerItem) ? "No Download" : "Download Overlay"
                   dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-download noDwnloadBtn" : "esri-icon-download dwnloadBtn"
-                  popupDiv.innerHTML = noDownload.includes(layerItem) ? "<span style='font-size: 10px'>No Download</span>" : "<span style='font-size: 10px'>Download Overlay</span>"
+                  //popupDiv = noDownload.includes(layerItem) ? "<span style='font-size: 10px'>No Download</span>" : "<span style='font-size: 10px'>Download Overlay</span>"
                   noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
                   dwnloadBtn.onclick = () => downloadOverlay(layerItem)
                   if(initBuild === false){
@@ -4057,14 +4080,14 @@
                     td.appendChild(btnDiv)
                   }
 
-                  dwnloadBtn.onpointerenter = () =>{
-                    document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "visible"
-                  }
+                  // dwnloadBtn.onpointerenter = () =>{
+                  //   document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "visible"
+                  // }
 
-                  dwnloadBtn.onpointerleave = () =>{
-                    document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "hidden"
-                  }
-                  td.appendChild(popupDiv)
+                  // dwnloadBtn.onpointerleave = () =>{
+                  //   document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "hidden"
+                  // }
+                  //td.appendChild(popupDiv)
                   td.appendChild(dwnloadBtn)
                   div.appendChild(document.createTextNode(layerItem))
                   div.style.width = "80%"
@@ -4251,6 +4274,7 @@
                   checkAdditionalOverlayCount()
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
+                  document.getElementById(`dwnloadBtn${itemInArr.name}`).style.display = "block" ? "none" : "block"
                 })
               }
 
@@ -4355,133 +4379,255 @@
                   }
                 }
 
-              } 
+              }
+
+              const getActiveLayers = (z) => itemArr.forEach((x) => {
+                if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
+                  let feat = retrieveFeatureLayer(x.name)
+                  feat.push()
+                  feat.forEach((f) => {
+                    view.whenLayerView(f).then((y) =>{
+                      displayFeatOnZoom(y,z)
+                    })
+                  })
+                 
+                }
+              })
               
-              function displayFeatOnZoom(zoom){
-                let zoomLvl = Math.round(zoom)
-                if(zoomLvl === -1){return}
-                let roadLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")
-                let aadtLayer = retrieveFeatureLayer("AADT")
-                let [fcLayer, urbanArea] = retrieveFeatureLayer("Functional Classification & Urban Areas")
-                let refMarkLayer = retrieveFeatureLayer("Reference Markers")
-                let controlLayer = retrieveFeatureLayer("Control Sections")
-                let speedLayer = retrieveFeatureLayer("Speed Limits")
-                let futureLayer = retrieveFeatureLayer("Future Traffic & Percent Truck")
-                let roadInvOnSysLayer = retrieveFeatureLayer("Roadway Inventory - On-System Roadbeds")
-                let cemeteryLayer = retrieveFeatureLayer("Cemeteries")
-                let buildQuery;
+              async function displayFeatOnZoom(layerView,zoom){                
+                  let getItem = {
+                    "Texas Roadways Unsegmented" : () => {
+                      switch(zoom){
+                        case 6: 
+                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                      }
+                    },
+                    "AADT" : () => {
+                      switch(zoom){
+                        case 5:
+                          layerView.layer.definitionExpression = `zLevel < (7)`
+                          break;
+                        case 6:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          break;
+                        }
+                    },
+                    "Functional Classification & Urban Areas" : () => {
+                        switch(zoom){
+                          case 6:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 7:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 8:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 9:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 10:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 11:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 12:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RDBD_TYPE = 'KG'" : null
+                            break;
+                          case 13:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "" : null
+                            break;
+                        }
+                    },
+                    "Reference Markers" : () => {
+                      switch(zoom){
+                        case 6:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          break;
+                        }
 
-                if(zoomLvl === 5){
-                  roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
-                  controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
-                  speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  roadInvOnSysLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 7"
-                  return
-                }
+                    },
+                    "Control Sections" : () => {
+                      switch(zoom){
+                        case 6:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
+                          break;
+                        }
+                    },
+                    "Speed Limits" : () => {
+                      switch(zoom){
+                        case 6:
+                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        }
+                    },
+                    "Future Traffic & Percent Truck" : () => {
+                      switch(zoom){
+                        case 6:
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        }
+                    },
+                    "Cemeteries" : () => {
+                      switch(zoom){
+                        case 6:
+                          layerView.layer.definitionExpression = "Zoom <= 7"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "Zoom <= 7"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "Zoom <= 7"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "Zoom <= 10"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "Zoom <= 10"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "Zoom <= 16"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = "Zoom <= 16"
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = "Zoom <= 16"
+                          break;
+                        }
+                    },
 
-                if(zoomLvl === 6){
-                  roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
-                  controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
-                  speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  roadInvOnSysLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 7"
-                  return
-                }
+                  }
 
-                if(zoomLvl === 7){
-                  roadLayer[0].definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
-                  controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
-                  speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  roadInvOnSysLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 7"
-                  return
-                }
-
-                if(zoomLvl === 8){
-                  roadLayer[0].definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
-                  controlLayer[0].definitionExpression = "RTE_PRFX='IH'"
-                  speedLayer[0].definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  roadInvOnSysLayer[0].definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 7"
-                  return
-                }
-
-                if(zoomLvl === 9){
-                  roadLayer[0].definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
-                  controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
-                  speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                  roadInvOnSysLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 10"
-                  return
-                }
-                if(zoomLvl === 10){
-                  roadLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : urbanArea.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
-                  controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
-                  speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                  roadInvOnSysLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 10"
-                  return
-                }
-                if(zoomLvl === 11){
-                  roadLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
-                  controlLayer[0].definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
-                  speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
-                  roadInvOnSysLayer[0].definitionExpression = ''
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 16"
-                  return
-                }
-                if(zoomLvl === 12){
-                  roadLayer[0].definitionExpression = ''
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.title === "TxDOT Functional Classification" ? fcLayer.definitionExpression = "RDBD_TYPE = 'KG'" : urbanArea.definitionExpression = "RDBD_TYPE = 'KG'"
-                  refMarkLayer[0].definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
-                  controlLayer[0].definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
-                  speedLayer[0].definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
-                  futureLayer[0].definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 16"
-                  return
-                }
-                if(zoomLvl === 13){
-                  roadLayer[0].definitionExpression = ''
-                  aadtLayer[0].definitionExpression = `zLevel < (${zoom} + 1)`
-                  fcLayer.definitionExpression = ''
-                  refMarkLayer[0].definitionExpression = ''
-                  controlLayer[0].definitionExpression = "RTE_PRFX <> 'CS'"
-                  speedLayer[0].definitionExpression = ''
-                  futureLayer[0].definitionExpression = ''
-                  cemeteryLayer[0].definitionExpression = "Zoom <= 16"
-                  return
-                }
-                return
+                  getItem[layerView.layer.name]()
               }
 
               async function basemapFeatureLayerActiveCheck(url, layerType){
@@ -4521,12 +4667,6 @@
                       return 
                     }
                   })
-                // console.log(returnStatus)
-                // let status = layerType === "featureLayer" ? await returnStatus.text() : await returnStatus.json()
-                // if(layerType === "featureLayer"){
-                  
-                //   return
-                // }
                
               }
               
@@ -4582,8 +4722,6 @@
                 
                 
               })
-
-              
 
               function aboutModal(){
                 let version = "5.0.0 Falkland Island"
