@@ -1172,8 +1172,11 @@
                   let element = document.getElementById(id)
                   removeEventGraphic(element.id)
                   element.remove()
-                  document.getElementById("btnGenerateURL").disabled = true
-                  document.getElementById("btnExportToKML").disabled = true
+                  if(!graphicsLayer.graphics.length){
+                    document.getElementById("btnGenerateURL").disabled = true
+                    document.getElementById("btnExportToKML").disabled = true
+                  }
+
                 }
 
                 graphSpan.textContent = `Route: ${gItem.attributes[0]} DFO: ${gItem.attributes[1]} - ${gItem.attributes[2]}`
@@ -1992,19 +1995,18 @@
                 reactiveUtils.when(
                   () => v.stationary,
                   () => {
-                    document.getElementById("zoom").textContent =`Level: ${v.zoom},`
+                    document.getElementById("zoom").textContent = `Level: ${v.zoom},`
                     v.watch("zoom", (z)=>{
                       if(Number.isInteger(v.zoom)){
-                        document.getElementById("zoom").textContent =`Level: ${v.zoom},`
+                        document.getElementById("zoom").textContent = `Level: ${v.zoom},`
+                        console.log(v.zoom)
                         getActiveLayers(v.zoom)
                       }
                     })
-
+                    //getActiveLayers(v.zoom)
                   }
                 )
-                
-
-
+                  
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
                   setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
@@ -2069,9 +2071,12 @@
               }
 
               function setIsVisible(layerId, returnId, id){
+                console.log(layerId)
                 layerId.visible = true;
                 activateBaseMapItem(id)
                 returnId.visible = 1
+                console.log(returnId.visible)
+                return
               }
 
               function initBasemapOverlayToggle(){
@@ -2622,11 +2627,18 @@
                     
                     let layerId = retrieveFeatureLayer(urlOverlay)
                     let returnId = itemArr.find(overlay => overlay.name === urlOverlay)
-                    layerId.visible = 1
-                    layerId.forEach(featLayer => setIsVisible(featLayer, returnId, urlOverlay))
-                    resetBaseMapItem("CLEAR")
+                    layerId.forEach((featLayer) => {
+                      featLayer.when((f) =>{
+                        setIsVisible(f, returnId, urlOverlay)
+                        resetBaseMapItem("CLEAR")
+                        getActiveLayers(view.zoom)
+                      })
+                    })
+
+
                   })
                 }
+
 
                 if(basemapParam){
                   resetAllBaseMapItems()
@@ -2746,6 +2758,7 @@
                   let isAllDisabled = disableQuery()
                   checkFieldStatus("#diagramTab", isAllDisabled)                
                 }
+
 
                 //Activate tab if provided
                 if (tabParam=="maps") {
@@ -4051,16 +4064,13 @@
                     return
                   }
                   let div = document.createElement("div")
-                  //let popupDiv = document.createElement("div")
-                  //popupDiv.className = "popupDivPosition"
                   div.id = layerItem
-                  //popupDiv.id = `dwnloadBtn${layerItem}`
                   let dwnloadBtn = document.createElement("button")
                   dwnloadBtn.style.display = "none"
                   dwnloadBtn.id = `dwnloadBtn${layerItem}`
                   dwnloadBtn.title = noDownload.includes(layerItem) ? "No Download" : "Download Overlay"
                   dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-download noDwnloadBtn" : "esri-icon-download dwnloadBtn"
-                  //popupDiv = noDownload.includes(layerItem) ? "<span style='font-size: 10px'>No Download</span>" : "<span style='font-size: 10px'>Download Overlay</span>"
+                  
                   noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
                   dwnloadBtn.onclick = () => downloadOverlay(layerItem)
                   if(initBuild === false){
@@ -4073,14 +4083,6 @@
                     td.appendChild(btnDiv)
                   }
 
-                  // dwnloadBtn.onpointerenter = () =>{
-                  //   document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "visible"
-                  // }
-
-                  // dwnloadBtn.onpointerleave = () =>{
-                  //   document.getElementById(`dwnloadBtn${layerItem}`).style.visibility = "hidden"
-                  // }
-                  //td.appendChild(popupDiv)
                   td.appendChild(dwnloadBtn)
                   div.appendChild(document.createTextNode(layerItem))
                   div.style.width = "80%"
@@ -4371,7 +4373,6 @@
                     a.remove()
                   }
                 }
-
               }
 
               const getActiveLayers = (z) => itemArr.forEach((x) => {
@@ -4379,8 +4380,7 @@
                   let feat = retrieveFeatureLayer(x.name)
                     view.whenLayerView(feat[0]).then((y) =>{
                       displayFeatOnZoom(y,z)
-                  })
-                 
+                    })
                 }
               })
               
@@ -4449,7 +4449,7 @@
                           layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         default:
-                          layerView.layer.definitionExpression = `zLevel < (14)`
+                          layerView.layer.definitionExpression = `zLevel <= 13`
                           break;
                         }
                     },
