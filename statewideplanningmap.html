@@ -1987,26 +1987,24 @@
               }
               //End LRS Identify------------------------------------------------
 
-              function controlZoomLevel(){
-                view.watch("zoom", (z)=>{
-                  //let z = view.zoom
-                  if(Number.isInteger(z)){
-                    document.getElementById("zoom").textContent =`Level: ${z},`
-                    getActiveLayers(z)
-                  }
-                })
-              }
-
               //Lat Long Coordinates on mouse move------------------------------
               view.when((v) => {
-                document.getElementById("zoom").textContent =`Level: ${v.zoom},`
-                view.watch("zoom", (z)=>{
-                  if(Number.isInteger(z)){
-                    document.getElementById("zoom").textContent =`Level: ${z},`
-                    getActiveLayers(z)
+                reactiveUtils.when(
+                  () => v.stationary,
+                  () => {
+                    document.getElementById("zoom").textContent =`Level: ${v.zoom},`
+                    v.watch("zoom", (z)=>{
+                      if(Number.isInteger(v.zoom)){
+                        document.getElementById("zoom").textContent =`Level: ${v.zoom},`
+                        getActiveLayers(v.zoom)
+                      }
+                    })
+
                   }
-                })
-                //controlZoomLevel()
+                )
+                
+
+
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
                   setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
@@ -2051,6 +2049,7 @@
                 isVisible ? resetBaseMapItem("CLEAR") : activateBaseMapItem("CLEAR")
                 map.reorder(layerId[0], itemArr.length+1)
                 getActiveLayers(view.zoom)
+                return
               }
 
               function retrieveFeatureLayer(name){
@@ -2423,7 +2422,7 @@
                 document.getElementById("sketchTab").style.display = "none";
                 document.getElementById("results").style.display = "none";
                 document.getElementById("parentCanvas").style.display = "none";
-                document.getElementById("viewDiv").style.cursor = "pointer"
+                document.getElementById("viewDiv").style.cursor = "default"
                 numberOfAttributes=0;
                 inventoryDiagramLog = [];
                 inventoryDiagramLogAllValues = [];
@@ -2449,8 +2448,9 @@
               }
               function clearAndResetMap() {
                 setZoomAndLocation([31.5,-100,6]);
-                
+                activateButton("baseMaps");
                 //Reset Diagram
+
                 document.getElementById("parentCanvas").style.display = "none";
                 numberOfAttributes=0;    
                 inventoryDiagramLog = [];
@@ -2462,9 +2462,15 @@
                 //reset buttons and div
                 clearInnerHTML("mapClickResults");
                 resetAllTools();
+                resetAllTabs()
+                activateButton("baseMaps");
+                document.getElementById("mapTab").style.display = "block";
                 measurementWidget.visible = false;
                 graphicsLayer.removeAll();
-                graphicsLayerLRSIdentify.removeAll();                
+                graphicsLayerLRSIdentify.removeAll();
+                document.getElementById("viewDiv").style.cursor = "default"
+                resetAllTabs
+                clearOverlay()                
               }       
               
               function resetAllBaseMapItems() {
@@ -2616,12 +2622,10 @@
                     
                     let layerId = retrieveFeatureLayer(urlOverlay)
                     let returnId = itemArr.find(overlay => overlay.name === urlOverlay)
-                    layerId.visible = true
+                    layerId.visible = 1
                     layerId.forEach(featLayer => setIsVisible(featLayer, returnId, urlOverlay))
                     resetBaseMapItem("CLEAR")
-                    
                   })
-                  
                 }
 
                 if(basemapParam){
@@ -2766,7 +2770,7 @@
                 return
               }      
               //End URL parameters----------------------------------------------
-              
+     
               //Draw map points-------------------------------------------------
               function mapThePoint(theLat,theLong,theColor,theSize,theDescription) {
                 var inputPoint = new Point({
@@ -2884,12 +2888,12 @@
               
               //Query form functions--------------------------------------------
               function updateQuery(){
+                let selectedId = getCurrentQuerySelection()
                 if(!conditions.length){
                   document.querySelectorAll(".qryBtn").forEach(x => x.disabled = true)
                   document.getElementById("outputFields").disabled = true
                   document.getElementById("results").style.display = "none"
                   document.getElementById("value").value = ""
-                  let selectedId = getCurrentQuerySelection()
                   resetFeatureLayer(selectedId)
                   return
                 }
@@ -2963,8 +2967,10 @@
                 query.returnGeometry = true;
                 query.supportsPagination = true;
                 try{
-                  featLayer.definitionExpression = where;
-                  let returnQuery = await featLayer.queryFeatures(query)
+                  
+                  let layerView = await view.whenLayerView(featLayer)
+                  let returnQuery = await layerView.layer.queryFeatures(query)
+                  layerView.layer.definitionExpression = where;
                   if(!returnQuery.features.length){
                     queryResponseUI({para: `Welp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null,  height="250px", width="350px")
                     document.getElementById("btnRunQuery").textContent = "Run Query"
@@ -3006,7 +3012,6 @@
                 await runAssetQuery(queryWhere, outputFieldList, featLayer)
 
                 let queryExtentComplete = await featLayer.queryExtent(query)
-                console.log(queryExtentComplete)
                 if(!queryExtentComplete.extent){
                   return
                 }
@@ -3018,25 +3023,13 @@
               }
 
               function goToQuery(queryReturnExtent, layer){
-                console.log(queryReturnExtent)
-                console.log(view)
                 view.whenLayerView(layer).then(layerView => {
-                  console.log(layerView)
-                  reactiveUtils.when(
-                    () => layerView.updating === false,
-                    () => {
-                      console.log("done")
-                      view.goTo(queryReturnExtent.extent)
-                        .then((x) => console.log(x))
-                        .catch(err => console.log(err))
-                      document.getElementById("btnToggleTableView").textContent = "Hide Table"
-                      document.getElementById("btnRunQuery").textContent = "Run Query"
-                      document.getElementById("btnRunQuery").disabled = false
-                      document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
-                    });
+                  view.goTo(queryReturnExtent.extent)
+                  document.getElementById("btnToggleTableView").textContent = "Hide Table"
+                  document.getElementById("btnRunQuery").textContent = "Run Query"
+                  document.getElementById("btnRunQuery").disabled = false
+                  document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
                 })
-                
-                
                 return 
               }
 
@@ -4274,7 +4267,7 @@
                   checkAdditionalOverlayCount()
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
-                  document.getElementById(`dwnloadBtn${itemInArr.name}`).style.display = "block" ? "none" : "block"
+                  document.getElementById(`dwnloadBtn${itemInArr.name}`).style.display = "block"
                 })
               }
 
@@ -4384,17 +4377,16 @@
               const getActiveLayers = (z) => itemArr.forEach((x) => {
                 if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
                   let feat = retrieveFeatureLayer(x.name)
-                  feat.push()
-                  feat.forEach((f) => {
-                    view.whenLayerView(f).then((y) =>{
+                    view.whenLayerView(feat[0]).then((y) =>{
                       displayFeatOnZoom(y,z)
-                    })
                   })
                  
                 }
               })
               
-              async function displayFeatOnZoom(layerView,zoom){                
+              async function displayFeatOnZoom(layerView,zoom){            
+                let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented"]
+                if(displayFeatZoom.includes(layerView.layer.name)){
                   let getItem = {
                     "Texas Roadways Unsegmented" : () => {
                       switch(zoom){
@@ -4420,6 +4412,9 @@
                           layerView.layer.definitionExpression = ''
                           break;
                         case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        default:
                           layerView.layer.definitionExpression = ''
                           break;
                       }
@@ -4453,6 +4448,9 @@
                         case 13:
                           layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
+                        default:
+                          layerView.layer.definitionExpression = `zLevel < (14)`
+                          break;
                         }
                     },
                     "Functional Classification & Urban Areas" : () => {
@@ -4481,6 +4479,9 @@
                           case 13:
                             layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "" : null
                             break;
+                          default:
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "" : null
+                            break;
                         }
                     },
                     "Reference Markers" : () => {
@@ -4507,6 +4508,9 @@
                           layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                           break;
                         case 13:
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          break;
+                        default:
                           layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                           break;
                         }
@@ -4538,6 +4542,9 @@
                         case 13:
                           layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
                           break;
+                        default:
+                          layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
+                          break;
                         }
                     },
                     "Speed Limits" : () => {
@@ -4564,6 +4571,9 @@
                           layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
                           break;
                         case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        default:
                           layerView.layer.definitionExpression = ''
                           break;
                         }
@@ -4594,6 +4604,9 @@
                         case 13:
                           layerView.layer.definitionExpression = ''
                           break;
+                        default:
+                          layerView.layer.definitionExpression = ''
+                          break;
                         }
                     },
                     "Cemeteries" : () => {
@@ -4622,12 +4635,16 @@
                         case 13:
                           layerView.layer.definitionExpression = "Zoom <= 16"
                           break;
+                        default:
+                          layerView.layer.definitionExpression = "Zoom <= 16"
+                          break;
                         }
                     },
 
                   }
-
                   getItem[layerView.layer.name]()
+                }
+                  
               }
 
               async function basemapFeatureLayerActiveCheck(url, layerType){
