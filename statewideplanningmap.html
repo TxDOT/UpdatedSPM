@@ -748,8 +748,9 @@
             }
             #btnRemoveLast{
               position: relative;
-              bottom: 2.62rem;
-              left: .55rem
+              top: .6rem;
+              left: 0rem;
+              width: 97%;
             }
             #btnRemoveAll{
               margin-bottom: 1.2rem;
@@ -766,7 +767,7 @@
               position:relative;
             }
             .classRowDiv{
-              top:.4rem;
+              top:1.2rem;
               position: relative;
               height: 3rem;
             }
@@ -1225,7 +1226,6 @@
                 var coordY;
                 var coordM;
                 var newLinePoints = [];
-                
                 for (var a=0; a < theGeom.data.features.length; a++) {
                   theGeomPart = theGeom.data.features[a].geometry.paths; 
                   for (var j = 0; j < theGeomPart[0].length; j++) {
@@ -1481,9 +1481,8 @@
                     printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
                     visible: true,
                     name: "print",
-                    templateCustomTextElements: [{"FOOTER - Author Name (DYNAMIC)": "hey"}]
                   }) 
-
+                  
                   view.ui.add(printer, {
                     position: "bottom-right"
                   })
@@ -1508,7 +1507,6 @@
               }
 
               //End Scale Bar---------------------------------------------------
-              let aadt = retrieveFeatureLayer("AADT")
               
               //Measure---------------------------------------------------------
               let measurementWidget = new DistanceMeasurement2D({
@@ -2008,7 +2006,6 @@
                     v.watch("zoom", (z)=>{
                       if(Number.isInteger(v.zoom)){
                         document.getElementById("zoom").textContent = `Level: ${v.zoom},`
-                        console.log(v.zoom)
                         getActiveLayers(v.zoom)
                       }
                     })
@@ -2080,11 +2077,9 @@
               }
 
               function setIsVisible(layerId, returnId, id){
-                console.log(layerId)
                 layerId.visible = true;
                 activateBaseMapItem(id)
                 returnId.visible = 1
-                console.log(returnId.visible)
                 return
               }
 
@@ -2210,6 +2205,7 @@
                 addInventoryAttribute(selectedAttribute);
                 hideSelectedOption(selectedAttribute)             
                 document.getElementById("riAttributes").value = ""
+                document.getElementById("btnRemoveLast").disabled = !inventoryDiagramLog.length ? true : false
               });  
               
               const hideSelectedOption = (srdSelectArr) => {
@@ -2367,7 +2363,11 @@
               exportEventsListener.addEventListener('click', (event) => {
                 exportKML();
               }); 
-              
+
+
+              document.getElementById("btnRemoveLast").addEventListener("click", ()=>[
+                removeLast()
+              ])
               //Remove all events
               const removeAllEventsListener = document.querySelector('#btnRemoveAll');
               removeAllEventsListener.addEventListener('click', (event) => {
@@ -2740,6 +2740,8 @@
                 if (diagramParam) {
                   inputEventListner("inpSRDRouteID")
                   const diagramFullArray = diagramParam.split('|');
+                  console.log(diagramFullArray)
+                  document.getElementById("btnRemoveLast").disabled = diagramFullArray[1] ? false : true
                   const diagramInputs = diagramFullArray[0].split(',');
                   document.getElementById("inpSRDRouteID").value = diagramInputs[0];
                   document.getElementById("inpSRDFromDFO").value = diagramInputs[1];
@@ -3371,6 +3373,26 @@
               }
               //End KML Export--------------------------------------------------
               
+
+              function removeLast(){
+                //drawRectangle(canvasOriginX+5,initialAttributeY-25,chartWidth-20,40,"#FFFFFF")
+                drawRectangle(30,attributeStartY+(numberOfAttributes*spacePerAttribute)-90, rulerWidth+5,60,"#FFFFFF"); 
+                numberOfAttributes -= 1
+                let removedItem = inventoryDiagramLog.pop()
+                let list = document.querySelector("#riAttributes").options
+                for(let i in list){
+                  try{
+                    if(list[i].value.includes(`${removedItem}`)){
+                      list[i].hidden = false
+                    }
+                  }
+                  catch{
+                    //undefined
+                  }
+                }
+                document.getElementById("btnRemoveLast").disabled = !inventoryDiagramLog.length ? true : false
+              }
+
               //Check diagram fields--------------------------------------------
               async function checkLRMInputs() {
                 diagramTitle = document.getElementById("inpSRDRouteID").value.toUpperCase();
@@ -4941,13 +4963,13 @@
 
                  
                 <button id="btnInventoryUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnRunOpt">Add Attribute</button>
-
+                <button id="btnRemoveLast" class="queryButtonClass spmMainBtn" disabled>Remove Last</button>
                 <div class="classRowDiv">
                   <button id="btnClearDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnClearConditions clearBtn">Clear</button>
                   <button id="btnToggleDiagramView" class="queryButtonClass srdBtn spmSecondaryBtn btnToggleTableView">Show Diagram</button>
                 </div>
                                 
-                <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Options</span>
+                <span class="stepClass underline" style="position: relative; top: 0.6rem; margin-bottom: .4rem;">Options</span>
 
                 <div class="classRowDiv">
                   <button id="btnExportPNG" class="queryButtonClass srdBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons"></span>Export PNG</button>
