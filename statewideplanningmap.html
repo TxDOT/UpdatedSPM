@@ -3375,8 +3375,7 @@
               
 
               function removeLast(){
-                //drawRectangle(canvasOriginX+5,initialAttributeY-25,chartWidth-20,40,"#FFFFFF")
-                drawRectangle(30,attributeStartY+(numberOfAttributes*spacePerAttribute)-90, rulerWidth+5,60,"#FFFFFF"); 
+                drawRectangle(10,attributeStartY+(numberOfAttributes*spacePerAttribute)-90, rulerWidth+45,60,"#FFFFFF"); 
                 numberOfAttributes -= 1
                 let removedItem = inventoryDiagramLog.pop()
                 let list = document.querySelector("#riAttributes").options
