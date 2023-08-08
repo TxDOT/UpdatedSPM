@@ -2590,10 +2590,7 @@
                 lightGrayLayer.visible = true
                 return
               }
-              
-              // function fillInForm(tabName, formInfo){
 
-              // }
               function readUrlParams() {
                 //Graphics Layer User Lines and Points
                 graphicsLayer = new GraphicsLayer();
@@ -2626,6 +2623,7 @@
                 pointParam = urlParams.get("point");
                 queryParam = urlParams.get("query");
                 diagramParam = urlParams.get("diagram");
+                urlParams.get("coords") ? locationParam = `${urlParams.get("coords")}, ${urlParams.get("z")}` : null
                 let queryType = urlParams.get("queryType")
 
                 if(overlayParam){
@@ -4084,7 +4082,7 @@
               }
 
               function appendChildToOverlayList(layerItem, layerType, initBuild, documentFrag){
-                  let noDownload = ["Live Traffic" , "Shale Plays"]
+                  let noDownload = ["Live Traffic" , "Shale Plays", "Future Interstates"]
                   let tr = document.createElement("tr")
                   let td = document.createElement("td")
                   td.id = layerItem
@@ -4171,7 +4169,8 @@
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
                       if(layer.title === "TxDOT Bridges"){
                         bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
-                        return
+                        createSourcesArr(layer)
+                        return 
                       }
                         featureLayerView = layer.fieldsIndex.uid.split(",")
                         return
@@ -4330,7 +4329,8 @@
               } 
               
               async function createpopupTemplate(titleField, popupInfo, popupText){
-                  let template = {
+                let template 
+                  template = {
                     title: titleField,
                     content: [{
                       type: "text",
@@ -4423,9 +4423,40 @@
               })
               
               async function displayFeatOnZoom(layerView,zoom){            
-                let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented"]
+                let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented", "Roadway Inventory - On-System Roadbeds"]
                 if(displayFeatZoom.includes(layerView.layer.name)){
                   let getItem = {
+                    "Roadway Inventory - On-System Roadbeds" : () => {
+                      switch(zoom){
+                        case 6: 
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 7:
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 8:
+                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          break;
+                        case 9:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          break;
+                        case 10:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          break;
+                        case 11:
+                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          break;
+                        case 12:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        case 13:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                        default:
+                          layerView.layer.definitionExpression = ''
+                          break;
+                      }
+                    },
                     "Texas Roadways Unsegmented" : () => {
                       switch(zoom){
                         case 6: 
@@ -4546,10 +4577,10 @@
                           layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          layerView.layer.definitionExpression = ""
                           break;
                         default:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          layerView.layer.definitionExpression = ""
                           break;
                         }
 
@@ -4779,7 +4810,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.0 Falkland Island"
+                let version = "5.0.1 Falkland Island"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -4900,7 +4931,7 @@
                 <ul id="conditions" class="noDisabled1 tableBtn">
                   <!-- <li>Conditions listed here</li> -->
                 </ul><br>
-                <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;">Select Output Fields</span>
+                <span class="stepClass underline" style="position: relative; top: 0.4rem; margin-bottom: .4rem;">Select Output Fields</span>
                 <select id="outputFields" multiple size="10" class="spmDropDown noDisabled1" disabled></select>
                 
                 <button class="queryButtonClass tableBtn spmMainBtn qryBtn" id="btnRunQuery">Run Query</button>
