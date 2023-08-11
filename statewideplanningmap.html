@@ -2074,6 +2074,10 @@
                 resetBaseMapItem(id)
                 returnId.visible = 0
                 resetButton("legend")
+                if(layerId.name === "Bridges" || layerId.name === "RoadInventory"){
+                  layerId.definitionExpression = ""
+                }
+
               }
 
               function setIsVisible(layerId, returnId, id){
@@ -2112,6 +2116,8 @@
               const resetListener = document.querySelector('#resetMap');
               resetListener.addEventListener('click', (event) => {
                 clearAndResetMap();
+                clearOverlay()
+
               }); 
               
               //Maps tab listener
@@ -2133,7 +2139,10 @@
                 pageBtnDisable("queryTab")
                 checkFieldStatus("#queryTab", isAllDisabled)
                 document.getElementById("queryTab").style.display = "block";
-                document.getElementById("viewDiv").style.cursor = "default"               
+                document.getElementById("viewDiv").style.cursor = "default"
+                document.querySelectorAll(".qryBtn").forEach(x => x.disabled = true)
+                document.getElementById("outputFields").disabled = true
+                document.getElementById("conditions").querySelectorAll(".queryCondition").forEach(x => x.remove())           
               });   
               
               //Roadway diagram listener
@@ -2443,8 +2452,12 @@
                 inventoryDiagramLogAllValues = [];
                 removeDrawEvent()
                 document.getElementById("btnClearProject").disabled = true
-                retrieveFeatureLayer("RoadInventory")[0].visible = false;
-                retrieveFeatureLayer("Bridges")[0].visible = false;
+                let ri = retrieveFeatureLayer("RoadInventory")[0]
+                let bi = retrieveFeatureLayer("Bridges")[0]
+                setInvisible(ri, ri.name, ri.name)
+                setInvisible(bi, bi.name, bi.name)
+
+                //resetBaseMapItem(bi.id)
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
                 resetLRSIdentify();
@@ -2861,6 +2874,7 @@
                 featLayer[0].visible = false
                 featLayer[0].definitionExpression = ""
                 clearConditions()
+                //toggleLayer(featLayer[0].name)
               }
 
               function queryResponseUI(text, type, height, width){
@@ -2887,7 +2901,7 @@
                 div[0].appendChild(h2)
                 div[0].appendChild(p)
                 div[0].appendChild(textArea)
-                
+                div[0].classList.add("queryStatus")
                 if(type === "button" || type === null){
                   let btn = document.createElement("button")
                   btn.id = "queryMessageBtn"
@@ -2899,7 +2913,7 @@
                   div[0].appendChild(btn)
                 }
                 
-                div[0].className = "queryStatus"
+                
                 document.body.appendChild(innerModal)
                 document.body.appendChild(templateClone)
               }
@@ -3012,10 +3026,10 @@
                   document.getElementById("btnRunQuery").disabled = false
                 }
                 catch(err){
-                  removeQueryResponseUI()
                   queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, "button",  height="250px", width="350px") 
                   document.getElementById("btnRunQuery").textContent = "Run Query"
                   document.getElementById("btnRunQuery").disabled = false
+                  //removeQueryResponseUI()
                 }
               }
 
@@ -4165,7 +4179,7 @@
                   
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
                   addFeatureLayer.when((layer)=>{               
-                    layer.opacity = layer.geometryType === "polygon" ? 0.5 : 1
+                    layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
                       if(layer.title === "TxDOT Bridges"){
                         bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
@@ -4332,7 +4346,8 @@
                 let template 
                   template = {
                     title: titleField,
-                    content: [{
+                    content: [
+                      {
                       type: "text",
                       text: popupText ? popupText.top : "",
                     },{
@@ -4379,6 +4394,13 @@
                           return "UNKNOWN"
                         }
                       `,
+                      }
+                    }
+
+                    if(i === "BRDG_ID"){
+                      let b = {
+                        type: "text",
+                        text: "<br>This layer assesses and identifies communities by census tract that are disadvantaged according to <a href='https://screeningtool.geoplatform.gov/en/methodology' target='_blank'>Justice40 Initiative criteria</a>."
                       }
                     }
                     template.expressionInfos.push(a)
@@ -4849,7 +4871,7 @@
 
               function appDetailsModal(){
                 
-                let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface"]
+                let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", "Updated Bridge Popups to include Bridge Report", "Updated Roadway Inventory - On System and Reference Marker scale dependencies"]
                 let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
