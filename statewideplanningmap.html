@@ -2752,7 +2752,6 @@
                 if (diagramParam) {
                   inputEventListner("inpSRDRouteID")
                   const diagramFullArray = diagramParam.split('|');
-                  console.log(diagramFullArray)
                   document.getElementById("btnRemoveLast").disabled = diagramFullArray[1] ? false : true
                   const diagramInputs = diagramFullArray[0].split(',');
                   document.getElementById("inpSRDRouteID").value = diagramInputs[0];
