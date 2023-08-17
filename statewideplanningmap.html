@@ -129,10 +129,27 @@
               display: none;
             }
             .queryStatus #queryMessageBtn{
+              position:relative;
               z-index: 1;
               margin-top: 1.3rem;
               margin-bottom: 1rem;
-              margin-left: calc(24vw - 4.9rem);
+              margin-left: calc(24vw - 5.8rem);
+              right: -1rem;
+            }
+            #copyCoord{
+              position: relative;
+              z-index: 1;
+              margin-top: -3rem;
+              margin-right: calc(24vw - 6rem);
+              left: 1.4rem;
+            }
+            #copyURL{
+              position: relative;
+              z-index: 1;
+              margin-top: -3rem;
+              margin-right: calc(24vw - 6rem);
+              visibility: hidden;
+              left: 6.5rem;
             }
             .esri-icon-notice-triangle{
               font-size: 1rem;
@@ -1206,7 +1223,7 @@
                 }
                 catch(err){
                   console.log(err)
-                  queryResponseUI({para: "Incorrect Values. Try again.", header:"Error"}, "button",  height="250px", width="350px")
+                  queryResponseUI({para: "Incorrect Values. Try again.", header:"Error"},  null, height="250px", width="350px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   document.getElementById("parentCanvas").style.display = "none";
@@ -1216,7 +1233,7 @@
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
                 if(!theGeom.data.features.length){
-                  queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, "button",  height="250px", width="350px")
+                  queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, null, height="250px", width="350px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   return true 
@@ -1820,7 +1837,7 @@
               function turnOffLRS(){
                 if(document.getElementById("sketchTab").style.display === "block"){
                   sketchDraw()
-                }
+                }queryToUrl
                 resetButton("lrsButton");
                 lrsButtonStatus = false;
                 clearInnerHTML("mapClickResults");
@@ -1848,22 +1865,15 @@
                 let isVisibleLayers = returnVisibleLayers()
                  if (evt.button === 2) {
                     let point = view.toMap({x: evt.x, y: evt.y});
-                    var mapForURL = "";
-                    if (txdotLayer.visible==true) {
-                      mapForURL = "txdot";
-                    } else if (lightGrayLayer.visible==true) {
-                      mapForURL = "lightgray";
-                    } else if (darkGrayLayer.visible==true) {
-                      mapForURL = "darkgray";
-                    } else {
-                      mapForURL = "esristreets";
-                    }
-    
+        
+                    const basemaps = view.layerViews.items.filter(f => f.layer.type !== "feature")
+                    const mapForURL = basemaps.find(f => f.layer.visible === true).layer.name 
+
                     let overlayUrl = isVisibleLayers.length ? `overlays=${isVisibleLayers.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
                     let rightClickURL = `${window.location.origin}${window.location.pathname}?${overlayUrl}`
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
                     
-                    queryToUrl(rightClickURL)
+                    queryToUrl(rightClickURL, {type:"Coords", coord: latLongOnly, name: "COPY XY"})
                   }
               }
 
@@ -2362,7 +2372,7 @@
                 var eventWidth = document.getElementById("eventWidth").value;
                 var eventDescription = document.getElementById("eventDescription").value;
                 if(Number(eventBeginDFO) >= Number(eventEndDFO)){
-                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, "button",  height="250px", width="350px")
+                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, null, height="250px", width="350px")
                   return
                 }            
                 getLineworkWithM(eventRoute,eventBeginDFO,eventEndDFO,eventColors,eventWidth,eventDescription);
@@ -2877,7 +2887,17 @@
                 //toggleLayer(featLayer[0].name)
               }
 
-              function queryResponseUI(text, type, height, width){
+              function createQueryBtn(btn, b){
+                btn.id = b.id
+                btn.className = "spmMainBtn"
+                btn.textContent = b.btnText
+                btn.onclick = () => {
+                  b.btnClick()
+                }
+                return btn
+              }
+
+              function queryResponseUI(text, btnType, height, width){
                 let getTemplate = document.getElementById("queryTemplate")
                 let templateClone = getTemplate.content.cloneNode(true)
                 let div = templateClone.querySelectorAll("div")
@@ -2902,15 +2922,22 @@
                 div[0].appendChild(p)
                 div[0].appendChild(textArea)
                 div[0].classList.add("queryStatus")
-                if(type === "button" || type === null){
-                  let btn = document.createElement("button")
-                  btn.id = "queryMessageBtn"
-                  btn.className = "spmMainBtn"
-                  btn.textContent = "CLOSE"
-                  btn.onclick = () => {
-                    removeQueryResponseUI()
+                let btns;
+                [{btnText: "CLOSE", id: "queryMessageBtn", btnClick: ()=>{removeQueryResponseUI()}}, {btnText: "COPY URL", id: "copyURL", btnClick: ()=>{navigator.clipboard.writeText(text.url)}}].forEach((b) =>{
+                  let btns = document.createElement("button")
+                  div[0].appendChild(createQueryBtn(btns, b))
+                })
+
+                if(btnType){
+                  let coordBtn = document.createElement("button")
+                  coordBtn.id = "copyCoord"
+                  coordBtn.textContent = btnType.name
+                  coordBtn.className = "spmSecondaryBtn"
+                  coordBtn.onclick = () =>{
+                    navigator.clipboard.writeText(btnType.coord)
+                    document.getElementById("copyURL").style.visibility = "visible"
                   }
-                  div[0].appendChild(btn)
+                  div[0].appendChild(coordBtn)
                 }
                 
                 
@@ -2921,6 +2948,7 @@
               const removeQueryResponseUI = () => {
                 document.querySelector(".queryStatus").remove()
                 document.querySelector(".overlay").remove()
+                
               }
               
               //Query form functions--------------------------------------------
@@ -3009,7 +3037,7 @@
                   let returnQuery = await layerView.layer.queryFeatures(query)
                   layerView.layer.definitionExpression = where;
                   if(!returnQuery.features.length){
-                    queryResponseUI({para: `Welp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null,  height="250px", width="350px")
+                    queryResponseUI({para: `Welp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null, height="250px", width="350px")
                     document.getElementById("btnRunQuery").textContent = "Run Query"
                     document.getElementById("btnRunQuery").disabled = false
                     return
@@ -3026,7 +3054,7 @@
                   document.getElementById("btnRunQuery").disabled = false
                 }
                 catch(err){
-                  queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, "button",  height="250px", width="350px") 
+                  queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, null, height="250px", width="350px") 
                   document.getElementById("btnRunQuery").textContent = "Run Query"
                   document.getElementById("btnRunQuery").disabled = false
                   //removeQueryResponseUI()
@@ -3413,7 +3441,7 @@
                 let nonRouteArr = ["LG", "RG"]
                 for(let x=0; x < nonRouteArr.length; x++){
                   if(diagramTitle.includes(nonRouteArr[x])){
-                    queryResponseUI({para:`Only use KG or centerline Route IDs (i.e IH0035-KG)`, header: "SRD Message"}, "button",  height="250px", width="350px")
+                    queryResponseUI({para:`Only use KG or centerline Route IDs (i.e IH0035-KG)`, header: "SRD Message"}, null, height="250px", width="350px")
                     document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                     document.getElementById("btnUpdateLRM").disabled = false
                     return
@@ -3422,7 +3450,7 @@
 
                 //Check that Route input is not empty
                 if(diagramEndDFO <= diagramBeginDFO){
-                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "SRD Message"}, "button",  height="250px", width="350px")
+                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "SRD Message"}, null, height="250px", width="350px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   return
@@ -3959,10 +3987,10 @@
                 view.goTo(graphicsExtent);                
           		}
 
-              function queryToUrl(textString){
+              function queryToUrl(textString, btnCoords){
                   navigator.clipboard.writeText(textString)
                   .then(()=>{
-                    queryResponseUI({para: "URL has been copied! Paste and go.", url: textString, header:"Share URL"}, "button",  height="250px", width="350px")
+                    queryResponseUI({para: "URL has been copied! Paste and go.", url: textString, header:"Share URL"}, btnCoords, height="250px", width="350px")
                     document.getElementById("previewUrl").textContent = textString
                   })
                   .catch(err => console.log("exportQuery:", err))
@@ -4268,19 +4296,19 @@
               }
 
               function createSourcesArr(featLayer){
-                let sourcesObj = [{url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Projects/FeatureServer/0", name: "TxDOT_Projects", searchFields: ["CONTROL_SECT_JOB"], displayField: "CONTROL_SECT_JOB", outFields: ["CONTROL_SECT_JOB ","DISTRICT_NUMBER ","LAYMAN_DESCRIPTION1","HIGHWAY_NUMBER"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries_Detailed/FeatureServer/0", name: "Texas_County_Boundaries_Detailed", searchFields: ["CNTY_NM"], displayField: "CNTY_NM", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0", name: "TxDOT_Districts/FeatureServer", searchFields: ["DIST_NM"], displayField: "DIST_NM", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Search/FeatureServer/0", name: "TxDOT_Roadways_Search/FeatureServer", searchFields: ["RTE_CNTY"], displayField: "RTE_CNTY", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Top_100_Congested_Roadways/FeatureServer/0", name: "TxDOT_Top_100_Congested_Roadways/FeatureServer", searchFields: ["RANK"], displayField: "RANK", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"]},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"]}]
+                let sourcesObj = [{url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Projects/FeatureServer/0", name: "TxDOT_Projects", searchFields: ["CONTROL_SECT_JOB"], displayField: "CONTROL_SECT_JOB", outFields: ["CONTROL_SECT_JOB","DISTRICT_NUMBER","HIGHWAY_NUMBER"], title: "Control Section Job (CSJ)"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries_Detailed/FeatureServer/0", name: "Texas_County_Boundaries_Detailed", searchFields: ["CNTY_NM"], displayField: "CNTY_NM", outFields: ["*"], title: "County"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0", name: "TxDOT_Districts/FeatureServer", searchFields: ["DIST_NM"], displayField: "DIST_NM", outFields: ["*"], title:"District"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Search/FeatureServer/0", name: "TxDOT_Roadways_Search/FeatureServer", searchFields: ["RTE_CNTY"], displayField: "RTE_CNTY", outFields: ["*"], title: "On System Highway"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Top_100_Congested_Roadways/FeatureServer/0", name: "TxDOT_Top_100_Congested_Roadways/FeatureServer", searchFields: ["RANK"], displayField: "RANK", outFields: ["*"], title: "Top 100 Rank"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"], title: "Minute Order Number"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section"}]
 
                 let featLayerPath = featLayer.parsedUrl.path.toLowerCase()
                 let src = sourcesObj.find(source => featLayerPath.includes(source.url.toLowerCase()))
-                let isInSearch = searchBar.sources.find(x => x.name === featLayer.title)                
+                let isInSearch = src ? searchBar.sources.find(x => x.name === src.title) : null          
                 if(!src || isInSearch) return
                 let sourceObj = {
                   layer: new FeatureLayer({
@@ -4295,7 +4323,7 @@
                   maxSuggestions: 6,
                   minSuggestCharacters: 0,
                   outFields: src.outFields,
-                  name: featLayer.title,
+                  name: src.title,
                   resultSymbol: {
                       type: "simple-line",
                       color: "cyan",
@@ -4832,7 +4860,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.1 Falkland Island"
+                let version = "5.0.2 Falkland Island"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -4866,19 +4894,22 @@
                   <br>
                   <a id="closeAbout">Version: ${version}</a>
 
-                  `, header:"About the Statewide Planning Map"}, "button", height="714px", width="473px")
+                  `, header:"About the Statewide Planning Map"}, null, height="714px", width="473px")
               }
 
               function appDetailsModal(){
                 
-                let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", "Updated Bridge Popups to include Bridge Report", "Updated Roadway Inventory - On System and Reference Marker scale dependencies"]
+                let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", 
+                                    "Updated Bridge Popups to include Bridge Report", 
+                                    "Updated Roadway Inventory - On System and Reference Marker scale dependencies", "Updated Control Section Job in Search",
+                                    `Added "Copy XY" button to Popup`]
                 let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
                       <ul>
                         ${releaseNotesList}
                       </ul>
-                  `, header: "Release Notes"}, "button", height="300px", width="473px")
+                  `, header: "Release Notes"}, null, height="300px", width="473px")
               }
             // end require - - -        
             });      
