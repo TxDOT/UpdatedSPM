@@ -3213,35 +3213,38 @@
               function sketchDraw(){
                 document.getElementById("viewDiv").style.cursor = "crosshair"
                 draw = view.on("click", function(event) {
-                  if(measurementWidget.visible === false){
-                    var testSketchDiv = document.getElementById("sketchTab");
-                    document.getElementById("btnClearProject").disabled = false
-                    document.getElementById("btnRecalcProject").disabled = false
-                    let point = view.toMap({x: event.x, y: event.y});
+                  if(document.getElementById("sketchTab").style.display === "block"){
+                    if(measurementWidget.visible === false){
+                      var testSketchDiv = document.getElementById("sketchTab");
+                      document.getElementById("btnClearProject").disabled = false
+                      document.getElementById("btnRecalcProject").disabled = false
+                      let point = view.toMap({x: event.x, y: event.y});
 
-                    //add graphic to map
-                    var pointGraphic = new Graphic({
-                      geometry: point,
-                        symbol: {
-                          type: "simple-marker",
-                          color: "red",
-                          size: "10px",
-                          outline: {
-                          color: "red",
-                          width: "2px"
+                      //add graphic to map
+                      var pointGraphic = new Graphic({
+                        geometry: point,
+                          symbol: {
+                            type: "simple-marker",
+                            color: "red",
+                            size: "10px",
+                            outline: {
+                            color: "red",
+                            width: "2px"
+                          }
                         }
-                      }
-                    });      
+                      });      
                     
-                    graphicsLayer.add(pointGraphic);                  
-                      
-                    linePoints.push([point.longitude,point.latitude]);
-                    if (linePoints.length > 1) {
-                      addLine(linePoints);
+                      graphicsLayer.add(pointGraphic);                  
+                        
+                      linePoints.push([point.longitude,point.latitude]);
+                      if (linePoints.length > 1) {
+                        addLine(linePoints);
+                      }
                     }
-                  }
                  
-                  event.stopPropagation()                   
+                    event.stopPropagation() 
+                  }
+                  
                 });  
               }
               
