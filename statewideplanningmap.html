@@ -4211,7 +4211,7 @@
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
                   addFeatureLayer.when((layer)=>{               
                     layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
-                    if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory "){
+                    if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
                       if(layer.title === "TxDOT Bridges"){
                         bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
                         createSourcesArr(layer)
