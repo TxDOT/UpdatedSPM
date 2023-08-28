@@ -1083,10 +1083,11 @@
               "esri/widgets/Expand",
               "esri/widgets/Popup",
               "esri/layers/support/LabelClass",
-              "esri/core/reactiveUtils"
+              "esri/core/reactiveUtils",
+              "esri/popup/ExpressionInfo"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
               
               var map = new Map({
                   //map content added below
@@ -1107,7 +1108,7 @@
                 "carBorderBool": `DECODE($feature.VEH_CAR, 1, "Yes", 0, "No", "NA")`,
                 "bridgeBorderBool": `DECODE($feature.RR_BRDGE, 1, "Yes", 0, "No", "NA")`,
                 "tollBorderBool": `DECODE($feature.TOLL_BRDGE, 1, "Yes", 0, "No", "NA")`,
-                "uzaDescription": `DECODE($feature.UZA_TYPE, "SUA", "Small Urban (Population 5,000 – 49,999)", "UA", "Urbanized (Population 50,000 – 199,999)", "LUA", "Large Urbanized (Population 200,000+)", "NA")`
+                "uzaDescription": `DECODE($feature.UZA_TYPE, "SUA", "Small Urban (Population 5,000 – 49,999)", "UA", "Urbanized (Population 50,000 – 199,999)", "LUA", "Large Urbanized (Population 200,000+)", "NA")`,
               }
               //load startup function
               const getURLParams = (url) => new URLSearchParams(url)
@@ -4395,8 +4396,8 @@
                   if(!popupInfo) return
                   let fieldName = Object.values(popupInfo)
                   let label = Object.keys(popupInfo)
+                  let a;
                   fieldName.forEach((i,x) => {
-                    let a;
                     if(Object.hasOwn(popupArcadeDefinition,i)){
                       a = {
                       name: `${titleField}Exp${x}`,
@@ -4428,12 +4429,6 @@
                       }
                     }
 
-                    if(i === "BRDG_ID"){
-                      let b = {
-                        type: "text",
-                        text: "<br>This layer assesses and identifies communities by census tract that are disadvantaged according to <a href='https://screeningtool.geoplatform.gov/en/methodology' target='_blank'>Justice40 Initiative criteria</a>."
-                      }
-                    }
                     template.expressionInfos.push(a)
                     template.content[1].fieldInfos.push({"fieldName": `expression/${titleField}Exp${x}`})
                   })
@@ -4665,7 +4660,7 @@
                           layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
                           break;
                         default:
-                          layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
+                          layerView.layer.definitionExpression = ""
                           break;
                         }
                     },
