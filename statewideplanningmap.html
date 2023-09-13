@@ -4635,6 +4635,9 @@
                     },
                     "Control Sections" : () => {
                       switch(zoom){
+                        case 5:
+                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          break;
                         case 6:
                           layerView.layer.definitionExpression = "RTE_PRFX='IH'"
                           break;
@@ -4642,16 +4645,16 @@
                           layerView.layer.definitionExpression = "RTE_PRFX='IH'"
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
                           break;
                         case 9:
                           layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='SH' or RTE_PRFX='US' or RTE_PRFX='SL')"
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
                           break;
                         case 12:
                           layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
