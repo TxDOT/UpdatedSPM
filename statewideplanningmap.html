@@ -1263,7 +1263,6 @@
                 //Loop through the results and split up the array based on any segment breaks
                 let result = [];
                 let currentArr = [newLinePoints[0]];
-                console.log(newLinePoints[0])
                 for (let i = 1; i < newLinePoints.length; i++) {
                   if (newLinePoints[i][0] !== currentArr[0][0]) {
                     result.push(currentArr);
@@ -4099,7 +4098,6 @@
                   </tbody>
                 `
                 const setAlert = JSON.parse(tocObj.find((x) => x.name === "SPM ALERT").popup)
-                console.log(setAlert)
                 setAlert.IsActive === "Yes" ? createServiceDown(setAlert.Text, setAlert.Color) : null
 
                 let previousItem
@@ -4818,7 +4816,6 @@
               }
               
               function createServiceDown(text, color, width){
-                console.log(text, color)
                 let serviceTemp = document.getElementById("serviceDown")
                 let serviceTempClone = serviceTemp.content.cloneNode(true)
                 let div = serviceTempClone.querySelectorAll("div")
@@ -4873,7 +4870,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.2 Falkland Island"
+                let version = "5.0.3 Falkland Island"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -4915,7 +4912,7 @@
                 let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", 
                                     "Updated Bridge Popups to include Bridge Report", 
                                     "Updated Roadway Inventory - On System and Reference Marker scale dependencies", "Updated Control Section Job in Search",
-                                    `Added "Copy XY" button to Popup`]
+                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control"]
                 let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
