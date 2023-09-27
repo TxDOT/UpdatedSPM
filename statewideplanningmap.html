@@ -108,16 +108,16 @@
               z-index: 1;
               left:50%;
               transform: translate(-30%, -50%);
-              top: 5rem;
+              top: 4rem;
               width: calc(100%-20%);
-              font-family: Roboto, Avenir, Helvetica, Arial, sans-serif;
-              height: 2.5rem;
+              font-family: Roboto, Avenir, Helvetica, Arial, sans-serif !important;
+              height: 1.5rem;
               color: white;
               padding: .5rem;
-              padding-top: 1.5rem;
               text-align: center;
               display: flex;
             }
+
             #graphics{
               top: 0rem;
               position: relative;
@@ -152,7 +152,7 @@
               left: 6.5rem;
             }
             .esri-icon-notice-triangle{
-              font-size: 1rem;
+              font-family: Roboto, Avenir, Helvetica, Arial, sans-serif !important;
             }
             .esri-print__advanced-options-section{
               display: none;
@@ -1233,6 +1233,7 @@
               }
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
+                
                 if(!theGeom.data.features.length){
                   queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, null, height="250px", width="350px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
@@ -1250,16 +1251,19 @@
                       coordX = theGeomPart[0][j][0];
                       coordY = theGeomPart[0][j][1];
                       coordM = theGeomPart[0][j][2];
-                      if (coordM>=theBegin&&coordM<=theEnd) {
+                      if((coordM>=theBegin&&coordM<=theEnd)){
                         newLinePoints.push([a,0,j,coordX,coordY]);                        
                       }
+                      else if(!newLinePoints.length && coordM>=theBegin){
+                        newLinePoints.push([a,0,j-1,coordX,coordY]);
+                      }
                   }
-                }  
+                }
 
                 //Loop through the results and split up the array based on any segment breaks
                 let result = [];
                 let currentArr = [newLinePoints[0]];
-                
+                console.log(newLinePoints[0])
                 for (let i = 1; i < newLinePoints.length; i++) {
                   if (newLinePoints[i][0] !== currentArr[0][0]) {
                     result.push(currentArr);
@@ -1274,6 +1278,7 @@
                 var indexTwo;
                 var indexThree;
                 var segmentArrayLength;
+                
                 //Loop through the results extend the events and add to the map
                 for (var z = 0; z < result.length; z++) {
                   //For the first point on the segment
@@ -4093,6 +4098,10 @@
                   <tbody id="addFeatRow"> 
                   </tbody>
                 `
+                const setAlert = JSON.parse(tocObj.find((x) => x.name === "SPM ALERT").popup)
+                console.log(setAlert)
+                setAlert.IsActive === "Yes" ? createServiceDown(setAlert.Text, setAlert.Color) : null
+
                 let previousItem
                 for(i=0; i < tocObj.length; i++){
                   if(tocObj[i].name === previousItem) continue
@@ -4155,6 +4164,7 @@
                     btnDiv.appendChild(rmvButton)
                     rmvButton.className = "esri-icon-close-circled removeOverlay"
                     rmvButton.id = `removeOverlay${layerItem}`
+                    rmvButton.onclick = () => toggleLayer(layerItem)
                     td.appendChild(btnDiv)
                   }
 
@@ -4808,9 +4818,11 @@
               }
               
               function createServiceDown(text, color, width){
+                console.log(text, color)
                 let serviceTemp = document.getElementById("serviceDown")
                 let serviceTempClone = serviceTemp.content.cloneNode(true)
                 let div = serviceTempClone.querySelectorAll("div")
+                //div[1].classList.add("esri-icon-notice-triangle")
                 div[1].textContent = text 
                 div[1].style.backgroundColor = color
                 document.body.appendChild(serviceTempClone)
