@@ -1250,17 +1250,14 @@
                       coordX = theGeomPart[0][j][0];
                       coordY = theGeomPart[0][j][1];
                       coordM = theGeomPart[0][j][2];
-                      console.log(theBegin, theEnd, coordX, coordY, coordM)
                       if((coordM>=theBegin&&coordM<=theEnd)){
                         newLinePoints.push([a,0,j,coordX,coordY]);                        
                       }
                       else if(!newLinePoints.length && coordM>=theBegin){
-                        console.error(theBegin, theEnd, theGeomPart[0][j-1][0], theGeomPart[0][j-1][1], theGeomPart[0][j-1][2])
                         newLinePoints.push([a,0,j,theGeomPart[0][j][0],theGeomPart[0][j][1]]);
                       }
                   }
                 }
-                console.log(newLinePoints)
                 //Loop through the results and split up the array based on any segment breaks
                 let result = [];
                 let currentArr = [newLinePoints[0]];
@@ -1285,7 +1282,7 @@
                   indexOne = result[z][0][0]
                   indexTwo = result[z][0][1];
                   indexThree = result[z][0][2];   
-                  console.log(indexOne, indexTwo, indexThree, result)
+
                   if (indexThree>0) {
                     var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][0];
                     var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][1];
@@ -1293,7 +1290,6 @@
                     var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1]; 
                     var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2]; //the m difference between vertices
                     var lengthFromFirstPoint = theBegin-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2];  //event from-beginning vertex m
-                    console.log(lengthFromFirstPoint, theBegin,theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2])         
                     var newBeginPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthFromFirstPoint);
                     
                     //Add to the beginning of the array
@@ -1317,7 +1313,6 @@
                     var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][1]; 
                     var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]; //the m difference between vertices
                     var lengthBeyondLastPoint = theEnd-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2];  //event from-ending vertex m
-                    console.log(lengthBeyondLastPoint, definedLength, theEnd,theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2])             
                     var newEndPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthBeyondLastPoint);
                     //Adding to the end of the array
                     //Don't run unless distance is greater than .001
@@ -1327,13 +1322,10 @@
                     }
                     if (lengthBeyondLastPoint>.001) {
                       result[z].push([0,0,0,newEndPoint[0],newEndPoint[1]]);
-                      console.log(result[z])
                     }     
                   }
                 }
-                console.log(result)
                 let finalResult = result.map(subArr => subArr.map(innerSubArr => innerSubArr.slice(3)));
-                console.log(finalResult)
                 for (var x = 0; x < finalResult.length; x++) {
                   var line = new Polyline({
                     paths: [finalResult[x]],
@@ -1366,8 +1358,6 @@
               //Finding the begin/end point of the event
               function interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,totalLength,segmentLength){
                 const ratio = (segmentLength*1609.344) / (totalLength*1609.344);
-                console.log(ratio, segmentLength*1609.344, totalLength*1609.344)
-                console.log(pointOneX,pointOneY,pointTwoX,pointTwoY,totalLength,segmentLength)
                 // Interpolate the Web Mercator coordinates of the point along the line
                 const interpolatedMercator = [
                   pointOneX + (ratio * (pointTwoX - pointOneX)),
@@ -1375,7 +1365,6 @@
                 ];                
 
                 var newCoord = [interpolatedMercator[0],interpolatedMercator[1]];
-                console.log(newCoord)
                 return newCoord;
               }
               //End drag and drop-----------------------------------------------
