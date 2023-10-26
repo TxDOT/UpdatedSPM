@@ -1100,7 +1100,7 @@
               
               let popupArcadeDefinition = {
                 "sum numbers" : "SUM([$feature.ev_dc_fast_num, $feature.ev_level1_evse_num, $feature.ev_level2_evse_num])",
-                "outsideShoulderText": `DECODE($feature.S_TYPE_O, 2, "Paved", "Unpaved")`,
+                "outsideShoulderText": `DECODE($feature.S_TYPE_O, 0, "Unpaved", 1, "Paved", 2, "Paved", 3, "Unpaved", 4, "Unpaved", 5, "Unpaved", 6, "Brick", "Unknown")`,
                 "costTruck": "Text(ROUND(($feature.COST_TRK/1000000),2), '$###.### Million')",
                 "surfTypeText": `DECODE($feature.SRF_TYPE, 1, "Unpaved", 99, "Unknown", "Paved")`,
                 "pedBorderBool": `DECODE($feature.PED, 1, "Yes", 0, "No", "NA")`,
@@ -1884,7 +1884,7 @@
                  if (lrsButtonStatus==true) {
                     graphicsLayerLRSIdentify.removeAll();
                     let point = view.toMap({x: event.x, y: event.y});
-                    var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs1?Lat="+point.latitude.toFixed(8)+"&Lon="+point.longitude.toFixed(8);
+                    var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
                     
                     //add graphic to map
                     var pointGraphic = new Graphic({
@@ -3563,8 +3563,8 @@
                 //Draw Multiple Control Sections found
                 drawTextCenter("Verifying Control Sections...",labelPositions[2],labelY+115,"#FF0000","12");                
                 
-                var urlFromDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs4?RouteID="+diagramTitle+"&DistanceFromOrigin="+diagramBeginDFO;
-                var urlToDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs4?RouteID="+diagramTitle+"&DistanceFromOrigin="+diagramEndDFO;
+                var urlFromDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/dfo?rte="+diagramTitle+"&dfo="+diagramBeginDFO;
+                var urlToDFO = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/dfo?rte="+diagramTitle+"&dfo="+diagramEndDFO;
                 
                 var diagramBMP = "";
                 var diagramEMP = "";
