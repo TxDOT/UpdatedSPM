@@ -3,10 +3,15 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <meta name="viewport" content="initial-scale=1, maximum-scale=1, user-scalable=no" />
+        <meta http-equiv="cache-control" content="max-age=0">
+        <meta http-equiv="cache-control" content="no-cache, no-store, must-revalidate">
+        <meta name="viewport" content="initial-scale=1, maximum-scale=1"/>
         <title>TxDOT - Statewide Planning Map</title>
         <link rel="stylesheet" href="https://js.arcgis.com/4.26/esri/themes/light/main.css">
-        <script src="https://js.arcgis.com/4.26/"></script>         
+        <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+
+        <script src="https://js.arcgis.com/4.26/"></script>
+
         <style>
             @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
             @media (max-width: 480px){
@@ -169,7 +174,10 @@
               letter-spacing: .0008em;
               font-weight: 400;
               line-height: 1.375rem;
+            }
+            .unselectable{
               user-select: none;
+              -webkit-user-select: none;
             }
             .dwnloadBtn{
               position: absolute;
@@ -1768,7 +1776,7 @@
                 }
                 return;
               }
-              
+            
               //Re-orders array
               function sendItemToFront(theArray,itemsToMove) {
                 let copyRdsInventoryArr = [...new Set([...itemsToMove,...theArray])]              
@@ -2025,7 +2033,7 @@
                     //getActiveLayers(v.zoom)
                   }
                 )
-                  
+                
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
                   setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
@@ -4214,7 +4222,7 @@
                     },
                     definitionExpression: featLayer.defExpress ?? "", 
                   })
-                  
+      
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
                   addFeatureLayer.when((layer)=>{               
                     layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
@@ -4395,7 +4403,6 @@
                       type: "text",
                       text: popupText ? popupText.bottom : "",
                     }],
-
                     expressionInfos:[]
                   }
 
@@ -4441,6 +4448,7 @@
                 return template
               }
 
+              document.getElementById("Copy-Popup").className("content_copy")
               async function downloadOverlay(featLayer){
                 let featList = retrieveFeatureLayer(featLayer)
 
@@ -4868,7 +4876,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.3 Falkland Island"
+                let version = "5.0.4 New Orleans"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -4910,7 +4918,7 @@
                 let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", 
                                     "Updated Bridge Popups to include Bridge Report", 
                                     "Updated Roadway Inventory - On System and Reference Marker scale dependencies", "Updated Control Section Job in Search",
-                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control"]
+                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control", "Updated eLRS endpoints", "Enabled copy and paste on feature popups"]
                 let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
@@ -4924,7 +4932,7 @@
         </script>
     </head>
     <body class="main">
-        <div id="header">
+        <div id="header" class="unselectable">
             <div class="logo">&nbsp;&nbsp;TxDOT - Statewide Planning Map</div>
             <nav>
                 <a class="links" target="_blank" title="View the Planning Map Help Document" href="https://storymaps.arcgis.com/stories/3dfe9b5f84734e14a7da4dfbc77833b5">Help</a>
@@ -4933,7 +4941,7 @@
                 &nbsp;&nbsp;
             </nav>        
         </div>
-        <div id="left-div">
+        <div id="left-div" class="unselectable">
             <div id="close"></div>
             <div id="tabsParent" class="tabsContainer">
                 <div class="tabsChild" id="baseMaps" title="Base Maps and Overlays">Map</div>
@@ -5175,20 +5183,20 @@
                 <div class="toolsChild esri-icon-printer" id="print" title="Print Map"></div>
                 <div class="toolsChild esri-icon-layer-list" id="legend" title="View Legend"></div>
             </div>   
-            <div id="marginal">
+            <div id="marginal" class="unselectable">
               <span id="zoom"></span>
               <span id="coords"></span>
             <!--Map coordinates and scale bar-->
             </div>
-            <div id="mapClickResults">
+            <div id="mapClickResults" class="unselectable">
             <!--Measure and LRS results, Legend-->
             </div>     
-            <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild"></div>
-            <div id="searchBox"></div>
-            <div id="resetMap" class="toolsChild" title="Clear and reset map">&#x21BB;</div>
-            <button class="hamburgler toolsChild esri-icon-drag-horizontal"></button>
-            <div id="results">Build a query and view the results here...</div>
-            <div id="parentCanvas">
+            <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
+            <div id="searchBox" class="unselectable"></div>
+            <div id="resetMap" class="toolsChild unselectable" title="Clear and reset map">&#x21BB;</div>
+            <button class="hamburgler toolsChild esri-icon-drag-horizontal unselectable"></button>
+            <div id="results" class="unselectable">Build a query and view the results here...</div>
+            <div id="parentCanvas" class="unselectable">
     			      <canvas id="myCanvas">
                     <!--custom graphics here-->
                 </canvas>
