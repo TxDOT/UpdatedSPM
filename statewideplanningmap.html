@@ -3146,6 +3146,7 @@
 
               function goToQuery(queryReturnExtent, layer){
                 view.whenLayerView(layer).then(layerView => {
+                  console.log(JSON.stringify(layerView.layer.loadStatus))
                   view.goTo(queryReturnExtent.extent)
                   document.getElementById("btnToggleTableView").textContent = "Hide Table"
                   document.getElementById("btnRunQuery").textContent = "Run Query"
