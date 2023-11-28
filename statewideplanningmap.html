@@ -1650,8 +1650,6 @@
               let page = 0
 
               const runManualSearch = (term) => {
-                document.getElementById("manualSearchPage").innerHTML = (offset / pagesize) + 1
-
                 // get the count for display purposes
                 // (this should be a separate function so that it only fires on search term change and not on pagination)
                 fetch(`https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0/query?f=json&where=RTE_NM+LIKE+%27%25${term}%25%27&returnDistinctValues=true&returnGeometry=false&orderByFields=RTE_NM&outFields=RTE_NM&returnCountOnly=true`)
@@ -1680,6 +1678,7 @@
                     const rtes = json.features.map(f => f.attributes.RTE_NM)
                     for (const rte of rtes) {
                       manualSearchResults.innerHTML = manualSearchResults.innerHTML += `${rte}<br>`
+                      document.getElementById("manualSearchPage").innerHTML = (offset / pagesize) + 1
                     }
                   }
                 })
@@ -1694,6 +1693,7 @@
                 if (!!term) setTimeout(() => {
                   if (term === manualSearchInput.value) {
                     offset = 0
+                    document.getElementById("manualSearchPage").innerHTML = 'loading...'
                     runManualSearch(term)
                   }
                 }, 250)
@@ -1701,6 +1701,7 @@
                   manualSearchCountDisplay.innerHTML = 0
                   manualListCountDisplay.innerHTML = 0
                   manualSearchResults.innerHTML = ''
+                  document.getElementById("manualSearchPage").innerHTML = 0
                 }
               })
 
