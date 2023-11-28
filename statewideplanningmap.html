@@ -971,6 +971,16 @@
               position: relative;
               top: .5rem;
             }
+
+            #manualSearchContainer {
+              position: absolute;
+              top: 15px;
+              left: 300px;
+              background-color: white;
+              padding: 4px;
+              max-height: 200px;
+              overflow-y: auto;
+            }
         </style>
         <script>
             var view;
@@ -1630,6 +1640,84 @@
                   return
                 })
               })
+
+              const manualSearchInput = document.getElementById("manualSearch")
+              const manualSearchCountDisplay = document.getElementById("manualSearchCount")
+              const manualListCountDisplay = document.getElementById("manualListCount")
+              const manualSearchResults = document.getElementById("manualSearchResults")
+              const pagesize = 13
+              let offset = 0
+              let page = 0
+
+              const runManualSearch = (term) => {
+                document.getElementById("manualSearchPage").innerHTML = (offset / pagesize) + 1
+
+                // get the count for display purposes
+                // (this should be a separate function so that it only fires on search term change and not on pagination)
+                fetch(`https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0/query?f=json&where=RTE_NM+LIKE+%27%25${term}%25%27&returnDistinctValues=true&returnGeometry=false&orderByFields=RTE_NM&outFields=RTE_NM&returnCountOnly=true`)
+                .then(res => {
+                  return res.json()
+                })
+                .then(json => {
+                  // use if statement to handle if someone starting typing again (this might be overkill)
+                  if (term === manualSearchInput.value) {
+                    manualSearchCountDisplay.innerHTML = json.count
+                  }
+                })
+                .catch(err => console.error(err))
+
+                // get the RTE_NMs for display and user interactivity
+                fetch(`https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0/query?f=json&where=RTE_NM+LIKE+%27%25${term}%25%27&returnDistinctValues=true&returnGeometry=false&orderByFields=RTE_NM&outFields=RTE_NM&resultRecordCount=${pagesize}&resultOffset=${offset}`)
+                .then(res => {
+                  return res.json()
+                })
+                .then(json => {
+                   // use if statement to handle if someone starting typing again (this might be overkill)
+                  if (term === manualSearchInput.value) {
+                    manualSearchResults.innerHTML = ''
+                    // handle the pagination. i think there is a key for exceeded
+                    manualListCountDisplay.innerHTML = json.features.length
+                    const rtes = json.features.map(f => f.attributes.RTE_NM)
+                    for (const rte of rtes) {
+                      manualSearchResults.innerHTML = manualSearchResults.innerHTML += `${rte}<br>`
+                    }
+                  }
+                })
+                .catch(err => console.error(err))
+              }
+
+              manualSearchInput.addEventListener("input", (event) => {
+                const term = event.target.value
+                // if the input is empty (they've deleted the text) then just clear the display
+                // otherwise, use if statement to handle someone typing fast which would send useless requests.
+                // only send lookup search query once paused for .25 sec
+                if (!!term) setTimeout(() => {
+                  if (term === manualSearchInput.value) {
+                    offset = 0
+                    runManualSearch(term)
+                  }
+                }, 250)
+                else {
+                  manualSearchCountDisplay.innerHTML = 0
+                  manualListCountDisplay.innerHTML = 0
+                  manualSearchResults.innerHTML = ''
+                }
+              })
+
+              const manualSearchNext = document.getElementById("manualSearchNext")
+              const manualSearchPrev = document.getElementById("manualSearchPrev")
+              manualSearchNext.addEventListener("click", () => {
+                // would need to handle if offset is larger than total count of possible records; disable button in such case
+                offset += pagesize
+                runManualSearch(manualSearchInput.value)
+              })
+              manualSearchPrev.addEventListener("click", () => {
+                // would need to handle if click will make offset go negative; just use 0 in such case
+                offset -= pagesize
+                runManualSearch(manualSearchInput.value)
+              })
+
+
               //End Search--------------------------------------------------------------------
 
               //Load Roadway Inventory forms------------------------------------
@@ -5235,7 +5323,22 @@
             </div>
             <div id="mapClickResults">
             <!--Measure and LRS results, Legend-->
-            </div>     
+            </div> 
+
+            <div id="manualSearchContainer">
+              <input type="text" id="manualSearch" class="" style="width:initial;" placeholder="Manual Search RTE_NM">
+              <p>
+                page: <span id="manualSearchPage">0</span>
+                <br>
+                showing: <span id="manualListCount" style="font-weight:font-bold;">0</span> of <span id="manualSearchCount" style="font-weight:font-bold;">0</span> matching routes
+              </p>
+              <div>
+                <button id="manualSearchPrev" style="cursor:pointer;"><</button>
+                <button id="manualSearchNext" style="cursor:pointer;">></button>
+              </div>
+              <div id="manualSearchResults"></div>
+            </div>
+
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
             <div id="searchBox" class="unselectable"></div>
             <div id="resetMap" class="toolsChild unselectable" title="Clear and reset map">&#x21BB;</div>
