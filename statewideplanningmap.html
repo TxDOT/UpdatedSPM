@@ -1641,6 +1641,7 @@
                 })
               })
 
+              const manualSearchResultsDisplay = document.getElementById("manualSearchResultsDisplay")
               const manualSearchInput = document.getElementById("manualSearch")
               const manualSearchCountDisplay = document.getElementById("manualSearchCount")
               const manualListCountDisplay = document.getElementById("manualListCount")
@@ -1660,6 +1661,10 @@
                   // use if statement to handle if someone starting typing again (this might be overkill)
                   if (term === manualSearchInput.value) {
                     manualSearchCountDisplay.innerHTML = json.count
+                    // handle no results
+                    if (json.count === 0) {
+                      document.getElementById("manualSearchPage").innerHTML = 'no results. try a different search'
+                    }
                   }
                 })
                 .catch(err => console.error(err))
@@ -1694,6 +1699,7 @@
                   if (term === manualSearchInput.value) {
                     offset = 0
                     document.getElementById("manualSearchPage").innerHTML = 'loading...'
+                    manualSearchResultsDisplay.style.display = 'block'
                     runManualSearch(term)
                   }
                 }, 250)
@@ -1702,6 +1708,7 @@
                   manualListCountDisplay.innerHTML = 0
                   manualSearchResults.innerHTML = ''
                   document.getElementById("manualSearchPage").innerHTML = 0
+                  manualSearchResultsDisplay.style.display = 'none'
                 }
               })
 
@@ -5328,16 +5335,18 @@
 
             <div id="manualSearchContainer">
               <input type="text" id="manualSearch" class="" style="width:initial;" placeholder="Manual Search RTE_NM">
-              <p>
-                page: <span id="manualSearchPage">0</span>
-                <br>
-                showing: <span id="manualListCount" style="font-weight:font-bold;">0</span> of <span id="manualSearchCount" style="font-weight:font-bold;">0</span> matching routes
-              </p>
-              <div>
-                <button id="manualSearchPrev" style="cursor:pointer;"><</button>
-                <button id="manualSearchNext" style="cursor:pointer;">></button>
+              <div id="manualSearchResultsDisplay" style="display:none;">
+                <p>
+                  page: <span id="manualSearchPage">0</span>
+                  <br>
+                  showing: <span id="manualListCount" style="font-weight:font-bold;">0</span> of <span id="manualSearchCount" style="font-weight:font-bold;">0</span> matching routes
+                </p>
+                <div>
+                  <button id="manualSearchPrev" style="cursor:pointer;"><</button>
+                  <button id="manualSearchNext" style="cursor:pointer;">></button>
+                </div>
+                <div id="manualSearchResults"></div>
               </div>
-              <div id="manualSearchResults"></div>
             </div>
 
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
