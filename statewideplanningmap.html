@@ -1086,6 +1086,7 @@
               "esri/widgets/Legend",
               "esri/layers/WebTileLayer",
               "esri/layers/WMTSLayer",
+              "esri/widgets/Print/CustomTemplate",
               "esri/widgets/Print",
               "esri/widgets/Print/PrintViewModel",
               "esri/widgets/Expand",
@@ -1095,7 +1096,7 @@
               "esri/popup/ExpressionInfo"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
+                        Legend, WebTileLayer, WMTSLayer, CustomTemplate, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
               
               var map = new Map({
                   //map content added below
@@ -1550,16 +1551,32 @@
               document.getElementById("print").addEventListener("click", ()=>{
                 if(!printer){
                   activateToolButton("print")
+                  let customPrintTemplate = new CustomTemplate({
+                    layoutOptions: true
+                  })
                   printer = new Print({
                     view: view,
-                    printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
                     visible: true,
                     name: "print",
+                    printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
+                    templateOptions:{
+                      legendEnabled: true,
+                      title: "My_Test",
+                      customTextElements: [{"FOOTER - Author Name (DYNAMIC)": "David Prosack"}]
+                    },
+                    // viewModel: new PrintVM({
+                    //   view: view,
+                    //   printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
+                    //   defaultTemplates: [customPrintTemplate]
+                    // })
                   }) 
-                  
+                  // const activeLayers = itemArr.filter(x => x.visible === 1)
+                  // console.log(retrieveFeatureLayer(activeLayers[0].name))
+                  // console.log(activeLayers)
                   view.ui.add(printer, {
                     position: "bottom-right"
                   })
+                  
                   resetToolButtons("print")
                   return
                 }
@@ -4284,17 +4301,46 @@
 
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
                       basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
+                      
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
                       addFeatureLayer.legendEnabled = false
                       addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                      loadRoadNames(addFeatureLayer)
                       return
                     }
                     createSourcesArr(layer)
-                   
                   })
                   map.add(addFeatureLayer)
                 return
+              }
+              
+              async function loadRoadNames(roadNameLayer){
+                let isExceed = true
+                let gid = 0
+                let page = 0
+                while(isExceed){
+                  console.log(`page = ${page}`)
+                  //page ++
+                  const roadQuery = roadNameLayer.createQuery()
+                  roadQuery.where = `"GID" > 0`
+                  roadQuery.start = page
+                  roadQuery.num = 10
+                  roadQuery.outFields = ['"RTE_NM"']
+                  roadQuery.orderByFields = ['"GID"']
+                  //roadQuery.returnGeometry = false
+                  
+                  //roadQuery.maxRecordCountFactor = 5
+                  roadQuery.returnDistinctValues = true
+                  
+                  let test = await roadNameLayer.queryFeatures(roadQuery)
+                 
+                  isExceed =  test.exceededTransferLimit
+                  console.log( test)
+
+                  page++
+                }
+
               }
 
               async function addBasemapAndFeatureToMap(featLayerUrlArr){
