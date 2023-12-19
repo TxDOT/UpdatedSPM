@@ -60,6 +60,27 @@
                 display: block !important;
               }
             }
+
+            .search-results{
+              position: absolute;
+              overflow-y: auto;
+              height: 100px;
+              width: 95%;
+              top: 150px;
+              background-color: white;
+              border-style: solid;
+              border-color: #204e70;
+              display: flex;
+              flex-direction: column;
+              visibility: hidden;
+            }
+
+            #road-name-results1 span:hover{
+              color: red;
+              cursor: pointer;
+              background-color: rgba(32,78,112,.2)
+            }
+
             html{
               scroll-behavior: smooth;
             }
@@ -201,6 +222,9 @@
               border: none;
               color: grey;
               
+            }
+            .featureLayerError{
+              text-decoration: line-through;
             }
             .dwnloadBtn:hover{
               color: green;
@@ -1215,6 +1239,7 @@
 
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
               async function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
+                console.log(rteID,frmDFO,toDFO,theColor,theWidth,theDescription)
                 document.getElementById("btnEventMap").textContent = "Loading...."
                 document.getElementById("btnEventMap").disabled = true
                 var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0";
@@ -1222,7 +1247,7 @@
                 let resp = await request(url+paraMeters)
                 document.getElementById("btnEventMap").textContent = "Add to Map"
                 document.getElementById("btnEventMap").disabled = false
-
+                console.log(resp)
                 try{
                   let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
                   if(!isWalkGeom){
@@ -1281,6 +1306,7 @@
                 let currentArr = [newLinePoints[0]];
 
                 for (let i = 1; i < newLinePoints.length; i++) {
+                  console.log(newLinePoints[i])
                   if (newLinePoints[i][0] !== currentArr[0][0]) {
                     result.push(currentArr);
                     currentArr = [newLinePoints[i]];
@@ -1332,6 +1358,7 @@
                     
                     //Loop through the results extend the events and add to the map
                     for (var z = 0; z < result.length; z++) {
+                      console.log(result[z])
                       //For the first point on the segment
                       indexOne = result[z][0][0]
                       indexTwo = result[z][0][1];
@@ -1937,13 +1964,14 @@
               function rightClickUrlDisplay(evt){
                 //get overlays that are visible
                 let isVisibleLayers = returnVisibleLayers()
+                console.log(isVisibleLayers)
                  if (evt.button === 2) {
                     let point = view.toMap({x: evt.x, y: evt.y});
         
                     const basemaps = view.layerViews.items.filter(f => f.layer.type !== "feature")
                     const mapForURL = basemaps.find(f => f.layer.visible === true).layer.name 
 
-                    let overlayUrl = isVisibleLayers.length ? `overlays=${isVisibleLayers.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
+                    let overlayUrl = isVisibleLayers.length ? `overlays=${isVisibleLayers.toString().replace(/\s/g, '')}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
                     let rightClickURL = `${window.location.origin}${window.location.pathname}?${overlayUrl}`
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
                     
@@ -2729,9 +2757,9 @@
                     if(!mainTOCLayers.includes(urlOverlay)){
                       appendChildToOverlayList(urlOverlay, "FeatureLayer", false)
                     }
-                    
-                    let layerId = retrieveFeatureLayer(urlOverlay)
-                    let returnId = itemArr.find(overlay => overlay.name === urlOverlay)
+
+                    let returnId = itemArr.find(overlay => overlay.urlOverlayName === urlOverlay)
+                    let layerId = retrieveFeatureLayer(returnId.name)
                     layerId.forEach((featLayer) => {
                       featLayer.when((f) =>{
                         setIsVisible(f, returnId, urlOverlay)
@@ -4145,7 +4173,8 @@
                 })
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, isLabel: x.attributes.labelText, visible: false, addToTOC: 0})
+                  itemArr.push({name: x.attributes.name, urlOverlayName: x.attributes.name.replace(/\s/g, ''), url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, isLabel: x.attributes.labelText, visible: false, addToTOC: 0})
+                  console.log(itemArr.at(-1).urlOverlayName)
                 })
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
@@ -4270,7 +4299,7 @@
               function addFeatureLayerToMap(featLayer, popupInfo){
                   let label = JSON.parse(featLayer.isLabel)
                   let featLayerLabel = new LabelClass(label)
-
+                  //basemapFeatureLayerActiveCheck(`${featLayer.url}`, "featureLayer")
                   let addFeatureLayer = new FeatureLayer({
                     url: featLayer.url,
                     visible: false,
@@ -4287,7 +4316,8 @@
                   })
       
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                  addFeatureLayer.when((layer)=>{               
+                  addFeatureLayer.when((layer)=>{     
+                              
                     layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
                       if(layer.title === "TxDOT Bridges"){
@@ -4300,13 +4330,13 @@
                     }
 
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
-                      basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
+                      
                       
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
                       addFeatureLayer.legendEnabled = false
                       addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
-                      loadRoadNames(addFeatureLayer)
+                      //loadRoadNames(addFeatureLayer)
                       return
                     }
                     createSourcesArr(layer)
@@ -4315,32 +4345,44 @@
                 return
               }
               
-              async function loadRoadNames(roadNameLayer){
-                let isExceed = true
-                let gid = 0
-                let page = 0
-                while(isExceed){
-                  console.log(`page = ${page}`)
+
+              async function loadRoadNames(rdName){
+                // let isExceed = true
+                // let gid = 0
+                // let page = 0
+                //while(isExceed){
+                  document.getElementsByClassName("search-results").item(0).style.visibility = "visible"
+                  document.getElementById("road-name-results1").innerHTML = ""
+                  const getRdUnsegLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")[0]
                   //page ++
-                  const roadQuery = roadNameLayer.createQuery()
-                  roadQuery.where = `"GID" > 0`
-                  roadQuery.start = page
+                  console.log(new Date().getTime())
+                  const roadQuery = getRdUnsegLayer.createQuery()
+                  roadQuery.where = `"RTE_NM" like '${rdName}%'`
+                  roadQuery.start = 0
                   roadQuery.num = 10
                   roadQuery.outFields = ['"RTE_NM"']
-                  roadQuery.orderByFields = ['"GID"']
-                  //roadQuery.returnGeometry = false
+                  roadQuery.returnGeometry = false
                   
                   //roadQuery.maxRecordCountFactor = 5
                   roadQuery.returnDistinctValues = true
                   
-                  let test = await roadNameLayer.queryFeatures(roadQuery)
-                 
+                  let test = await getRdUnsegLayer.queryFeatures(roadQuery)
+                  console.log(rdName) 
                   isExceed =  test.exceededTransferLimit
-                  console.log( test)
+                  console.log(test)
+                  console.log(new Date().getTime())
+                  if(!test.features.length){
+                    document.getElementById("road-name-results1").innerHTML = `<span>No Results.</span>`
+                  }
+                  const searchArr = test.features.map((item) => {
+                    document.getElementById("road-name-results1").innerHTML += `<span onclick="getRdName(this)">${item.attributes.RTE_NM}</span>`
+                    return
+                  })
 
-                  page++
-                }
 
+                  console.log(searchArr)
+                  //page++
+                //}
               }
 
               async function addBasemapAndFeatureToMap(featLayerUrlArr){
@@ -4872,7 +4914,7 @@
                   
               }
 
-              async function basemapFeatureLayerActiveCheck(url, layerType){
+              async function basemapFeatureLayerActiveCheck(url, layerType, name){
                 let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
                 let returnStatus = fetch(url)
                 returnStatus
@@ -4893,6 +4935,7 @@
                           status = y.includes(errStr) ? true : false 
                         }
                       })
+                      document.getElementById(name).classList.add("nodownload", "featureLayerError")
                       status ? createServiceDown(alertTxt, "red") : null
                       return
                     }
@@ -5018,8 +5061,20 @@
                       </ul>
                   `, header: "Release Notes"}, null, height="300px", width="473px")
               }
+
+             document.getElementById("eventRoute").addEventListener("keyup", (event)=>{
+              if(event.target.value.length >= 3){
+                console.log(event.target)
+                console.log(new Date().getTime())
+                loadRoadNames(event.target.value)
+              }
+             }) 
             // end require - - -        
-            });      
+            });
+            function getRdName(e){
+              document.getElementById("eventRoute").value = e.textContent
+              document.getElementsByClassName("search-results").item(0).style.visibility = "hidden"
+            }      
         </script>
     </head>
     <body class="main">
@@ -5032,6 +5087,7 @@
                 &nbsp;&nbsp;
             </nav>        
         </div>
+
         <div id="left-div" class="unselectable">
             <div id="close"></div>
             <div id="tabsParent" class="tabsContainer">
@@ -5178,6 +5234,7 @@
                 <span class="tabDesc">Create and export roadway segments.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
                 <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
+                <span class="search-results" id="road-name-results1"></span>
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1 eventDisable" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1 eventDisable" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
                 <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Customize</span>
