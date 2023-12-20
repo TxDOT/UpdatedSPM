@@ -72,15 +72,33 @@
               border-color: #204e70;
               display: flex;
               flex-direction: column;
+              visibility: collapse;
+            }
+/* 
+            #road-name-results1{
               visibility: hidden;
             }
-
-            #road-name-results1 span:hover{
+            #road-name-results-query{
+              visibility: hidden;
+            } */
+            .search-results li:hover{
               color: red;
               cursor: pointer;
               background-color: rgba(32,78,112,.2)
             }
+            #value:focus ~ .search-results{
+              visibility: visible;
+              transition: visibility 0s linear 300ms, opacity 300ms;
+            }
 
+            #eventRoute:focus ~ .search-results{
+              visibility: visible;
+              transition: visibility 0s linear 300ms, opacity 300ms;
+            }
+            .road-names-search{
+              text-align: left;
+              z-index: 999;
+            }
             html{
               scroll-behavior: smooth;
             }
@@ -222,9 +240,6 @@
               border: none;
               color: grey;
               
-            }
-            .featureLayerError{
-              text-decoration: line-through;
             }
             .dwnloadBtn:hover{
               color: green;
@@ -1110,7 +1125,6 @@
               "esri/widgets/Legend",
               "esri/layers/WebTileLayer",
               "esri/layers/WMTSLayer",
-              "esri/widgets/Print/CustomTemplate",
               "esri/widgets/Print",
               "esri/widgets/Print/PrintViewModel",
               "esri/widgets/Expand",
@@ -1120,7 +1134,7 @@
               "esri/popup/ExpressionInfo"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, CustomTemplate, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
               
               var map = new Map({
                   //map content added below
@@ -1239,15 +1253,14 @@
 
               //data is an array of Route ID, From DFO, To DFO ["IH0035-KG",15,30], rework to loop through records in the file
               async function getLineworkWithM(rteID,frmDFO,toDFO,theColor,theWidth,theDescription) {
-                console.log(rteID,frmDFO,toDFO,theColor,theWidth,theDescription)
                 document.getElementById("btnEventMap").textContent = "Loading...."
                 document.getElementById("btnEventMap").disabled = true
-                var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0";
+                var url = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0";
                 var paraMeters = "/query?f=json&where=RTE_NM='" + rteID + "'&returnGeometry=true&returnM=true";
                 let resp = await request(url+paraMeters)
                 document.getElementById("btnEventMap").textContent = "Add to Map"
                 document.getElementById("btnEventMap").disabled = false
-                console.log(resp)
+
                 try{
                   let isWalkGeom = walkGeom(resp,rteID,frmDFO,toDFO,theColor,theWidth,theDescription);
                   if(!isWalkGeom){
@@ -1273,7 +1286,6 @@
                   document.getElementById("btnUpdateLRM").disabled = false
                   return true 
                 }
-
                 var theGeomPart;
                 var coordX;
                 var coordY;
@@ -1281,7 +1293,7 @@
                 var nextCoordM;
                 var internalSegmentFlag=false;
                 var newLinePoints = [];
-
+                
                 for (var a=0; a < theGeom.data.features.length; a++) {
                   theGeomPart = theGeom.data.features[a].geometry.paths; 
                   for (var j = 0; j < theGeomPart[0].length; j++) {
@@ -1302,11 +1314,11 @@
                   }
                 }
 
+                //Loop through the results and split up the array based on any segment breaks
                 let result = [];
                 let currentArr = [newLinePoints[0]];
 
                 for (let i = 1; i < newLinePoints.length; i++) {
-                  console.log(newLinePoints[i])
                   if (newLinePoints[i][0] !== currentArr[0][0]) {
                     result.push(currentArr);
                     currentArr = [newLinePoints[i]];
@@ -1315,6 +1327,7 @@
                   }
                 }
                 result.push(currentArr); 
+
 
                 if (internalSegmentFlag) {
                   var internalResult = [[]];
@@ -1349,90 +1362,90 @@
 
                   result = internalResult;
 
-                  }
-                  else{
-                    var indexOne;
-                    var indexTwo;
-                    var indexThree;
-                    var segmentArrayLength;
+                  } else {
                     
-                    //Loop through the results extend the events and add to the map
-                    for (var z = 0; z < result.length; z++) {
-                      console.log(result[z])
-                      //For the first point on the segment
-                      indexOne = result[z][0][0]
-                      indexTwo = result[z][0][1];
-                      indexThree = result[z][0][2];   
+                  var indexOne;
+                  var indexTwo;
+                  var indexThree;
+                  var segmentArrayLength;
+                
+                  //Loop through the results extend the events and add to the map
+                  for (var z = 0; z < result.length; z++) {
+                    //For the first point on the segment
+                    indexOne = result[z][0][0]
+                    indexTwo = result[z][0][1];
+                    indexThree = result[z][0][2];   
 
-                      if (indexThree>0) {
-                        var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][0];
-                        var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][1];
-                        var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
-                        var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1]; 
-                        var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2]; //the m difference between vertices
-                        var lengthFromFirstPoint = theBegin-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2];  //event from-beginning vertex m
-                        var newBeginPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthFromFirstPoint);
-                        
-                        //Add to the beginning of the array
-                        //Don't run unless distance is greater than .001
-                        if (lengthFromFirstPoint>.001) {
-                            result[z].unshift([0,0,0,newBeginPoint[0],newBeginPoint[1]]);                  
-                        }
-                      }      
+                    if (indexThree>0) {
+                      var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][0];
+                      var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][1];
+                      var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
+                      var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1]; 
+                      var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2]; //the m difference between vertices
+                      var lengthFromFirstPoint = theBegin-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree-1][2];  //event from-beginning vertex m
+                      var newBeginPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthFromFirstPoint);
                       
-                      segmentArrayLength = result[z].length;
-                      
-                      //For the last point on the segment
-                      indexOne = result[z][segmentArrayLength-1][0];
-                      indexTwo = result[z][segmentArrayLength-1][1];
-                      indexThree = result[z][segmentArrayLength-1][2];
-                      
-                      if (indexThree<theGeom.data.features[indexOne].geometry.paths[indexTwo].length-1) {
-                        var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
-                        var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1];
-                        var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][0];
-                        var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][1]; 
-                        var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]; //the m difference between vertices
-                        var lengthBeyondLastPoint = theEnd-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2];  //event from-ending vertex m
-                        var newEndPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthBeyondLastPoint);
-                        
-                        //Adding to the end of the array
-                        //Don't run unless distance is greater than .001
-                        if (lengthBeyondLastPoint>.001) {
-                          result[z].push([0,0,0,newEndPoint[0],newEndPoint[1]]);
-                        }     
+                      //Add to the beginning of the array
+                      //Don't run unless distance is greater than .001
+                      if (lengthFromFirstPoint>.001) {
+                          result[z].unshift([0,0,0,newBeginPoint[0],newBeginPoint[1]]);                  
                       }
+                    }      
+                  
+                    segmentArrayLength = result[z].length;
+                    
+                    //For the last point on the segment
+                    indexOne = result[z][segmentArrayLength-1][0];
+                    indexTwo = result[z][segmentArrayLength-1][1];
+                    indexThree = result[z][segmentArrayLength-1][2];
+                    
+                    if (indexThree<theGeom.data.features[indexOne].geometry.paths[indexTwo].length-1) {
+                      var pointOneX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][0];
+                      var pointOneY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][1];
+                      var pointTwoX = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][0];
+                      var pointTwoY = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][1]; 
+                      var definedLength = theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree+1][2]-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2]; //the m difference between vertices
+                      var lengthBeyondLastPoint = theEnd-theGeom.data.features[indexOne].geometry.paths[indexTwo][indexThree][2];  //event from-ending vertex m
+                      var newEndPoint = interpolatePoint(pointOneX,pointOneY,pointTwoX,pointTwoY,definedLength,lengthBeyondLastPoint);
+                      
+                      //Adding to the end of the array
+                      //Don't run unless distance is greater than .001
+                      if (lengthBeyondLastPoint>.001) {
+                        result[z].push([0,0,0,newEndPoint[0],newEndPoint[1]]);
+                      }     
                     }
                   }
-                  
-                  let finalResult = result.map(subArr => subArr.map(innerSubArr => innerSubArr.slice(3)));
 
-                  for (var x = 0; x < finalResult.length; x++) {
-                    var line = new Polyline({
-                      paths: [finalResult[x]],
-                      spatialReference: { wkid: 102100 }
-                    });
-
-                    lineGraphic = new Graphic({
-                      attributes: [rteID,theBegin,theEnd,theColor,theWidth,theDescription],
-                      geometry: line,
-                      symbol: {
-                        type: "simple-line",
-                        color: theColor,
-                        width: theWidth
-                      },
-                      popupTemplate: new PopupTemplate({
-                        title: rteID,
-                        content: theDescription
-
-                      })                  
-                    });
-                    //Add line to map
-                    graphicsLayer.add(lineGraphic);
-                    
-                    addGraphicToEventDisplay(lineGraphic)              
                 }
 
+                let finalResult = result.map(subArr => subArr.map(innerSubArr => innerSubArr.slice(3)));
+
+                for (var x = 0; x < finalResult.length; x++) {
+                  var line = new Polyline({
+                    paths: [finalResult[x]],
+                    spatialReference: { wkid: 102100 }
+                  });
+          
+                  lineGraphic = new Graphic({
+                    attributes: [rteID,theBegin,theEnd,theColor,theWidth,theDescription],
+                    geometry: line,
+                    symbol: {
+                      type: "simple-line",
+                      color: theColor,
+                      width: theWidth
+                    },
+                    popupTemplate: new PopupTemplate({
+                      title: rteID,
+                      content: theDescription
+
+                    })                  
+                  });
+                  //Add line to map
+                  graphicsLayer.add(lineGraphic);
+                  
+                  addGraphicToEventDisplay(lineGraphic)              
+                }
+                
                 internalSegmentFlag=false;
                 zoomToGraphicExtent();
               }
@@ -1578,32 +1591,16 @@
               document.getElementById("print").addEventListener("click", ()=>{
                 if(!printer){
                   activateToolButton("print")
-                  let customPrintTemplate = new CustomTemplate({
-                    layoutOptions: true
-                  })
                   printer = new Print({
                     view: view,
+                    printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
                     visible: true,
                     name: "print",
-                    printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
-                    templateOptions:{
-                      legendEnabled: true,
-                      title: "My_Test",
-                      customTextElements: [{"FOOTER - Author Name (DYNAMIC)": "David Prosack"}]
-                    },
-                    // viewModel: new PrintVM({
-                    //   view: view,
-                    //   printServiceUrl: "https://maps.txdot.gov/createags/rest/services/CustomPrint/GPServer/Export%20Web%20Map",
-                    //   defaultTemplates: [customPrintTemplate]
-                    // })
                   }) 
-                  // const activeLayers = itemArr.filter(x => x.visible === 1)
-                  // console.log(retrieveFeatureLayer(activeLayers[0].name))
-                  // console.log(activeLayers)
+                  
                   view.ui.add(printer, {
                     position: "bottom-right"
                   })
-                  
                   resetToolButtons("print")
                   return
                 }
@@ -1964,14 +1961,13 @@
               function rightClickUrlDisplay(evt){
                 //get overlays that are visible
                 let isVisibleLayers = returnVisibleLayers()
-                console.log(isVisibleLayers)
                  if (evt.button === 2) {
                     let point = view.toMap({x: evt.x, y: evt.y});
         
                     const basemaps = view.layerViews.items.filter(f => f.layer.type !== "feature")
                     const mapForURL = basemaps.find(f => f.layer.visible === true).layer.name 
 
-                    let overlayUrl = isVisibleLayers.length ? `overlays=${isVisibleLayers.toString().replace(/\s/g, '')}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
+                    let overlayUrl = isVisibleLayers.length ? `overlays=${isVisibleLayers.toString()}&map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}` : `map=${mapForURL}&location=${point.latitude.toFixed(8)},${point.longitude.toFixed(8)},${view.zoom}`
                     let rightClickURL = `${window.location.origin}${window.location.pathname}?${overlayUrl}`
                     var latLongOnly = point.latitude.toFixed(8)+","+point.longitude.toFixed(8);
                     
@@ -2757,9 +2753,9 @@
                     if(!mainTOCLayers.includes(urlOverlay)){
                       appendChildToOverlayList(urlOverlay, "FeatureLayer", false)
                     }
-
-                    let returnId = itemArr.find(overlay => overlay.urlOverlayName === urlOverlay)
-                    let layerId = retrieveFeatureLayer(returnId.name)
+                    
+                    let layerId = retrieveFeatureLayer(urlOverlay)
+                    let returnId = itemArr.find(overlay => overlay.name === urlOverlay)
                     layerId.forEach((featLayer) => {
                       featLayer.when((f) =>{
                         setIsVisible(f, returnId, urlOverlay)
@@ -4173,8 +4169,7 @@
                 })
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
-                  itemArr.push({name: x.attributes.name, urlOverlayName: x.attributes.name.replace(/\s/g, ''), url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, isLabel: x.attributes.labelText, visible: false, addToTOC: 0})
-                  console.log(itemArr.at(-1).urlOverlayName)
+                  itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, isLabel: x.attributes.labelText, visible: false, addToTOC: 0})
                 })
                 createTOC(itemArr, docFrag)  
                 await addBasemapAndFeatureToMap(itemArr)
@@ -4299,7 +4294,7 @@
               function addFeatureLayerToMap(featLayer, popupInfo){
                   let label = JSON.parse(featLayer.isLabel)
                   let featLayerLabel = new LabelClass(label)
-                  //basemapFeatureLayerActiveCheck(`${featLayer.url}`, "featureLayer")
+
                   let addFeatureLayer = new FeatureLayer({
                     url: featLayer.url,
                     visible: false,
@@ -4316,8 +4311,7 @@
                   })
       
                   featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                  addFeatureLayer.when((layer)=>{     
-                              
+                  addFeatureLayer.when((layer)=>{               
                     layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
                     if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
                       if(layer.title === "TxDOT Bridges"){
@@ -4330,29 +4324,35 @@
                     }
 
                     if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
-                      
-                      
+                      basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
                       addFeatureLayer.visible = true
                       addFeatureLayer.opacity = 0
                       addFeatureLayer.legendEnabled = false
                       addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
-                      //loadRoadNames(addFeatureLayer)
                       return
                     }
                     createSourcesArr(layer)
+                   
                   })
                   map.add(addFeatureLayer)
                 return
               }
-              
 
               async function loadRoadNames(rdName){
                 // let isExceed = true
                 // let gid = 0
                 // let page = 0
                 //while(isExceed){
-                  document.getElementsByClassName("search-results").item(0).style.visibility = "visible"
-                  document.getElementById("road-name-results1").innerHTML = ""
+                  let getSpan = "";
+                  const getDivId = document.querySelectorAll(".search-results").forEach((x) => {
+                    let id = x.attributes["id"].value
+                    let b = window.getComputedStyle(document.getElementById(`${id}`))
+                    if(b.visibility === "visible"){
+                      getSpan = x.id
+                    }
+                  })
+
+                  document.getElementById(`${getSpan}`).innerHTML = ""
                   const getRdUnsegLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")[0]
                   //page ++
                   console.log(new Date().getTime())
@@ -4372,19 +4372,18 @@
                   console.log(test)
                   console.log(new Date().getTime())
                   if(!test.features.length){
-                    document.getElementById("road-name-results1").innerHTML = `<span>No Results.</span>`
+                    document.getElementById(`${getSpan}`).innerHTML = `<span>No Results.</span>`
                   }
                   const searchArr = test.features.map((item) => {
-                    document.getElementById("road-name-results1").innerHTML += `<span onclick="getRdName(this)">${item.attributes.RTE_NM}</span>`
-                    return
+                    document.getElementById(`${getSpan}`).innerHTML += `<li class="road-names-search" onclick="getRdName(this)">${item.attributes.RTE_NM}</li>`
+                    return item.attributes.RTE_NM
                   })
-
 
                   console.log(searchArr)
                   //page++
                 //}
               }
-
+              
               async function addBasemapAndFeatureToMap(featLayerUrlArr){
                 let addToMapPromise = new Promise(async(res, rej) =>{
                   for(i=0; i < featLayerUrlArr.length; i++){
@@ -4582,6 +4581,7 @@
                 return template
               }
 
+      
               async function downloadOverlay(featLayer){
                 let featList = retrieveFeatureLayer(featLayer)
 
@@ -4914,7 +4914,7 @@
                   
               }
 
-              async function basemapFeatureLayerActiveCheck(url, layerType, name){
+              async function basemapFeatureLayerActiveCheck(url, layerType){
                 let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
                 let returnStatus = fetch(url)
                 returnStatus
@@ -4935,7 +4935,6 @@
                           status = y.includes(errStr) ? true : false 
                         }
                       })
-                      document.getElementById(name).classList.add("nodownload", "featureLayerError")
                       status ? createServiceDown(alertTxt, "red") : null
                       return
                     }
@@ -5052,7 +5051,7 @@
                 let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", 
                                     "Updated Bridge Popups to include Bridge Report", 
                                     "Updated Roadway Inventory - On System and Reference Marker scale dependencies", "Updated Control Section Job in Search",
-                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control", "Updated eLRS endpoints", "Enabled copy and paste on feature popups", "Updated Event tab functionality"]
+                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control", "Updated eLRS endpoints", "Enabled copy and paste on eLRS/feature popups"]
                 let releaseNotesList="";
                 releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
                 queryResponseUI({para: `
@@ -5060,21 +5059,24 @@
                         ${releaseNotesList}
                       </ul>
                   `, header: "Release Notes"}, null, height="300px", width="473px")
-              }
+              } 
+              
+              document.querySelectorAll(".search-results").forEach((elem) => {
+                let previousElemId = elem.previousElementSibling.id
+                document.getElementById(`${previousElemId}`).addEventListener("keyup", (event)=>{
+                  if(event.target.value.length >= 3){
+                    console.log(new Date().getTime())
+                    loadRoadNames(event.target.value)
+                  }
+                })
+              })  
 
-             document.getElementById("eventRoute").addEventListener("keyup", (event)=>{
-              if(event.target.value.length >= 3){
-                console.log(event.target)
-                console.log(new Date().getTime())
-                loadRoadNames(event.target.value)
-              }
-             }) 
             // end require - - -        
             });
             function getRdName(e){
+              console.log(e)
               document.getElementById("eventRoute").value = e.textContent
-              document.getElementsByClassName("search-results").item(0).style.visibility = "hidden"
-            }      
+            }    
         </script>
     </head>
     <body class="main">
@@ -5087,7 +5089,6 @@
                 &nbsp;&nbsp;
             </nav>        
         </div>
-
         <div id="left-div" class="unselectable">
             <div id="close"></div>
             <div id="tabsParent" class="tabsContainer">
@@ -5142,6 +5143,7 @@
                     <!--<option value="LIKE">LIKE (use % as a wildcard)</option>-->
                 </select>
                 <input type="text" id="value" class="noDisabled1" placeholder="Enter a value to query" disabled>
+                <span class="search-results" id="road-name-results-query"></span>
                 <button class="queryButtonClass noDisabled1 spmMainBtn btnAddCondition qryBtn" id="btnAddCondition">Add Condition</button>
                 <!-- <section><p id="fieldBuilder" class="queryBuilder">i.e EMP</p><p id="operatorBuilder" class="queryBuilder">i.e ></p><p id="valueBuilder" class="queryBuilder">i.e 1244</p></section> -->
                 <ul id="conditions" class="noDisabled1 tableBtn">
