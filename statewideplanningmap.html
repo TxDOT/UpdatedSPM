@@ -60,9 +60,106 @@
                 display: block !important;
               }
             }
+
+            .search-results{
+              position: absolute;
+              overflow-y: auto;
+              height: 100px;
+              width: 96.2%;
+              background-color: white;
+              border-style: solid;
+              border-color: #204e70;
+              border-width: thin;
+              flex-direction: column;
+              display: none;
+            }
+            
+            #road-name-results-event {
+              top: 9.5rem;
+            }
+
+            #road-name-results-query {
+              top: 20rem;
+            }
+
+            #road-name-results-srd{
+              top:9.5rem;
+            }
+/*          
+            #road-name-results1{
+              visibility: hidden;
+            }
+            #road-name-results-query{
+              visibility: hidden;
+            } */
+            .search-results li:hover{
+              /* color: red; */
+              cursor: pointer;
+              background-color: rgba(32,78,112,.2)
+            }
+
+            #value:disabled ~ #btnAddCondition{
+              background-color: lightgray;
+              color:gray;
+              pointer-events: none;
+            }
+
+            .search-results:focus ~ #buttonTest{
+              visibility: visible;
+            }
+            .clear-dropdown{
+              position: absolute;
+              right: 1rem;
+              visibility: hidden;
+              background-color: rgba(255, 255, 255, 0);
+              border: none;
+              cursor: pointer;
+            }
+            .clear-dropdown:hover{
+              content: 'Clear';
+            }
+
+            .clear-dropdown:focus{
+              color: rgba(0,0,0,.3);
+            }
+
+            #clear-query-search{
+              top: 17.9rem
+            }
+
+            #clear-event-search{
+              top: 7.54rem
+            }
+            #clear-srd-search{
+              top: 7.5rem;
+            }
+            form > #eventRoute:not(:placeholder-shown) > .clear-dropdown{
+              visibility: visible;
+            }
+
+            #eventRoute:placeholder-shown ~ .clear-dropdown{
+              visibility: hidden;
+            }
+            
+            .road-names-search:focus ~ .search-results{
+              display: none;
+            }
+
+            .road-names-search{
+              text-align: left;
+              visibility: visible;
+              padding-left: .4rem;
+              list-style: none;
+            }
+
             html{
               scroll-behavior: smooth;
             }
+
+            ul {
+              padding-left: 1.5rem;
+            }
+
             #printWidget{
               position:relative;
               top: 5rem;
@@ -136,7 +233,7 @@
             .queryStatus #queryMessageBtn{
               position:relative;
               z-index: 1;
-              margin-top: 1.3rem;
+              margin-top: 4.3rem;
               margin-bottom: 1rem;
               margin-left: calc(24vw - 5.8rem);
               right: -1rem;
@@ -155,6 +252,9 @@
               margin-right: calc(24vw - 6rem);
               visibility: hidden;
               left: 6.5rem;
+            }
+            .esri-icon-close{
+              color:#14375A
             }
             .esri-icon-notice-triangle{
               font-family: Roboto, Avenir, Helvetica, Arial, sans-serif !important;
@@ -428,6 +528,46 @@
             .expandNotes:active .notes{
               display:block
             }
+            #old-release-notes{
+              display: block;
+            }
+            
+            #curr-release-notes{
+              position: relative;
+              visibility: visible;
+              top: 0rem;
+              display: block;
+            }
+
+            #curr-change-btn{
+              position: relative;
+              top: 0rem
+            }
+
+            #old-release-btn{
+              position: relative;
+              top: 0rem;
+            }
+
+            .app-details{
+              width:100%;
+              position: absolute;
+              padding:0rem;
+              border-radius:0rem;
+              border:none;
+              background-color: rgba(245, 245, 245, 0);
+              height: 2rem;
+              right:0rem;
+              color:black;
+            }
+          
+            /* #curr-change-btn:hover.underline::after, #old-release-btn:hover.underline::after{
+              width: 100%;
+              cursor: pointer;
+              transition: width 1.5s;
+            } */
+
+
             #marginal {
                 position: absolute;
                 bottom: 12px;
@@ -714,6 +854,13 @@
             #value{
               position: relative;
               top: 0.4rem;
+            }
+            #value:placeholder-shown ~ #btnAddCondition{
+              background-color: lightgray;
+              color:gray;
+              border: 2px lightgray solid;
+              height: 2rem;
+              pointer-events: none;
             }
             #btnAddCondition,#btnUpdateLRM,#btnDiagramGenerateURL, #btnRunQuery,#btnEventMap, #btnInventoryUpdateLRM {
                 width: 97%;
@@ -1117,6 +1264,7 @@
                 "bridgeBorderBool": `DECODE($feature.RR_BRDGE, 1, "Yes", 0, "No", "NA")`,
                 "tollBorderBool": `DECODE($feature.TOLL_BRDGE, 1, "Yes", 0, "No", "NA")`,
                 "uzaDescription": `DECODE($feature.UZA_TYPE, "SUA", "Small Urban (Population 5,000 – 49,999)", "UA", "Urbanized (Population 50,000 – 199,999)", "LUA", "Large Urbanized (Population 200,000+)", "NA")`,
+                "fipsUzaCd": `Text(Number($feature.FIPS_UZA_CD), '00000')`
               }
               //load startup function
               const getURLParams = (url) => new URLSearchParams(url)
@@ -1130,9 +1278,10 @@
                   initBasemapOverlayToggle()
                   onViewLoad()
                   readUrlParams()
+                  roadSegmentQuery("IH0035-KG")
                 }
               }
-              
+
               //Drag and Drop---------------------------------------------------
               var dropZone = document.getElementById('viewDiv');
               
@@ -1427,8 +1576,7 @@
               
               //Base map tile layers--------------------------------------------
               function loadBaseMaps(txdotLayerUrl){
-                //let returnUrl = basemapFeatureLayerActiveCheck(tileLayerTxDOT)
-                //console.log(returnUrl)
+
                 txdotLayer = new VectorTileLayer({
                   url: txdotLayerUrl,
                   visible: false,
@@ -1685,6 +1833,8 @@
               }
 
               const getCurrentQuerySelection = () => document.querySelector(`input[name="featQuery"]:checked`).value
+              //prevent Enter key from being clicked, while in form
+              document.querySelector("form").onkeypress = (e) => e.key === "Enter" ? e.preventDefault() : null
 
               function disableQuery(){
                 let isChecked = document.querySelector(`input[name="featQuery"]:checked`)
@@ -1879,6 +2029,7 @@
                     outputFieldsSelect.appendChild(optionSelect);
                     fieldSelect.appendChild(optionField);                  
                   }
+                  //fieldSelect.value !== "RIA_RTE_ID" ? document.getElementById("road-name-results-query").style.display = "none" : null
                   res("complete")
                 })
 
@@ -1970,10 +2121,18 @@
               function returnVisibleLayers(){
                 let visibleLayer = []
                 let getVisibleLayers = itemArr.filter(x => x.visible === 1)
-                getVisibleLayers.forEach(y => visibleLayer.push(y.name))
+                getVisibleLayers.forEach((y) => {
+                  let newName = modifyString(y.name.replace("&", "and"), " ", "_")
+                  visibleLayer.push(newName)
+                })
                 return visibleLayer
               }
               
+              function modifyString(string, before, after){
+                let replaceString = string.replaceAll(before, after)
+                return replaceString
+              }
+
               const setElementText = (elementName, setValue) => document.getElementById(elementName).innerHTML = setValue
 
               function processLRSResponse(theResponse) {
@@ -2065,7 +2224,7 @@
                 document.getElementById("mapClickResults").appendChild(newSpan); 
               }
               //End LRS Identify------------------------------------------------
-
+        
               //Lat Long Coordinates on mouse move------------------------------
               view.when((v) => {
                 reactiveUtils.when(
@@ -2192,7 +2351,7 @@
               //Maps tab listener
               const baseMapListener = document.querySelector('#baseMaps');
               baseMapListener.addEventListener('click', (event) => {
-                resetAllTabs();
+                resetAllTabs(1);
                 activateButton("baseMaps");
                 document.getElementById("mapTab").style.display = "block";
                 document.getElementById("viewDiv").style.cursor = "default"
@@ -2201,7 +2360,7 @@
               //Query tab listener
               const queryListener = document.querySelector('#dataQuery');
               queryListener.addEventListener('click', (event) => {
-                resetAllTabs();
+                resetAllTabs(1);
                 resetTabInput("queryTab")
                 let isAllDisabled = disableQuery()
                 activateButton("dataQuery");
@@ -2211,13 +2370,15 @@
                 document.getElementById("viewDiv").style.cursor = "default"
                 document.querySelectorAll(".qryBtn").forEach(x => x.disabled = true)
                 document.getElementById("outputFields").disabled = true
-                document.getElementById("conditions").querySelectorAll(".queryCondition").forEach(x => x.remove())           
+                document.getElementById("conditions").querySelectorAll(".queryCondition").forEach(x => x.remove())
+                runRoadNameQuery()
+                clearSearch()         
               });   
               
               //Roadway diagram listener
               const roadwayDiagramListener = document.querySelector('#roadwayDiagram');
               roadwayDiagramListener.addEventListener('click', (event) => {
-                resetAllTabs();
+                resetAllTabs(1);
                 resetTabInput("diagramTab")
                 inputEventListner("inpSRDRouteID")
                 let isAllDisabled = disableQuery()
@@ -2227,13 +2388,15 @@
                 document.getElementById("diagramTab").style.display = "block";
                 document.getElementById("viewDiv").style.cursor = "default"   
                 document.getElementById("riAttributes").disabled = true 
-                document.querySelectorAll(".srdBtn").forEach(x => x.disabled = true)  
+                document.querySelectorAll(".srdBtn").forEach(x => x.disabled = true)
+                runRoadNameQuery()
+                clearSearch()
               });    
               
               //Event tab listener
               const eventTabListener = document.querySelector('#eventForm');
               eventTabListener.addEventListener('click', (event) => {
-                resetAllTabs();
+                resetAllTabs(1);
                 resetTabInput("eventTab")
                 inputEventListner("eventRoute")
                 let isAllDisabled = disableQuery()
@@ -2248,17 +2411,19 @@
                 document.getElementById("eventWidth").disabled = true
                 document.getElementById("eventDescription").disabled = true
                 document.querySelectorAll(".eventBtn").forEach(x => x.disabled = true)
+                runRoadNameQuery()
+                clearSearch()
               });               
               
               //Graphic sketch listener
               const graphicSketchListener = document.querySelector('#graphicSketch');
               graphicSketchListener.addEventListener('click', (event) => {
-                resetAllTabs();
+                resetAllTabs(1);
                 activateButton("graphicSketch");
                 document.getElementById("sketchTab").style.display = "block";
-                
                 document.getElementById("btnRecalcProject").disabled = true
-                sketchDraw()   
+                sketchDraw()
+                clearSearch()   
               }); 
               
               //Check LRM Inputs listener
@@ -2274,6 +2439,7 @@
                 graphicsLayer.removeAll();
                 checkLRMInputs();
                 resetSrdSelectOption()
+                clearSearch()
               })
               
               //Add Inventory Attribute listener
@@ -2502,7 +2668,7 @@
                 })
               }
 
-              function resetAllTabs() {
+              function resetAllTabs(skip) {
                 resetButton("baseMaps");
                 resetButton("dataQuery");                
                 resetButton("roadwayDiagram");
@@ -2521,10 +2687,15 @@
                 inventoryDiagramLogAllValues = [];
                 removeDrawEvent()
                 document.getElementById("btnClearProject").disabled = true
-                let ri = retrieveFeatureLayer("RoadInventory")[0]
-                let bi = retrieveFeatureLayer("Bridges")[0]
-                setInvisible(ri, ri.name, ri.name)
-                setInvisible(bi, bi.name, bi.name)
+                
+                if(!skip){
+                  let ri = retrieveFeatureLayer("RoadInventory")[0]
+                  let bi = retrieveFeatureLayer("Bridges")[0]
+                  setInvisible(ri, ri.name, ri.name)
+                  setInvisible(bi, bi.name, bi.name)
+                  document.getElementById("dwnloadBtnBridges").style.display = "none"
+                  activateBaseMapItem("CLEAR")
+                }
 
                 //resetBaseMapItem(bi.id)
                 userDrawnSketchLength=0;
@@ -2566,7 +2737,6 @@
                 graphicsLayer.removeAll();
                 graphicsLayerLRSIdentify.removeAll();
                 document.getElementById("viewDiv").style.cursor = "default"
-                resetAllTabs
                 clearOverlay()                
               }       
               
@@ -2711,18 +2881,18 @@
                 if(overlayParam){
                   let splitOverlay = overlayParam.split(",")
                   splitOverlay.forEach((urlOverlay) => {
-                    if(!mainTOCLayers.includes(urlOverlay)){
-                      appendChildToOverlayList(urlOverlay, "FeatureLayer", false)
+                    let layerName = modifyString(urlOverlay.replace("and", "&"), "_", " ")
+                    if(!mainTOCLayers.includes(layerName)){
+                      appendChildToOverlayList(layerName, "FeatureLayer", false)
                     }
-                    
-                    let layerId = retrieveFeatureLayer(urlOverlay)
-                    let returnId = itemArr.find(overlay => overlay.name === urlOverlay)
+                    let layerId = retrieveFeatureLayer(layerName)
+                    let returnId = itemArr.find(overlay => overlay.name === layerName)
                     layerId.forEach((featLayer) => {
                       featLayer.when((f) =>{
-                        setIsVisible(f, returnId, urlOverlay)
+                        setIsVisible(f, returnId, layerName)
                         resetBaseMapItem("CLEAR")
                         getActiveLayers(view.zoom)
-                        document.getElementById(`dwnloadBtn${urlOverlay}`).style.display = "block"
+                        document.getElementById(`dwnloadBtn${layerName}`).style.display = "block"
                       })
                     })
 
@@ -2943,7 +3113,12 @@
                 featLayer[0].visible = false
                 featLayer[0].definitionExpression = ""
                 clearConditions()
-                //toggleLayer(featLayer[0].name)
+                if(featLayer[0].name === "Bridges"){
+                  setInvisible(featLayer[0], featLayer[0].name, featLayer[0].name)
+                  document.getElementById("dwnloadBtnBridges").style.display = "none"
+                  activateBaseMapItem("CLEAR")
+                }
+                // toggleLayer(featLayer[0].name)
               }
 
               function createQueryBtn(btn, b){
@@ -4264,7 +4439,7 @@
                     popupEnabled: true,
                     popupTemplate: popupInfo,
                     labelIsVisible: true,
-                    labelingInfo: JSON.parse(featLayer.isLabel) ?  [featLayerLabel] : "",
+                    labelingInfo: JSON.parse(featLayer.isLabel) ?  [featLayerLabel] : null,
                     dockOptions:{
                       position: "bottom-right"
                     },
@@ -4290,7 +4465,7 @@
                       addFeatureLayer.opacity = 0
                       addFeatureLayer.legendEnabled = false
                       addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
-                      return
+                     
                     }
                     createSourcesArr(layer)
                    
@@ -4299,6 +4474,61 @@
                 return
               }
 
+              function abortFetch(){
+                const controller = new AbortController()
+                const signal = controller.signal
+                controller.abort()
+                console.log("aborted")
+                return
+              }
+
+              function roadSegmentQuery(rdName){
+                const getRdUnsegLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")[0]
+                const roadQuery = getRdUnsegLayer.createQuery()
+                roadQuery.where = `"RTE_NM" like '${rdName}%'`
+                roadQuery.start = 0
+                roadQuery.num = 10
+                roadQuery.outFields = ['"RTE_NM"']
+                roadQuery.returnGeometry = false
+                  
+                //roadQuery.maxRecordCountFactor = 5
+                roadQuery.returnDistinctValues = true
+
+                let returnQuery = getRdUnsegLayer.queryFeatures(roadQuery)
+                return returnQuery
+              }
+
+              async function loadRoadNames(rdName, id, queryElem){
+                //abort query feature fetch
+                abortFetch()
+               
+                //page ++
+                const returnRoadQuery = await roadSegmentQuery(rdName)
+                  
+                if(!returnRoadQuery.features.length){
+                  document.getElementById(`${id}`).innerHTML = `<span>No Results.</span>`
+                  document.querySelectorAll(".clear-dropdown").forEach((btn) => {
+                    btn.style.visibility = "visible"
+                    btn.disabled = false
+                  })
+                  return
+                }
+                
+                document.getElementById(`${id}`).innerHTML = ""
+                const searchArr = returnRoadQuery.features.map((item) => {
+                  document.getElementById(`${id}`).innerHTML += `<li class="road-names-search" onclick="getRdName(this)" data-id="${queryElem}">${item.attributes.RTE_NM}</li>`
+                  return item.attributes.RTE_NM
+                })
+                console.log(rdName)
+                document.querySelectorAll(".clear-dropdown").forEach((i) => {
+                  i.style.visibility = "visible"
+                  i.disabled = false
+                })
+                  //page++
+                //}
+                return
+              }
+              
               async function addBasemapAndFeatureToMap(featLayerUrlArr){
                 let addToMapPromise = new Promise(async(res, rej) =>{
                   for(i=0; i < featLayerUrlArr.length; i++){
@@ -4370,7 +4600,8 @@
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"], title: "Minute Order Number"},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)"},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section"}]
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section"},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0", name: "Texas_Roadways_Unsegmented", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search"}]
 
                 let featLayerPath = featLayer.parsedUrl.path.toLowerCase()
                 let src = sourcesObj.find(source => featLayerPath.includes(source.url.toLowerCase()))
@@ -4924,7 +5155,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.4 New Orleans"
+                let version = "5.0.5 Santa Fe"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -4963,20 +5194,73 @@
 
               function appDetailsModal(){
                 
-                let releaseNotes = ["Updated JS to ESRI 4.x", "Updated User Interface", "Updated Search to include Bridges", 
-                                    "Updated Bridge Popups to include Bridge Report", 
-                                    "Updated Roadway Inventory - On System and Reference Marker scale dependencies", "Updated Control Section Job in Search",
-                                    `Added "Copy XY" button to Popup`, "Add Admin Alert Control", "Updated eLRS endpoints", "Enabled copy and paste on eLRS/feature popups"]
-                let releaseNotesList="";
-                releaseNotes.map(x => releaseNotesList += `<li>${x}</li>`)
+                let releaseNotes = [{text: "Updated JS to ESRI 4.x", event: "old"}, {text:"Updated User Interface", event: "old"}, {text:"Updated Search to include Bridges", event: "old"}, 
+                                    {text: "Updated Bridge Popups to include Bridge Report", event: "old"}, 
+                                    {text: "Updated Roadway Inventory - On System and Reference Marker scale dependencies", event: "old"}, {text: "Updated Control Section Job in Search", event: "old"},
+                                    {text: "Added 'Copy XY' button to Popup", event: "old"}, {text: "Add Admin Alert Control", event: "old"}, {text: "Updated eLRS endpoints", event: "old"}, {text: "Enabled copy and paste on eLRS/feature popups", event: "old"},
+                                    {text: "Roadname Search added to Query, Event, SRD forms", event: "new"}, {text:"City Boundaries feature layer added to Overlay list", event: "new"}
+                                  ]
+
+                let oldReleaseNotesList="";
+                let newReleaseNotesList="";
+
+                releaseNotes.map((x) => {
+                  x.event === "old" ? oldReleaseNotesList += `<li class="show-details">${x.text}</li>` : newReleaseNotesList += `<li class="show-details">${x.text}</li>`
+                  //oldReleaseNotesList += `<li class="show-details">${x}</li>`
+                })
                 queryResponseUI({para: `
-                      <ul>
-                        ${releaseNotesList}
-                      </ul>
-                  `, header: "Release Notes"}, null, height="300px", width="473px")
+     
+                      <span id="curr-change-btn" class="app-details stepClass underline">Current Changes</span>
+                      <div id="curr-release-notes">
+                        <ul>
+                          ${newReleaseNotesList}
+                        </ul>
+                      </div>
+                      <span id="old-release-btn" class="app-details stepClass underline">Previous Changes</span>
+                      <div id="old-release-notes">
+                        <ul>
+                          ${oldReleaseNotesList}
+                        </ul>
+                      </div>
+                  `, header: "Release Notes"}, null, height="310px", width="473px")
+              } 
+
+              function runRoadNameQuery(){
+                let tabDictionary = {
+                  "queryTab" : document.getElementById("value"),
+                  "eventTab" : document.getElementById("eventRoute"),
+                  "diagramTab": document.getElementById("inpSRDRouteID")
+                }
+                document.querySelectorAll(".search-results").forEach(async (elem) => {
+                  if(elem.parentNode.parentElement.style.display === "block"){
+                    let queryElemId = tabDictionary[`${elem.parentNode.offsetParent.id}`]
+                    queryElemId.addEventListener("keyup", (event)=>{
+                      if((elem.parentNode.offsetParent.id === "queryTab" && elem.parentNode[2].value !== "RIA_RTE_ID") || (event.key === "Shift" || event.key === "Enter")) return
+                      if(event.target.value.length >= 3){
+                        elem.style.display = "flex"
+                        loadRoadNames(event.target.value, elem.id, queryElemId.id)
+                      }
+                    })
+                  }
+                })
+                return
               }
+            
             // end require - - -        
-            });      
+            });
+            function getRdName(e){
+              document.getElementById(`${e.dataset.id}`).value = e.textContent
+              e.parentNode.style.display = "none"
+              document.querySelectorAll(".clear-dropdown").forEach(btn => btn.style.visibility = "hidden")
+              return
+            }   
+
+            function clearSearch(){
+              document.querySelectorAll(".search-results").forEach(e => e.style.display="none")
+              document.querySelectorAll(".route-field").forEach(field => field.value = "")
+              document.querySelectorAll(".clear-dropdown").forEach(drp => drp.style.visibility = "hidden")
+              return
+            }
         </script>
     </head>
     <body class="main">
@@ -5017,6 +5301,7 @@
         			</table>
             </div>
             <div class="tocTabsQuery" id="queryTab">
+              
               <form onsubmit="return false" name="errorQuery">
                 <p class="borderLine"></p>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .3rem;">Note about the Query form</span>
@@ -5042,7 +5327,9 @@
                     <option value=">=">Greater than or equal to</option>
                     <!--<option value="LIKE">LIKE (use % as a wildcard)</option>-->
                 </select>
-                <input type="text" id="value" class="noDisabled1" placeholder="Enter a value to query" disabled>
+              
+                <input type="text" id="value" class="noDisabled1 route-field" placeholder="Enter a value to query" disabled>
+                
                 <button class="queryButtonClass noDisabled1 spmMainBtn btnAddCondition qryBtn" id="btnAddCondition">Add Condition</button>
                 <!-- <section><p id="fieldBuilder" class="queryBuilder">i.e EMP</p><p id="operatorBuilder" class="queryBuilder">i.e ></p><p id="valueBuilder" class="queryBuilder">i.e 1244</p></section> -->
                 <ul id="conditions" class="noDisabled1 tableBtn">
@@ -5072,7 +5359,11 @@
                     <!-- <h1 style="position:relative; color:white; background-color: #14375A; height: 2rem; bottom: 1.7rem; width: 22.1rem; right:0.6rem; text-align: left; padding-top: .4rem; padding-left: 1rem;">Query Message</h1> -->
                   </div>
                 </template>
-                <span class="error" id="errorQuery"></span> 
+                <span class="error" id="errorQuery"></span>
+                <button class="clear-dropdown esri-icon-close" id="clear-query-search" onclick="clearSearch()"></button>
+                <span class="search-results" id="road-name-results-query"></span>
+                
+
               </form>          
             </div>
             <div class="tocTabsDiagram" id="diagramTab">
@@ -5081,7 +5372,7 @@
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .3rem;">Note about the Diagram form</span>
                 <span class="tabDesc">Display roadway attributes on a diagram.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
-                <input id="inpSRDRouteID"  type="text" placeholder="Route ID - Example: US0290-KG">
+                <input class="route-field" id="inpSRDRouteID"  type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="End Measure - Example: 20" disabled>
                 <!-- <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 2: Add Control Sections to Diagram</span> -->
@@ -5126,6 +5417,9 @@
                 </div>
                 
                 <span class="error" id="errorSrd"></span>
+                <span class="search-results" id="road-name-results-srd"></span>
+                <button class="clear-dropdown esri-icon-close" id="clear-srd-search" onclick="clearSearch()"></button>
+
               </form>                
             </div>
             <div class="tocTabsEvent" id="eventTab">
@@ -5134,7 +5428,8 @@
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .3rem;">Note about the Event form</span>
                 <span class="tabDesc">Create and export roadway segments.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
-                <input type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
+                <input class="route-field" type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
+
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1 eventDisable" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1 eventDisable" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
                 <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Customize</span>
@@ -5166,6 +5461,8 @@
                 </div>
                 
                 <span class="error" id="errorEvent"></span>
+                <span class="search-results" id="road-name-results-event"></span>
+                <button class="clear-dropdown esri-icon-close" id="clear-event-search" onclick="clearSearch()"></button>
               </form>                 
             </div>            
             <div class="tocTabsSketch" id="sketchTab">
