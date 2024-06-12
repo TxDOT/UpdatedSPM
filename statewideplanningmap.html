@@ -60,7 +60,28 @@
                 display: block !important;
               }
             }
+            #solarEclipse{
+              position: relative;
+              width:100%;
 
+            }
+            #solarEclipseDiscard{
+              position: relative;
+              font-size: 11px;
+              top: 2.7rem;
+              max-width: 47%;
+            }
+            .curr-Youtube-Selec{
+              background-color: red !important;
+            }
+            .youtube-Selec{
+              margin-left: 20px;
+              border-radius: 50%; 
+              background-color: #204e70cc; 
+              height: 20px; 
+              width: 20px; 
+              display: inline-block;
+            }
             .search-results{
               position: absolute;
               overflow-y: auto;
@@ -178,6 +199,7 @@
               overflow-y: auto;
               max-height: calc(100vh - 6rem);
               align-items: flex-start;
+              overflow-x: hidden;
             }
             .stepClass{
               display: flex;
@@ -233,7 +255,7 @@
             .queryStatus #queryMessageBtn{
               position:relative;
               z-index: 1;
-              margin-top: 4.3rem;
+              /* margin-top: 4.3rem; */
               margin-bottom: 1rem;
               margin-left: calc(24vw - 5.8rem);
               right: -1rem;
@@ -1195,8 +1217,8 @@
             ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"]
             ];
 
-            let mainTOCLayers = ["2024 Solar eclipse", "AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
-                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "National Highway System", "Alt Fuels - Electric", "Hurricane Evacuation Routes", "Metropolitan Planning Organizations", "Live Traffic"]
+            let mainTOCLayers = ["2024 Solar Eclipse", "AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
+                                 "Reference Markers", "Top 100 Congested Roadways", "Tolls", "TxDOT Safety Rest Areas", "National Highway System", "Alt Fuels - Electric", "Metropolitan Planning Organizations", "Live Traffic"]
 
             let displayPopupInfo = [{}]
             
@@ -1250,7 +1272,7 @@
 
               //load toc feature layer
               let tocFeatureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/sPM_eCLIPSE/FeatureServer/0"//"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
+                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
               })
               
               let popupArcadeDefinition = {
@@ -1279,6 +1301,9 @@
                   onViewLoad()
                   readUrlParams()
                   roadSegmentQuery("IH0035-KG")
+                  toggleLayer("2024 Solar Eclipse")
+                  // document.getElementById(`dwnloadBtn2024 Solar Eclipse`).style.display = "block"
+                  retrieveCookie() ? null : run2024EclipseModal(1)
                 }
               }
 
@@ -1958,6 +1983,7 @@
                 let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
 
                 let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
+
                 view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
                   populateQueryForm(getQueryType);
 
@@ -3158,8 +3184,15 @@
                 div[0].classList.add("queryStatus")
                 let btns;
                 [{btnText: "CLOSE", id: "queryMessageBtn", btnClick: ()=>{removeQueryResponseUI()}}, {btnText: "COPY URL", id: "copyURL", btnClick: ()=>{navigator.clipboard.writeText(text.url)}}].forEach((b) =>{
+                  let innerDiv = document.createElement("div")
+                  let outerDiv = document.createElement("div")
+                  outerDiv.style.width = "100%"
+                  outerDiv.style.marginRight = "25px"
                   let btns = document.createElement("button")
-                  div[0].appendChild(createQueryBtn(btns, b))
+                  innerDiv.appendChild(createQueryBtn(btns, b))
+                  innerDiv.style.float = "right"
+                  outerDiv.appendChild(innerDiv)
+                  div[0].appendChild(outerDiv)
                 })
 
                 if(btnType){
@@ -4364,7 +4397,7 @@
               }
 
               function appendChildToOverlayList(layerItem, layerType, initBuild, documentFrag){
-                  let noDownload = ["Live Traffic" , "Shale Plays", "Future Interstates"]
+                  let noDownload = ["Live Traffic" , "Shale Plays", "Future Interstates", "2024 Solar Eclipse"]
                   let tr = document.createElement("tr")
                   let td = document.createElement("td")
                   td.id = layerItem
@@ -4415,7 +4448,7 @@
                 let returnfeatLayer = retrieveFeatureLayer(url.name)
                 returnfeatLayer.forEach(x => {
                   x.visible = false
-                  itemArr.find(y => y.name === x.name).visible = 0
+                  //itemArr.find(y => y.name === x.name).visible = 0
                 })
                 document.getElementById("addFeatRow").childNodes.forEach((i,x) => {
                   if(i.textContent.includes(idRight)){
@@ -4429,6 +4462,10 @@
 
               function addFeatureLayerToMap(featLayer, popupInfo){
                   let label = JSON.parse(featLayer.isLabel)
+                  const eclipse2024 = {
+                    symbol: {type: "text",color: "white",backgroundColor:[125, 116, 119, 1],borderLineColor: "black",borderLineSize: 1,yoffset: 5,font: {family: "Belleza Regular",size: 12,weight: "bold"}},labelPlacement: "above-center",labelExpressionInfo: {expression: "Concatenate('Start ' + $feature.FULL_ECL + ', totality',$feature.DURATION)"},minScale: 2311162 
+                  }
+                  const eclipseUrl = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/city_points_eclipse/FeatureServer/34"
                   let featLayerLabel = new LabelClass(label)
 
                   let addFeatureLayer = new FeatureLayer({
@@ -4439,7 +4476,7 @@
                     popupEnabled: true,
                     popupTemplate: popupInfo,
                     labelIsVisible: true,
-                    labelingInfo: JSON.parse(featLayer.isLabel) ?  [featLayerLabel] : null,
+                    labelingInfo: JSON.parse(featLayer.isLabel) ?  [featLayerLabel] : featLayer.url[0] === eclipseUrl ? [eclipse2024] : null,
                     dockOptions:{
                       position: "bottom-right"
                     },
@@ -4601,7 +4638,7 @@
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)"},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City"},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Unsegmented/FeatureServer/0", name: "Texas_Roadways_Unsegmented", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search"}]
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0", name: "Texas_Roadways_Unsegmented", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search"}]
 
                 let featLayerPath = featLayer.parsedUrl.path.toLowerCase()
                 let src = sourcesObj.find(source => featLayerPath.includes(source.url.toLowerCase()))
@@ -5245,9 +5282,61 @@
                 })
                 return
               }
+              
+              
+              function run2024EclipseModal(index){
+                //if date is after 04/08 then dont load modal
+                queryResponseUI({
+                  para: `
+                    <div>
+                      <div>
+                        <iframe src="https://www.youtube.com/embed/R7JAVPfOcls" allow="fullscreen" id="youtubeVid" width="700" height="345" style="position: relative;"></iframe>
+                      </div>
+                    </div>
+                    <div>
+                      <div style="width: 100%;">
+                        <button onclick="changeSrcUrl('decr')" class="spmMainBtn">Previous Video</button>
+                        <button onclick="changeSrcUrl('incr')" class="spmMainBtn" style="float: right; position: relative; left: 15px;">Next Video</button>
+                        <div style="display: flex; flex-direction: row;">
+                          <div style="bottom: 24px; left: 113px; position: relative;">
+                            <a  class="youtube-Selec curr-Youtube-Selec" index-search=0 onclick="changeVideo(0)"></a>
+                            <a  class="youtube-Selec" index-search=1 onclick="changeVideo(1)"></a>
+                            <a  class="youtube-Selec" index-search=2 onclick="changeVideo(2)"></a>
+                            <a  class="youtube-Selec" index-search=3 onclick="changeVideo(3)"></a>
+                            <a  class="youtube-Selec" index-search=4 onclick="changeVideo(4)"></a>
+                            <a  class="youtube-Selec" index-search=5 onclick="changeVideo(5)"></a>
+                            <a  class="youtube-Selec" index-search=6 onclick="changeVideo(6)"></a>
+                            <a  class="youtube-Selec" index-search=7 onclick="changeVideo(7)"></a>
+                            <a  class="youtube-Selec" index-search=8 onclick="changeVideo(8)"></a>
+                            <a  class="youtube-Selec" index-search=9 onclick="changeVideo(9)"></a>
+                            <a  class="youtube-Selec" index-search=10 onclick="changeVideo(10)"></a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                   
+                    <p>
+                      Access a YouTube playlist of training videos for how to use the Statewide Planning Map or watch each video individually. You can also access the Statewide Planning Map story map page to find these videos tutorials as well as other useful information.
+                    </p>
+                    <p>
+                      Bring up this screen again at any time by pressing the Help button at the top right of the application window.
+                    </p>
+
+                    <div id="solarEclipseDiscard">
+                      <input type="checkbox" id="removeSolarEclipseModal" onclick="setCookies(event)">
+                      <label for="removeSolarEclipseModal">Don't show me this again</label>
+                    </div>
+
+                  `
+                , header: "New Training Videos"},null, width="1000px")
+                
+                document.getElementsByClassName("queryStatus")[0].style.minWidth = '47rem'
+              }
+            
             
             // end require - - -        
             });
+
             function getRdName(e){
               document.getElementById(`${e.dataset.id}`).value = e.textContent
               e.parentNode.style.display = "none"
@@ -5260,6 +5349,58 @@
               document.querySelectorAll(".route-field").forEach(field => field.value = "")
               document.querySelectorAll(".clear-dropdown").forEach(drp => drp.style.visibility = "hidden")
               return
+            }
+
+            function setCookies(e){
+              if(localStorage.getItem("Eclipse")){
+                localStorage.removeItem("Eclipse")
+                return
+              }
+              localStorage.setItem("Eclipse", true)
+              return
+            }
+
+            function retrieveCookie(){
+              const isEclipse = localStorage.getItem("Eclipse")
+              return isEclipse
+            }
+
+            function changeVideo(index){
+              const getDelimeter = document.querySelectorAll(".youtube-Selec")
+
+              getDelimeter.forEach(cir => {
+                if(cir.getAttribute("index-search") === String(index)){
+                  cir.classList.add("curr-Youtube-Selec")
+                }
+                else{
+                  cir.classList.remove("curr-Youtube-Selec")
+                }
+              })
+              const spmVideoList = [
+                  {url: "https://www.youtube.com/embed/R7JAVPfOcls", index: 0},{url: "https://www.youtube.com/embed/xnBjuLCQZUU", index: 1},{url: "https://www.youtube.com/embed/XG9H89IkoHc", index: 2},
+                  {url: "https://www.youtube.com/embed/wC5MIASMOsQ", index: 3},{url: "https://www.youtube.com/embed/KB4tYiZXVAE", index: 4},{url: "https://www.youtube.com/embed/89X3bJBexKc", index: 5},
+                  {url: "https://www.youtube.com/embed/jm9b_dsw9KQ", index: 6},{url: "https://www.youtube.com/embed/aZm_IXg5XKw", index: 7},{url: "https://www.youtube.com/embed/drRTYGgj0ro", index: 8},
+                  {url: "https://www.youtube.com/embed/yldKy65sSNA", index: 9},{url: "https://www.youtube.com/embed/p5hB779LxkA", index: 10}
+              ]
+
+              const findVid = spmVideoList.find(vid => vid.index === index).url
+              youtubeVid.src = findVid
+              return
+            }
+
+            function changeSrcUrl(direction){
+                const spmVideoList = [
+                  {url: "https://www.youtube.com/embed/R7JAVPfOcls", index: 0},{url: "https://www.youtube.com/embed/xnBjuLCQZUU", index: 1},{url: "https://www.youtube.com/embed/XG9H89IkoHc", index: 2},
+                  {url: "https://www.youtube.com/embed/wC5MIASMOsQ", index: 3},{url: "https://www.youtube.com/embed/KB4tYiZXVAE", index: 4},{url: "https://www.youtube.com/embed/89X3bJBexKc", index: 5},
+                  {url: "https://www.youtube.com/embed/jm9b_dsw9KQ", index: 6},{url: "https://www.youtube.com/embed/aZm_IXg5XKw", index: 7},{url: "https://www.youtube.com/embed/drRTYGgj0ro", index: 8},
+                  {url: "https://www.youtube.com/embed/yldKy65sSNA", index: 9},{url: "https://www.youtube.com/embed/p5hB779LxkA", index: 10}
+                ]
+
+                let index = spmVideoList.find(vid => vid.url === youtubeVid.src).index
+                direction === 'incr' ? index += 1 : index -= 1
+
+                changeVideo(index)
+                return
             }
         </script>
     </head>
@@ -5361,7 +5502,7 @@
                 </template>
                 <span class="error" id="errorQuery"></span>
                 <button class="clear-dropdown esri-icon-close" id="clear-query-search" onclick="clearSearch()"></button>
-                <span class="search-results" id="road-name-results-query"></span>
+                <!-- <span class="search-results" id="road-name-results-query"></span> -->
                 
 
               </form>          
@@ -5417,7 +5558,7 @@
                 </div>
                 
                 <span class="error" id="errorSrd"></span>
-                <span class="search-results" id="road-name-results-srd"></span>
+                <!-- <span class="search-results" id="road-name-results-srd"></span> -->
                 <button class="clear-dropdown esri-icon-close" id="clear-srd-search" onclick="clearSearch()"></button>
 
               </form>                
@@ -5461,7 +5602,7 @@
                 </div>
                 
                 <span class="error" id="errorEvent"></span>
-                <span class="search-results" id="road-name-results-event"></span>
+                <!-- <span class="search-results" id="road-name-results-event"></span> -->
                 <button class="clear-dropdown esri-icon-close" id="clear-event-search" onclick="clearSearch()"></button>
               </form>                 
             </div>            
