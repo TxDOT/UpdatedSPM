@@ -68,7 +68,7 @@
             #solarEclipseDiscard{
               position: relative;
               font-size: 11px;
-              top: 2.7rem;
+              top: 4.1rem;
               max-width: 47%;
             }
             .curr-Youtube-Selec{
@@ -154,6 +154,7 @@
             #clear-srd-search{
               top: 7.5rem;
             }
+            
             form > #eventRoute:not(:placeholder-shown) > .clear-dropdown{
               visibility: visible;
             }
@@ -192,7 +193,7 @@
               position: relative;
               z-index: 1;
               max-width: 24%;
-              left: calc(50vw - 11rem);
+              left: calc(100vw - 60%);
               top: 4vh;
               min-width: 23rem;
               width: fit-content;
@@ -200,6 +201,14 @@
               max-height: calc(100vh - 6rem);
               align-items: flex-start;
               overflow-x: hidden;
+            }
+            .featItemDesc{
+              display: -webkit-box !important;
+              -webkit-box-orient: vertical !important;
+              -webkit-line-clamp: 5 !important;
+              overflow: hidden !important;
+              text-overflow: ellipsis !important;
+              margin: 10px !important;
             }
             .stepClass{
               display: flex;
@@ -252,13 +261,39 @@
             #graphics::-webkit-scrollbar{
               display: none;
             }
-            .queryStatus #queryMessageBtn{
-              position:relative;
+            .featLayerUIClass{
+              position: relative;
+              z-index: 1;
+              left: 13px;
+              top: 14rem;
+              width:50%;
+              background: white;
+              padding-right: 5px;
+            }
+            #appendToMe{
+              position: absolute;
+              width:50rem;
+              display: flex;
+              flex-direction: column;
+              min-height: 547px;
+              max-height: 600px;
+              overflow-y: auto;
+              left: 18rem;
+            }
+            #innerLayerInfo{
+              position: relative;
+              left: 3px;
+              bottom: 10px;
+            }
+
+            .queryStatus #queryMessageBtn {
+              position: relative;
               z-index: 1;
               /* margin-top: 4.3rem; */
               margin-bottom: 1rem;
               margin-left: calc(24vw - 5.8rem);
               right: -1rem;
+              bottom: -22px;
             }
             #copyCoord{
               position: relative;
@@ -301,6 +336,17 @@
               user-select: none;
               -webkit-user-select: none;
             }
+            .featInfoBtn{
+              position: absolute;
+              left:77%;
+              padding-top: .3rem;
+              background: none;
+              background-color: none;
+              cursor: pointer;
+              border: none;
+              z-index: 9999;
+            }
+
             .dwnloadBtn{
               position: absolute;
               left: 83%;
@@ -311,7 +357,7 @@
               border: none;
             }
             .dwnloadBtn button{
-              display: "none";
+              display: none;
             }
             .noDwnloadBtn{
               position:absolute;
@@ -326,6 +372,18 @@
             }
             .dwnloadBtn:hover{
               color: green;
+            }
+            #infoBottomSpan{
+              position: relative;
+              border: 2px solid rgb(20, 55, 90);
+              width: 100%;
+              display: block;
+            }
+            .featInfoBtn:hover{
+              color: green;
+            }
+            .closeInfoBox{
+              color: red;
             }
 
             .invisible{
@@ -527,6 +585,15 @@
               color:#888;
               outline: #888
             }
+            #featLayerId{
+              background-color: #14375A;
+              text-align: left;
+              color: white;
+              width: 100%;
+              margin: 0px;
+              padding-left: 5px;
+              font-size: 15px;
+            }
             #modalHeader{
               bottom: 1.6rem;
               color: white;
@@ -636,6 +703,14 @@
               width: 3.03rem;
               display: flex;
               justify-content: center;
+            }
+            #drawSelection{
+              position: absolute;
+              right: 49px;
+              top: 224px;
+              background: white;
+              width: 118px;
+              display: none;
             }
             body {
                 margin: 0;
@@ -844,7 +919,25 @@
               overflow: hidden;
               width: 19rem;
             }
+            .dfoSetBtn{
+              position: relative;
+            }
+            #setDFOStartPt, #setDiagramDFOStartPt{
+              bottom: 53px;
+              left: 8px;
+            }
+            #setDFOEndPt, #setDiagramDFOEndPt{
+              left: 242px;
+              bottom: 46px;
+            }
+            #eventEndDFO, #eventBeginDFO, #inpSRDFromDFO, #inpSRDToDFO{
+              width: 77% !important;
+            }
 
+            #eventEndDFO + #setDFOEndPt:enabled {
+              display: block;
+            }
+            
             #errorEvent{
               width: 97%;
               font-size: 1rem;
@@ -1164,6 +1257,10 @@
             let basemapAll;
             let queryTableResults;
             let draw;
+            let addPtEvent;
+            let addLineEvent;
+            let addPolygonEvent;
+            let addTextEvent;
             
             // URL Parameters
             var urlParams;
@@ -1208,7 +1305,7 @@
             var diagramEndDFO;   
             var inventoryDiagramLog = [];
             var inventoryDiagramLogAllValues = [];
-            var drawMPTLabels = true;
+            var drawMPTLabels = true; 
             
             var diagramColors = [
             ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"],
@@ -1217,7 +1314,7 @@
             ["#CB4335","#F5B7B1"],["#884EA0","#D7BDE2"],["#2E86C1","#85C1E9"],["#28B463","#82E0AA"],["#D4AC0D","#F7DC6F"],["#BA4A00","#E59866"],["#839192","#BFC9CA"]
             ];
 
-            let mainTOCLayers = ["2024 Solar Eclipse", "AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
+            let mainTOCLayers = ["AADT", "Bridges", "Control Sections", "Functional Classification & Urban Areas", "Maintenance Section Boundaries",
                                  "Reference Markers", "Top 100 Congested Roadways", "Tolls", "TxDOT Safety Rest Areas", "National Highway System", "Alt Fuels - Electric", "Metropolitan Planning Organizations", "Live Traffic"]
 
             let displayPopupInfo = [{}]
@@ -1261,10 +1358,11 @@
               "esri/widgets/Popup",
               "esri/layers/support/LabelClass",
               "esri/core/reactiveUtils",
-              "esri/popup/ExpressionInfo"
+              "esri/popup/ExpressionInfo",
+              "esri/widgets/Sketch"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo, Sketch) {
               
               var map = new Map({
                   //map content added below
@@ -1297,13 +1395,11 @@
                 basemapFeatureLayerActiveCheck(tileLayerTxDOT, "basemapLayer")
                 window.onload = async () => {
                   await loadTOCContent()
+                  getURLParams(window.location.search).get("ui") ? setIFrameUi() : readUrlParams()
                   initBasemapOverlayToggle()
                   onViewLoad()
-                  readUrlParams()
                   roadSegmentQuery("IH0035-KG")
-                  toggleLayer("2024 Solar Eclipse")
-                  // document.getElementById(`dwnloadBtn2024 Solar Eclipse`).style.display = "block"
-                  retrieveCookie() ? null : run2024EclipseModal(1)
+                  
                 }
               }
 
@@ -1675,7 +1771,11 @@
                   ymax: 36.825,
                 }
               };
-            
+              
+              let sketch = new Sketch({
+                layer: new GraphicsLayer(),
+                view: view
+              })
               //Scale Bar-------------------------------------------------------
               var scaleBar = new ScaleBar({
                 view: view,
@@ -1939,8 +2039,8 @@
                       document.getElementById("btnRemoveAll").disabled = false
                       document.getElementById("btnEventMap").disabled = false
                     }
+                    event.explicitOriginalTarget.id === "eventRoute" ? document.getElementById("setDFOStartPt").disabled = false : document.getElementById("setDiagramDFOStartPt").disabled = false
                     event.target.nextElementSibling.disabled = false
-                    
                   }
                   else{
                     event.target.nextElementSibling.disabled = true
@@ -1977,7 +2077,6 @@
                 
               }
               
-
               function onViewLoad(){
                 let url = getURLParams(window.location.search)
                 let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
@@ -2113,37 +2212,73 @@
                   }
               }
 
-              view.on("click",function(event){
-                 if (lrsButtonStatus==true) {
-                    graphicsLayerLRSIdentify.removeAll();
-                    let point = view.toMap({x: event.x, y: event.y});
-                    var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
-                    
-                    //add graphic to map
-                    var pointGraphic = new Graphic({
-                          geometry: point,
-                          symbol: {
-                            type: "simple-marker",
-                            color: "red",
-                            size: "10px"
-                          }
-                    });      
-                    
-                    graphicsLayerLRSIdentify.add(pointGraphic);
-                    setElementText("mapClickResults", "Calculating LRMs...")
-                    //Populate LRS Readout
-                    request(url).then(function(response) {
-                        processLRSResponse(response);
-                    }
-                    
-                    );
-                    event.stopPropagation()                  
-                 } 
-                 rightClickUrlDisplay(event)
-
-                                
+              view.on("click", async function(event){
+                if (lrsButtonStatus==true) {
+                  graphicsLayerLRSIdentify.removeAll();
+                  let point = view.toMap({x: event.x, y: event.y});
+                  var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
+                  
+                  //add graphic to map
+                  var pointGraphic = new Graphic({
+                        geometry: point,
+                        symbol: {
+                          type: "simple-marker",
+                          color: "red",
+                          size: "10px"
+                        }
+                  });      
+                  
+                  graphicsLayerLRSIdentify.add(pointGraphic);
+                  setElementText("mapClickResults", "Calculating LRMs...")
+                  //Populate LRS Readout
+                  let response = await getLRSResponse(url)
+                  processLRSResponse(response);
+                  
+                  event.stopPropagation()                  
+                } 
+                rightClickUrlDisplay(event)
               });
               
+              async function getLRSResponse(url){
+                let response = await request(url)
+                return response
+              }
+
+              function getLocationOnRoad(type, tab){
+                document.getElementById("viewDiv").style.cursor = "crosshair"
+                let clickDFO = view.on("click", async (event)=>{
+                  let mapPt = view.toMap({x: event.x, y: event.y});
+                  let url = `https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat=${mapPt.latitude.toFixed(8)}&lon=${mapPt.longitude.toFixed(8)}`;
+                  let val = await getLRSResponse(url)
+                
+                  type === "begin" ?  processBeginDFO(val, tab) : proceessEndDFO(val, tab)
+                  document.getElementById("viewDiv").style.cursor = "default"
+                  clickDFO.remove()
+                  
+                })
+                return
+              }
+
+              function processBeginDFO(val, tab){
+                tab === "diagramTab" ? document.getElementById("inpSRDFromDFO").value = Number(val.data[0].RTE_DFO) : document.getElementById("eventBeginDFO").value = Number(val.data[0].RTE_DFO)
+                tab === "diagramTab" ? document.getElementById("setDiagramDFOEndPt").disabled = false : null
+                tab === "diagramTab" ? document.getElementById("inpSRDToDFO").disabled = false : document.getElementById("eventEndDFO").disabled = false
+                tab === "diagramTaab"
+                return
+              }
+
+              function proceessEndDFO(val, tab){
+                tab === "diagramTab" ? document.getElementById("inpSRDToDFO").value = Number(val.data[0].RTE_DFO) : document.getElementById("eventEndDFO").value = Number(val.data[0].RTE_DFO)
+                tab === "diagramTab" ? null : document.getElementById("eventColors").disabled = false
+                tab === "diagramTab" ? null : document.getElementById("eventWidth").disabled = false
+                tab === "diagramTab" ? null : document.getElementById("eventDescription").disabled = false
+
+                tab === "diagramTab" ? null : document.getElementById("btnRemoveAll").disabled = false
+                tab === "diagramTab" ? null : document.getElementById("btnEventMap").disabled = false
+                tab === "diagramTab" ? document.getElementById("btnUpdateLRM").disabled = false : null
+                return
+              }
+
               function returnVisibleLayers(){
                 let visibleLayer = []
                 let getVisibleLayers = itemArr.filter(x => x.visible === 1)
@@ -2260,10 +2395,10 @@
                     v.watch("zoom", (z)=>{
                       if(Number.isInteger(v.zoom)){
                         document.getElementById("zoom").textContent = `Level: ${v.zoom},`
-                        getActiveLayers(v.zoom)
+                        //getActiveLayers(v.zoom)
                       }
                     })
-                    //getActiveLayers(v.zoom)
+                    getActiveLayers(v.zoom)
                   }
                 )
                 
@@ -2282,6 +2417,7 @@
                 openGoogleMaps();
               }); 
 
+              //toggle on legend
               document.getElementById("legend").addEventListener("click", (event) => {
                 if(legend.visible === true){
                   legend.visible = false
@@ -2297,6 +2433,33 @@
               function turnOffLegend(){
                 legend.visible = false
                 resetButton("legend")
+              }
+
+              document.getElementById("draw").addEventListener("click", ()=>{
+                let divDrawDisplay = document.getElementById("drawSelection").style.display
+                console.log(divDrawDisplay)
+                divDrawDisplay === "block"  ? resetButton("draw") : activateToolButton("draw")
+                divDrawDisplay === "block" ? document.getElementById("drawSelection").style.display = "none" : document.getElementById("drawSelection").style.display = "block"
+              })
+
+              document.getElementById("addPoint").addEventListener("click", (e)=>{
+                activateToolButton("addPoint")
+                sketch.create("point", {mode: "click"})
+                addPtEvent = sketch.on("create", (event)=>{
+                  console.log(event)
+                })
+              })
+
+              function removeSketchEventsListener(type){
+                let typeDict = {
+                  "point": addPtEvent,
+                  "line": addLineEvent,
+                  "polygon": addPolygonEvent,
+                  "text": addTextEvent
+                }
+
+                typeDict[type].remove()
+                return
               }
 
               function toggleLayer(id){
@@ -2328,6 +2491,8 @@
                 resetBaseMapItem(id)
                 returnId.visible = 0
                 resetButton("legend")
+                removeInfoUI()
+                resetCloseInfoBox()
                 if(layerId.name === "Bridges" || layerId.name === "RoadInventory"){
                   layerId.definitionExpression = ""
                 }
@@ -2343,7 +2508,10 @@
 
               function initBasemapOverlayToggle(){
                 document.getElementById("tocMaps").addEventListener("click", (event)=>{
-                  if(event.target.id === "CLEAR") return clearOverlay()
+                  if(event.target.id === "CLEAR"){
+                    clearOverlay()
+                    return
+                  }
                   if(event.target.id === "layerSearch") return
                   return toggleLayer(event.target.id)
                 })
@@ -2362,6 +2530,7 @@
                 overlayVisible.forEach((x) => {
                   toggleLayer(x.name)
                   document.getElementById(`dwnloadBtn${x.name}`).style.display = "none"
+                  document.getElementById(`infoBtn${x.name}`).style.display = "none"
                 })
                 
               }
@@ -2593,7 +2762,7 @@
               
               //Clear Sketch
               const sketchClearListener = document.querySelector('#btnClearProject');
-              sketchClearListener.addEventListener('click', (event) => {
+              sketchClearListener.addEventListener(['click', 'change'], (event) => {
                 document.getElementById("btnRecalcProject").disabled = true
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
@@ -2605,6 +2774,30 @@
               //Recalculate Sketch
               document.getElementById("btnRecalcProject").addEventListener("click",()=>{
                 deCalculateCost()
+              })
+
+              //get start dfo location
+              document.getElementById("setDFOStartPt").addEventListener("click", ()=>{
+                let tab = "eventTab"
+                getLocationOnRoad("begin", tab)
+                document.getElementById("setDFOEndPt").disabled = false
+              })
+
+              document.getElementById("setDiagramDFOStartPt").addEventListener("click", ()=>{
+                let tab = "diagramTab"
+                getLocationOnRoad("begin", tab)
+                document.getElementById("setDFOEndPt").disabled = false
+              })
+
+              //get end dfo location
+              document.getElementById("setDFOEndPt").addEventListener("click", (event)=>{
+                let tab = "eventTab"
+                getLocationOnRoad("end", tab)
+              })
+
+              document.getElementById("setDiagramDFOEndPt").addEventListener("click", (event)=>{
+                let tab = "diagramTab"
+                getLocationOnRoad("end", tab)
               })
               
               //Add Event Button
@@ -2718,7 +2911,6 @@
                   let ri = retrieveFeatureLayer("RoadInventory")[0]
                   let bi = retrieveFeatureLayer("Bridges")[0]
                   setInvisible(ri, ri.name, ri.name)
-                  setInvisible(bi, bi.name, bi.name)
                   document.getElementById("dwnloadBtnBridges").style.display = "none"
                   activateBaseMapItem("CLEAR")
                 }
@@ -2869,16 +3061,108 @@
                 return
               }
 
-              function readUrlParams() {
-                //Graphics Layer User Lines and Points
+              function setIFrameUi(){
+                urlParams = getURLParams(window.location.search)
+                setUpURLParams(urlParams)
+
+                const viewDiv = document.getElementById("viewDiv")
+                const tocDiv = document.getElementById("left-div")
+                const header = document.getElementById("header")
+
+                viewDiv.style.left = "0px"
+                viewDiv.style.width = "100vw"
+                viewDiv.style.height = "100vh"
+                viewDiv.style.top = "0px"
+                tocDiv.style.display = "none !important"
+                header.style.display = "none"
+                
+                setBasemap()
+                overlayParam ? setOverlays() : null
+                locationParam ? setZoomAndLocation(locationParam.split(",")) : null
+                eventParam ? setEventParam() : null
+                //any layer
+               return 
+              }
+
+              function setUpURLParams(urlParams){
                 graphicsLayer = new GraphicsLayer();
                 map.add(graphicsLayer);               
                 
                 //Graphics Layer LRS Identify
                 graphicsLayerLRSIdentify = new GraphicsLayer();
-                map.add(graphicsLayerLRSIdentify);                 
-                
+                map.add(graphicsLayerLRSIdentify);   
+
+                basemapParam = urlParams.get("map") ?? "lightgray";
+                overlayParam = urlParams.get("overlays");
+                tabParam = urlParams.get("tab");
+                locationParam = urlParams.get("location");
+                eventParam = urlParams.get("event");
+                pointParam = urlParams.get("point");
+                queryParam = urlParams.get("query");
+                diagramParam = urlParams.get("diagram");
+                urlParams.get("coords") ? locationParam = `${urlParams.get("coords")}, ${urlParams.get("z")}` : null
+                let queryType = urlParams.get("queryType")
+                return
+              }
+
+              function setOverlays(){
+                let splitOverlay = overlayParam.split(",")
+                splitOverlay.forEach((urlOverlay) => {
+                  let layerName = modifyString(urlOverlay.replace("and", "&"), "_", " ")
+                  if(!mainTOCLayers.includes(layerName)){
+                    appendChildToOverlayList(layerName, "FeatureLayer", false)
+                  }
+                  let layerId = retrieveFeatureLayer(layerName)
+                  let returnId = itemArr.find(overlay => overlay.name === layerName)
+                  layerId.forEach((featLayer) => {
+                    featLayer.when((f) =>{
+                      setIsVisible(f, returnId, layerName)
+                      resetBaseMapItem("CLEAR")
+                      getActiveLayers(view.zoom)
+                      document.getElementById(`dwnloadBtn${layerName}`).style.display = "block"
+                    })
+                  })
+                })
+              }
+
+              function setEventParam(){
+                inputEventListner("eventRoute")
+                var eventParams = eventParam.replace(/%23/g, "#");
+                const eventArray = eventParams.split('|');
+                eventArray.forEach((x) => {
+                  let [route, bDfo, eDfo, color, width, desc] = x.split(",")
+
+                  // document.getElementById("eventRoute").value = route
+                  // document.getElementById("eventBeginDFO").value = bDfo
+                  // document.getElementById("eventEndDFO").value = eDfo
+                  // document.getElementById("eventColors").value = color
+                  // document.getElementById("eventWidth").value = width
+                  // document.getElementById("eventDescription").value = desc
+
+                  getLineworkWithM(route,bDfo,eDfo,color,width,desc);
+                })
+
+                eventCheckOnLoad()
+                let isAllDisabled = disableQuery()
+                checkFieldStatus("#eventTab", isAllDisabled)    
+              }
+
+              function setBasemap(){
+                resetAllBaseMapItems()
+                basemapAll.find(x => x.name === basemapParam).featLayer.visible = true
+                activateBaseMapItem(basemapParam)
+              }
+
+              function readUrlParams() {
+                //Graphics Layer User Lines and Points
+                //check to display splash screen
+                retrieveCookie() ? null : runStartUpModal(1)
                 let url = window.location.search
+
+                urlParams = getURLParams(url);
+                //set Url params
+                setUpURLParams(urlParams)
+
                 if(!url.length){
                   resetTabInput("eventTab")
                   resetTabInput("diagramTab")
@@ -2892,45 +3176,14 @@
                   return
                 }
 
-                urlParams = getURLParams(url);
-                basemapParam = urlParams.get("map") ?? "lightgray";
-                overlayParam = urlParams.get("overlays");
-                tabParam = urlParams.get("tab");
-                locationParam = urlParams.get("location");
-                eventParam = urlParams.get("event");
-                pointParam = urlParams.get("point");
-                queryParam = urlParams.get("query");
-                diagramParam = urlParams.get("diagram");
-                urlParams.get("coords") ? locationParam = `${urlParams.get("coords")}, ${urlParams.get("z")}` : null
-                let queryType = urlParams.get("queryType")
 
                 if(overlayParam){
-                  let splitOverlay = overlayParam.split(",")
-                  splitOverlay.forEach((urlOverlay) => {
-                    let layerName = modifyString(urlOverlay.replace("and", "&"), "_", " ")
-                    if(!mainTOCLayers.includes(layerName)){
-                      appendChildToOverlayList(layerName, "FeatureLayer", false)
-                    }
-                    let layerId = retrieveFeatureLayer(layerName)
-                    let returnId = itemArr.find(overlay => overlay.name === layerName)
-                    layerId.forEach((featLayer) => {
-                      featLayer.when((f) =>{
-                        setIsVisible(f, returnId, layerName)
-                        resetBaseMapItem("CLEAR")
-                        getActiveLayers(view.zoom)
-                        document.getElementById(`dwnloadBtn${layerName}`).style.display = "block"
-                      })
-                    })
-
-
-                  })
+                  setOverlays()
                 }
 
 
                 if(basemapParam){
-                  resetAllBaseMapItems()
-                  basemapAll.find(x => x.name === basemapParam).featLayer.visible = true
-                  activateBaseMapItem(basemapParam)
+                  setBasemap()
                 }
                 
                 //Set map zoom and location if provided
@@ -2940,24 +3193,8 @@
                 
                 //Add the event if provided
                 if (eventParam) {
-                  inputEventListner("eventRoute")
-                  var eventParam = eventParam.replace(/%23/g, "#");
-                  const eventArray = eventParam.split('|');
-                  eventArray.forEach((x) => {
-                    let [route, bDfo, eDfo, color, width, desc] = x.split(",")
-                    document.getElementById("eventRoute").value = route
-                    document.getElementById("eventBeginDFO").value = bDfo
-                    document.getElementById("eventEndDFO").value = eDfo
-                    document.getElementById("eventColors").value = color
-                    document.getElementById("eventWidth").value = width
-                    document.getElementById("eventDescription").value = desc
+                  setEventParam()
 
-                    getLineworkWithM(route,bDfo,eDfo,color,width,desc);
-                  })
-
-                  eventCheckOnLoad()
-                  let isAllDisabled = disableQuery()
-                  checkFieldStatus("#eventTab", isAllDisabled)                      
                 }
                 
                 //Add the event if provided
@@ -3107,15 +3344,16 @@
 
               //Set map zoom (30,-100,10)---------------------------------------
               function setZoomAndLocation(theLocation) {
-                  var point = new Point({
-                    x: theLocation[1],
-                    y: theLocation[0],
-                    spatialReference: new SpatialReference({
-                      wkid: 4326
-                    })
-                  });
-                  view.center = point;
-                  view.zoom = theLocation[2];                 
+                var point = new Point({
+                  x: theLocation[1],
+                  y: theLocation[0],
+                  spatialReference: new SpatialReference({
+                    wkid: 4326
+                  })
+                });
+                view.center = point;
+                view.zoom = theLocation[2];
+                return           
               }
               //End set map zoom------------------------------------------------
               
@@ -3139,6 +3377,7 @@
                 featLayer[0].visible = false
                 featLayer[0].definitionExpression = ""
                 clearConditions()
+
                 if(featLayer[0].name === "Bridges"){
                   setInvisible(featLayer[0], featLayer[0].name, featLayer[0].name)
                   document.getElementById("dwnloadBtnBridges").style.display = "none"
@@ -3155,6 +3394,26 @@
                   b.btnClick()
                 }
                 return btn
+              }
+
+              function queryFeatureLayerUI(text, height, width){
+                let getQueryLayerTemplate = document.getElementById("layerInfo")
+                let cloneTemplate = getQueryLayerTemplate.content.cloneNode(true)
+                let innerDiv = cloneTemplate.querySelectorAll("div")
+                innerDiv[0].classList.add("featLayerUIClass")
+                innerDiv[0].id = "featLayerUIDiv"
+                // let header = document.createElement("h2")
+                // header.id = "featLayerId"
+                // header.textContent = text.header
+                let bottomSpan = document.createElement("span")
+                bottomSpan.id = "infoBottomSpan"
+                let layerInfo = document.createElement("p")
+                layerInfo.innerHTML = text.info
+                innerDiv[0].appendChild(bottomSpan)
+                // innerDiv[0].appendChild(header)
+                innerDiv[0].appendChild(layerInfo)
+                document.getElementById("appendToMe").appendChild(cloneTemplate)
+                return
               }
 
               function queryResponseUI(text, btnType, height, width){
@@ -3298,8 +3557,7 @@
                 query.outFields = [outFields];
                 query.returnGeometry = true;
                 query.supportsPagination = true;
-                try{
-                  
+                try{                  
                   let layerView = await view.whenLayerView(featLayer)
                   let returnQuery = await layerView.layer.queryFeatures(query)
                   layerView.layer.definitionExpression = where;
@@ -3396,51 +3654,51 @@
               }
 
               async function makeTableFromService(dataArray) {
-                  let makeTablePromise = new Promise((res,rej) => {
-                    var fieldNames = [];
-                    for(var i=0; i<dataArray.fields.length; i++) {
-                        fieldNames.push(dataArray.fields[i].name);
-                    }
-              
-                  // Create a table to display the data
-                    var table = document.createElement('table');
-                    table.classList.add("queryTableResults"); 
-                    table.setAttribute("id", "queryResultTable");
-                  
-                    var header = document.createElement('tr');  
-                  
-                    for (var i=0; i<fieldNames.length; i++) {
-                        var th = document.createElement('th');
-                        th.classList.add("queryTblHeader");
-                        th.textContent = fieldNames[i];
-                        th.addEventListener('click', onHeaderClick); // Add click event listener
-                        header.appendChild(th);
-                    }
-                    table.appendChild(header);
-                  
-                  //Build the table
-                    for(var i=0; i<dataArray.features.length; i++) {
-                        var row = document.createElement('tr');
-                        row.addEventListener("click", (evt)=>{
-                          getRowInfo(evt)
-                        })
-                        for (var x in dataArray.features[i].attributes) {
-                            
-                            td = document.createElement('td');
-                            td.textContent = dataArray.features[i].attributes[x];
-                            td.classList.add("queryTblData");
-                            row.appendChild(td);                        
-                        }
-                        table.appendChild(row);
-                    }
-                    var results = document.getElementById('results');
-                    results.innerHTML = ''; // Clear previous results
-                    results.appendChild(table);
-                    document.getElementById("results").style.display = "block";
-                    res("table created")
-                  })
+                let makeTablePromise = new Promise((res,rej) => {
+                  var fieldNames = [];
+                  for(var i=0; i<dataArray.fields.length; i++) {
+                      fieldNames.push(dataArray.fields[i].name);
+                  }
+            
+                // Create a table to display the data
+                  var table = document.createElement('table');
+                  table.classList.add("queryTableResults"); 
+                  table.setAttribute("id", "queryResultTable");
+                
+                  var header = document.createElement('tr');  
+                
+                  for (var i=0; i<fieldNames.length; i++) {
+                      var th = document.createElement('th');
+                      th.classList.add("queryTblHeader");
+                      th.textContent = fieldNames[i];
+                      th.addEventListener('click', onHeaderClick); // Add click event listener
+                      header.appendChild(th);
+                  }
+                  table.appendChild(header);
+                
+                //Build the table
+                  for(var i=0; i<dataArray.features.length; i++) {
+                      var row = document.createElement('tr');
+                      row.addEventListener("click", (evt)=>{
+                        getRowInfo(evt)
+                      })
+                      for (var x in dataArray.features[i].attributes) {
+                          
+                          td = document.createElement('td');
+                          td.textContent = dataArray.features[i].attributes[x];
+                          td.classList.add("queryTblData");
+                          row.appendChild(td);                        
+                      }
+                      table.appendChild(row);
+                  }
+                  var results = document.getElementById('results');
+                  results.innerHTML = ''; // Clear previous results
+                  results.appendChild(table);
+                  document.getElementById("results").style.display = "block";
+                  res("table created")
+                })
 
-                  return await makeTablePromise
+                return await makeTablePromise
               }               
               
               function sortTable(columnIndex, isAscending) {
@@ -4393,51 +4651,79 @@
                   return
                 }
                 document.getElementById("layerSearch").disabled = false
+                
                 return
               }
 
               function appendChildToOverlayList(layerItem, layerType, initBuild, documentFrag){
-                  let noDownload = ["Live Traffic" , "Shale Plays", "Future Interstates", "2024 Solar Eclipse"]
-                  let tr = document.createElement("tr")
-                  let td = document.createElement("td")
-                  td.id = layerItem
-                  td.className = "baseMapList"
-                  td.onclick = (event) => {
-                    if(event.target.id.includes("dwnloadBtn")){return}
-                    document.getElementById(`dwnloadBtn${layerItem}`).style.display = document.getElementById(`dwnloadBtn${layerItem}`).style.display === "block" ? "none" : "block"
+                let noDownload = ["Live Traffic" , "Shale Plays", "Future Interstates"]
+                let tr = document.createElement("tr")
+                let td = document.createElement("td")
+                
+                td.id = layerItem
+                td.className = "baseMapList"
+                td.onclick = (event) => {
+                  if(event.target.id.includes("dwnloadBtn") || event.target.id.includes("infoBtn")) return
+                  document.getElementById(`infoBtn${layerItem}`).style.display = document.getElementById(`infoBtn${layerItem}`).style.display === "block" ? "none" : "block"
+                  document.getElementById(`dwnloadBtn${layerItem}`).style.display = document.getElementById(`dwnloadBtn${layerItem}`).style.display === "block" ? "none" : "block"
+                  return
+                }
+
+                let div = document.createElement("div")
+                div.id = layerItem
+                
+                let dwnloadBtn = document.createElement("button")
+                let infoBtn = document.createElement("button")
+               
+                dwnloadBtn.style.display = "none"
+                infoBtn.style.display = "none"
+                dwnloadBtn.id = `dwnloadBtn${layerItem}`
+                dwnloadBtn.title = noDownload.includes(layerItem) ? "No Download" : "Download Overlay"
+                dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-download noDwnloadBtn" : "esri-icon-download dwnloadBtn"
+                
+                infoBtn.className = "esri-icon-description featInfoBtn"
+                infoBtn.id = `infoBtn${layerItem}`
+                infoBtn.onclick = (event) => {
+                  if(infoBtn.classList.contains("closeInfoBox")){
+                    infoBtn.classList.toggle("closeInfoBox")
+                    removeInfoUI()
                     return
                   }
-                  let div = document.createElement("div")
-                  div.id = layerItem
-                  let dwnloadBtn = document.createElement("button")
-                  dwnloadBtn.style.display = "none"
-                  dwnloadBtn.id = `dwnloadBtn${layerItem}`
-                  dwnloadBtn.title = noDownload.includes(layerItem) ? "No Download" : "Download Overlay"
-                  dwnloadBtn.className = noDownload.includes(layerItem) ? "esri-icon-download noDwnloadBtn" : "esri-icon-download dwnloadBtn"
+                  resetCloseInfoBox()
+                  returnLayerInfo(event)
+                  infoBtn.classList.toggle("closeInfoBox")
+                  // if(document.getElementById(`infoBtn${layerItem}`).style.display === "block"){
+                  //   removeInfoUI()
+                  //   return
+                  // }
                   
-                  noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
-                  dwnloadBtn.onclick = () => downloadOverlay(layerItem)
-                  if(initBuild === false){
-                    let btnDiv = document.createElement("div")
-                    btnDiv.id = "rmvDiv"
-                    let rmvButton = document.createElement("button")
-                    btnDiv.appendChild(rmvButton)
-                    rmvButton.className = "esri-icon-close-circled removeOverlay"
-                    rmvButton.id = `removeOverlay${layerItem}`
-                    rmvButton.onclick = () => toggleLayer(layerItem)
-                    td.appendChild(btnDiv)
-                  }
+                  return
+                }
 
-                  td.appendChild(dwnloadBtn)
-                  div.appendChild(document.createTextNode(layerItem))
-                  div.style.width = "80%"
-                  td.appendChild(div)
+                noDownload.includes(layerItem) ? dwnloadBtn.disabled = true : null
+                dwnloadBtn.onclick = () => downloadOverlay(layerItem)
+                if(initBuild === false){
+                  let btnDiv = document.createElement("div")
+                  btnDiv.id = "rmvDiv"
+                  let rmvButton = document.createElement("button")
+                  btnDiv.appendChild(rmvButton)
+                  rmvButton.className = "esri-icon-close-circled removeOverlay esri-icon-notice-round"
+                  rmvButton.id = `removeOverlay${layerItem}`
+                  
+                  td.appendChild(btnDiv)
+                }
+                
+                td.appendChild(dwnloadBtn)
+                td.appendChild(infoBtn)
+                div.appendChild(document.createTextNode(layerItem))
+                div.style.width = "77%"
+                td.appendChild(div)
 
-                  tr.appendChild(td)
-                  if(layerType === "FeatureLayer"){
-                    initBuild === false ? document.getElementById("addFeatRow").appendChild(tr) : documentFrag.appendChild(tr)
-                    return
-                  }
+                tr.appendChild(td)
+                if(layerType === "FeatureLayer"){
+                  initBuild === false ? document.getElementById("addFeatRow").appendChild(tr) : documentFrag.appendChild(tr)
+                  return
+                }
               }
 
               function removeOverlay(id){
@@ -4445,8 +4731,10 @@
                 let [idLeft, idRight] = id.split("removeOverlay")
                 if(!idRight){return}
                 let url = itemArr.find(name => name.name === idRight)
+                
                 let returnfeatLayer = retrieveFeatureLayer(url.name)
                 returnfeatLayer.forEach(x => {
+                  setInvisible(x, url, idRight)
                   x.visible = false
                   //itemArr.find(y => y.name === x.name).visible = 0
                 })
@@ -4457,57 +4745,54 @@
                 })
                 itemArr.find(z => z.name === idRight).addToTOC = 0
                 checkAdditionalOverlayCount()
-                return
+                removeInfoUI()
+                returnVisibleLayers().length === 0 ? activateBaseMapItem("CLEAR") : null
+                return 
               }
 
               function addFeatureLayerToMap(featLayer, popupInfo){
-                  let label = JSON.parse(featLayer.isLabel)
-                  const eclipse2024 = {
-                    symbol: {type: "text",color: "white",backgroundColor:[125, 116, 119, 1],borderLineColor: "black",borderLineSize: 1,yoffset: 5,font: {family: "Belleza Regular",size: 12,weight: "bold"}},labelPlacement: "above-center",labelExpressionInfo: {expression: "Concatenate('Start ' + $feature.FULL_ECL + ', totality',$feature.DURATION)"},minScale: 2311162 
+                let label = JSON.parse(featLayer.isLabel)
+                let featLayerLabel = new LabelClass(label)
+                
+                let addFeatureLayer = new FeatureLayer({
+                  url: featLayer.url,
+                  visible: false,
+                  outFields: ["*"],
+                  name: featLayer.name,
+                  popupEnabled: true,
+                  popupTemplate: popupInfo,
+                  labelIsVisible: true,
+                  labelingInfo: JSON.parse(featLayer.isLabel),
+                  dockOptions:{
+                    position: "bottom-right"
+                  },
+                  definitionExpression: featLayer.defExpress ?? "", 
+                })
+                  
+                featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
+                addFeatureLayer.when((layer)=>{       
+                  layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
+                  if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
+                    if(layer.title === "TxDOT Bridges"){
+                      bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
+                      createSourcesArr(layer)
+                      return 
+                    }
+                      featureLayerView = layer.fieldsIndex.uid.split(",")
+                      return
                   }
-                  const eclipseUrl = "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/city_points_eclipse/FeatureServer/34"
-                  let featLayerLabel = new LabelClass(label)
 
-                  let addFeatureLayer = new FeatureLayer({
-                    url: featLayer.url,
-                    visible: false,
-                    outFields: ["*"],
-                    name: featLayer.name,
-                    popupEnabled: true,
-                    popupTemplate: popupInfo,
-                    labelIsVisible: true,
-                    labelingInfo: JSON.parse(featLayer.isLabel) ?  [featLayerLabel] : featLayer.url[0] === eclipseUrl ? [eclipse2024] : null,
-                    dockOptions:{
-                      position: "bottom-right"
-                    },
-                    definitionExpression: featLayer.defExpress ?? "", 
-                  })
-      
-                  featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                  addFeatureLayer.when((layer)=>{               
-                    layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
-                    if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
-                      if(layer.title === "TxDOT Bridges"){
-                        bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
-                        createSourcesArr(layer)
-                        return 
-                      }
-                        featureLayerView = layer.fieldsIndex.uid.split(",")
-                        return
-                    }
-
-                    if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
-                      basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
-                      addFeatureLayer.visible = true
-                      addFeatureLayer.opacity = 0
-                      addFeatureLayer.legendEnabled = false
-                      addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
-                     
-                    }
-                    createSourcesArr(layer)
-                   
-                  })
-                  map.add(addFeatureLayer)
+                  if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
+                    basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
+                    addFeatureLayer.visible = true
+                    addFeatureLayer.opacity = 0
+                    addFeatureLayer.legendEnabled = false
+                    addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                  }
+                  createSourcesArr(layer)
+                  
+                })
+                map.add(addFeatureLayer)
                 return
               }
 
@@ -4515,7 +4800,6 @@
                 const controller = new AbortController()
                 const signal = controller.signal
                 controller.abort()
-                console.log("aborted")
                 return
               }
 
@@ -4556,7 +4840,6 @@
                   document.getElementById(`${id}`).innerHTML += `<li class="road-names-search" onclick="getRdName(this)" data-id="${queryElem}">${item.attributes.RTE_NM}</li>`
                   return item.attributes.RTE_NM
                 })
-                console.log(rdName)
                 document.querySelectorAll(".clear-dropdown").forEach((i) => {
                   i.style.visibility = "visible"
                   i.disabled = false
@@ -4575,6 +4858,7 @@
                       let popupObj = JSON.parse(featLayerUrlArr[i].popup)
                       let popupObjText = JSON.parse(featLayerUrlArr[i].popupTxt)
                       let popupInfo = await createpopupTemplate(featLayerUrlArr[i].name, popupObj, popupObjText)
+                      
                       addFeatureLayerToMap(featLayerUrlArr[i], popupInfo)
                       continue
                     }
@@ -4629,16 +4913,16 @@
               }
 
               function createSourcesArr(featLayer){
-                let sourcesObj = [{url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Projects/FeatureServer/0", name: "TxDOT_Projects", searchFields: ["CONTROL_SECT_JOB"], displayField: "CONTROL_SECT_JOB", outFields: ["CONTROL_SECT_JOB","DISTRICT_NUMBER","HIGHWAY_NUMBER"], title: "Control Section Job (CSJ)"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries_Detailed/FeatureServer/0", name: "Texas_County_Boundaries_Detailed", searchFields: ["CNTY_NM"], displayField: "CNTY_NM", outFields: ["*"], title: "County"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0", name: "TxDOT_Districts/FeatureServer", searchFields: ["DIST_NM"], displayField: "DIST_NM", outFields: ["*"], title:"District"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Search/FeatureServer/0", name: "TxDOT_Roadways_Search/FeatureServer", searchFields: ["RTE_CNTY"], displayField: "RTE_CNTY", outFields: ["*"], title: "On System Highway"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Top_100_Congested_Roadways/FeatureServer/0", name: "TxDOT_Top_100_Congested_Roadways/FeatureServer", searchFields: ["RANK"], displayField: "RANK", outFields: ["*"], title: "Top 100 Rank"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"], title: "Minute Order Number"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section"},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0", name: "Texas_Roadways_Unsegmented", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search"}]
+                let sourcesObj = [{url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Projects/FeatureServer/0", name: "TxDOT_Projects", searchFields: ["CONTROL_SECT_JOB"], displayField: "CONTROL_SECT_JOB", outFields: ["CONTROL_SECT_JOB","DISTRICT_NUMBER","HIGHWAY_NUMBER"], title: "Control Section Job (CSJ)", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/ArcGIS/rest/services/Texas_County_Boundaries_Detailed/FeatureServer/0", name: "Texas_County_Boundaries_Detailed", searchFields: ["CNTY_NM"], displayField: "CNTY_NM", outFields: ["*"], title: "County", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Districts/FeatureServer/0", name: "TxDOT_Districts/FeatureServer", searchFields: ["DIST_NM"], displayField: "DIST_NM", outFields: ["*"], title:"District", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Search/FeatureServer/0", name: "TxDOT_Roadways_Search/FeatureServer", searchFields: ["RTE_CNTY"], displayField: "RTE_CNTY", outFields: ["*"], title: "On System Highway", count: 9},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Top_100_Congested_Roadways/FeatureServer/0", name: "TxDOT_Top_100_Congested_Roadways/FeatureServer", searchFields: ["RANK"], displayField: "RANK", outFields: ["*"], title: "Top 100 Rank", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"], title: "Minute Order Number", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0", name: "Texas_Roadways", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search", count: 6}]
 
                 let featLayerPath = featLayer.parsedUrl.path.toLowerCase()
                 let src = sourcesObj.find(source => featLayerPath.includes(source.url.toLowerCase()))
@@ -4647,14 +4931,19 @@
                 let sourceObj = {
                   layer: new FeatureLayer({
                         url: src.url,
+                        orderBy:[{
+                          field: src.searchFields[0],
+                          order: "ascending"
+                        }]
+
                   }),
                   searchFields: src.searchFields,
                   suggestionsEnabled: true,
                   displayField: src.displayField,
                   exactMatch: false,
                   autoSelect: true,
-                  maxResults: 6,
-                  maxSuggestions: 6,
+                  maxResults: src.count,
+                  maxSuggestions: src.count,
                   minSuggestCharacters: 0,
                   outFields: src.outFields,
                   name: src.title,
@@ -4676,6 +4965,7 @@
                   appendChildToOverlayList(event.target.value, "FeatureLayer", false)
                   toggleLayer(event.target.value)
                   document.getElementById(`dwnloadBtn${itemInArr.name}`).style.display = "block"
+                  document.getElementById(`infoBtn${itemInArr.name}`).style.display = "block"
                 })
               }
 
@@ -4778,29 +5068,30 @@
                     a.download = `${resp.meta.request}/downloads/data?format=fgdb&spatialRefId=4326&where=1=1`
                     a.target = "_blank"
                     a.click()
-
                     a.remove()
                   }
                 }
               }
-
-              function queryExtent(){
-
-              }
-
               const getActiveLayers = (z) => itemArr.forEach((x) => {
                 if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
                   let feat = retrieveFeatureLayer(x.name)
-                    view.whenLayerView(feat[0]).then((y) =>{
-                      // y.queryExtent().then((res) =>{
-                      //   console.log(res)
-                      // })
-                      displayFeatOnZoom(y,z)
-                    })
+                  let layerView;
+                  view.allLayerViews.items.forEach((layer) => {
+                    if(layer.layer.name === feat[0].name){
+                      layerView = layer
+                    }
+                  })
+                    // view.whenLayerView(feat[0]).then((y) =>{
+                    //   test = y
+                    //   test.filter = null
+                    //   console.log(y)
+                    //   displayFeatOnZoom(y,z)
+                    // })
+                  displayFeatOnZoom(layerView, z)
                 }
               })
               
-              async function displayFeatOnZoom(layerView,zoom){            
+              async function displayFeatOnZoom(layerView, zoom){            
                 let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented", "Roadway Inventory - On-System Roadbeds"]
                 if(displayFeatZoom.includes(layerView.layer.name)){
                   let getItem = {
@@ -4838,65 +5129,93 @@
                     "Texas Roadways Unsegmented" : () => {
                       switch(zoom){
                         case 6: 
-                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                          }
+                          console.log(layerView)
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                          }
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
+                          }
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
+                          }
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                          }
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                        layerView.filter = {
+                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                          }
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = ''
+                        layerView.filter = {
+                            where: ""
+                          }
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = ''
+                        layerView.filter = {
+                            where: ""
+                          }
                           break;
                         default:
-                          layerView.layer.definitionExpression = ''
+                        layerView.filter = {
+                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                          }
+                          console.log(layerView)
                           break;
                       }
                     },
                     "AADT" : () => {
                       switch(zoom){
                         case 5:
-                          layerView.layer.definitionExpression = `zLevel < (7)`
+                          layerView.definitionExpression = `zLevel < (7)`
                           break;
                         case 6:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.filter = {
+                            where: `zLevel < (${zoom} + 1)`
+                          }
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.filter = {
+                            where: `zLevel < (${zoom} + 1)`
+                          }
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.filter = {
+                            where: `zLevel < (${zoom} + 1)`
+                          }
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.filter = {
+                            where: `zLevel < (${zoom} + 1)`
+                          }
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         default:
-                          layerView.layer.definitionExpression = `zLevel <= 13`
+                          layerView.definitionExpression = `zLevel <= 13`
                           break;
                         }
                     },
@@ -5110,6 +5429,7 @@
                     
                   })
                   .then((y) => {
+                    console.log(y)
                     if(layerType === "featureLayer"){
                       let status = false
                       errorArr = ["was not found"]
@@ -5129,7 +5449,6 @@
                       createServiceDown(alertTxt, "red")
                       //turn on service down div
                       //backupTxdotLayer.visible = true
-                      console.error("")
                       loadBaseMaps("https://tiles.arcgis.com/tiles/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Vector_Tile_Basemap_BACKUP/VectorTileServer")
                       return 
                     }
@@ -5145,40 +5464,6 @@
                 div[1].textContent = text 
                 div[1].style.backgroundColor = color
                 document.body.appendChild(serviceTempClone)
-              }
-
-              function moveTable(){
-                let routeTable = document.getElementById("results")
-                var mousePosition;
-                var offset = [0,0];
-                var isDown = false;
-
-
-                routeTable.addEventListener('mousedown', function(e) {
-                    isDown = true;
-                    offset = [
-                    routeTable.offsetLeft - e.clientX,
-                    routeTable.offsetTop - e.clientY
-                    ];
-                }, true);
-
-                document.addEventListener('mouseup', function() {
-                    isDown = false;
-                }, true);
-
-                document.addEventListener('mousemove', function(event) {
-                    event.preventDefault();
-                    if (isDown) {
-                        mousePosition = {
-                    
-                            x : event.clientX,
-                            y : event.clientY
-                    
-                        };
-                        routeTable.style.left = (mousePosition.x + offset[0]) + 'px';
-                        routeTable.style.top  = (mousePosition.y + offset[1]) + 'px';
-                    }
-                }, true);
               }
 
               document.getElementById("about").addEventListener("click", ()=>{
@@ -5284,7 +5569,7 @@
               }
               
               
-              function run2024EclipseModal(index){
+              function runStartUpModal(index){
                 //if date is after 04/08 then dont load modal
                 queryResponseUI({
                   para: `
@@ -5332,11 +5617,78 @@
                 
                 document.getElementsByClassName("queryStatus")[0].style.minWidth = '47rem'
               }
-            
+
+              function resetCloseInfoBox(){
+                if(document.querySelector(".closeInfoBox")){
+                  let infoBoxExist = document.querySelectorAll(".closeInfoBox")
+                  infoBoxExist.forEach(y => y.classList.remove("closeInfoBox"))
+                }
+                return
+              }
+              
+              function removeInfoUI(){
+                if(document.querySelector(".featLayerUIClass")){
+                  let featExistArr = document.querySelectorAll(".featLayerUIClass")
+                  featExistArr.forEach(y => y.remove())
+                  return true
+                }
+                return false
+              }
+
+              function returnLayerInfo(event){
+                //on hover fetch layer info
+                //display layer info in box
+                try{
+                  console.log(event)
+                  const elementName = event.target.parentElement.id
+                  removeInfoUI()
+                  const featLayerArr = retrieveFeatureLayer(elementName)
+                  
+                  featLayerArr.forEach((feat, index) => {
+                    console.log(feat, index)
+                    fetch(`https://www.arcgis.com/sharing/rest/content/items/${feat.serviceItemId}?f=json`)
+                      .then(resp => resp.json())
+                      .then(item => {
+                        console.log(item)
+                        // infoArr.push({"layerName": item.title, "layerDesc": item.description, "dateModified": feat.sourceJSON.editingInfo.dataLastEditDate, "layerOwner": item.owner, "id": item.id, eleName: elementName, "length": featLayerArr.length, "isVisible" : false
+                        // })
+                        showLayerInfo(item, feat)
+                      })
+                  })
+                  
+                }
+                catch(err){
+                  //err
+                }
+                
+              }
+
+              function showLayerInfo(currItem, modDate){
+                queryFeatureLayerUI({
+                  info: `
+                    <div id="innerLayerInfo">
+                        <h2>
+                          ${currItem.title}
+                          
+                        </h2>
+                        <div class="featItemDesc">
+                          <div>
+                            ${currItem.description}
+                          </div>
+                        </div>                      
+                        <a href=https://www.arcgis.com/home/item.html?id=${currItem.id} target=_blank>Open Item details page</a>
+                        <h3>Last Modified</h3>
+                        <p>
+                          ${new Date(modDate.sourceJSON.editingInfo.dataLastEditDate).toLocaleString(undefined)}
+                        </p>
+                    </div>
+                  
+                  
+                  `, header: `${modDate.name} Layer Info`},null, width="50px")
+              }
             
             // end require - - -        
             });
-
             function getRdName(e){
               document.getElementById(`${e.dataset.id}`).value = e.textContent
               e.parentNode.style.display = "none"
@@ -5442,7 +5794,6 @@
         			</table>
             </div>
             <div class="tocTabsQuery" id="queryTab">
-              
               <form onsubmit="return false" name="errorQuery">
                 <p class="borderLine"></p>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .3rem;">Note about the Query form</span>
@@ -5502,7 +5853,7 @@
                 </template>
                 <span class="error" id="errorQuery"></span>
                 <button class="clear-dropdown esri-icon-close" id="clear-query-search" onclick="clearSearch()"></button>
-                <!-- <span class="search-results" id="road-name-results-query"></span> -->
+                <span class="search-results" id="road-name-results-query"></span>
                 
 
               </form>          
@@ -5516,6 +5867,10 @@
                 <input class="route-field" id="inpSRDRouteID"  type="text" placeholder="Route ID - Example: US0290-KG">
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="End Measure - Example: 20" disabled>
+
+                <button class="dfoSetBtn" id="setDiagramDFOStartPt">X</button>
+                <button class="dfoSetBtn" id="setDiagramDFOEndPt">Y</button>
+                
                 <!-- <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 2: Add Control Sections to Diagram</span> -->
                 <button id="btnUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnAddCondition" disabled>Create Diagram</button>
                 <span class="stepClass underline" style="position: relative; top: 0.1rem; margin-bottom: .4rem;" disabled>Add Additional Attributes</span>
@@ -5558,7 +5913,7 @@
                 </div>
                 
                 <span class="error" id="errorSrd"></span>
-                <!-- <span class="search-results" id="road-name-results-srd"></span> -->
+                <span class="search-results" id="road-name-results-srd"></span>
                 <button class="clear-dropdown esri-icon-close" id="clear-srd-search" onclick="clearSearch()"></button>
 
               </form>                
@@ -5569,10 +5924,14 @@
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .3rem;">Note about the Event form</span>
                 <span class="tabDesc">Create and export roadway segments.</span>
                 <span class="stepClass underline" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Add Route</span>
+                
                 <input class="route-field" type="text" id="eventRoute" placeholder="Route ID - Example: US0290-KG" name="RTE_NM"/>
-
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1 eventDisable" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1 eventDisable" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
+                
+                <button class="dfoSetBtn" id="setDFOStartPt">X</button>
+                <button class="dfoSetBtn" id="setDFOEndPt">Y</button>
+                
                 <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Customize</span>
                 <select id="eventColors" name="Color" class="spmDropDown noDisabled1 eventDisable" disabled>
                     <option value="">Select a Color</option>
@@ -5602,7 +5961,7 @@
                 </div>
                 
                 <span class="error" id="errorEvent"></span>
-                <!-- <span class="search-results" id="road-name-results-event"></span> -->
+                <span class="search-results" id="road-name-results-event"></span>
                 <button class="clear-dropdown esri-icon-close" id="clear-event-search" onclick="clearSearch()"></button>
               </form>                 
             </div>            
@@ -5668,7 +6027,16 @@
                 <div class="toolsChild esri-icon-applications" id="googleMaps" title="Jump to Google"></div>
                 <div class="toolsChild esri-icon-printer" id="print" title="Print Map"></div>
                 <div class="toolsChild esri-icon-layer-list" id="legend" title="View Legend"></div>
-            </div>   
+                <div class="toolsChild esri-icon-edit" id="draw" title="Draw"></div>
+            </div>
+            <div id="drawSelection">
+              <div style="display: flex; flex-direction: column;">
+                <button class="toolsChild esri-icon-text" id="addPoint">Add Point</button>
+                <button class="toolsChild esri-icon-polyline" title="Add Polyline" id="addPolyline"></button>
+                <button class="toolsChild esri-icon-polygon" title="Add Polygon" id="addPolygon"></button>
+                <button class="toolsChild esri-icon-comment" title="Add Text" id="addText"></button>
+              </div>
+            </div>
             <div id="marginal" class="unselectable">
               <span id="zoom"></span>
               <span id="coords"></span>
@@ -5693,6 +6061,10 @@
               </div>
             </template>
             <div id="expandPopup"></div>          
-        </div>
+      </div>
+      <div id="appendToMe"></div>
+      <template id="layerInfo">
+        <div></div>
+      </template>
     </body>
 </html>
