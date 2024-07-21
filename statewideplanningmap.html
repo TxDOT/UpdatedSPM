@@ -30,7 +30,7 @@
               #queryMessageBtn{
                 margin-left:  16.6rem !important;
               }
-              #diagramTab, #roadwayDiagram{
+              #diagramTab, #roadwayDiagram, .queryStatus, .overlay{
                 display: none !important;
               }
             }
@@ -48,6 +48,9 @@
               }
               #queryMessageBtn{
                 margin-left:  15.6rem !important;
+              }
+              .queryStatus, .overlay{
+                display: none !important;
               }
             }
             @media (min-width: 1025px) and (max-width: 1280px){
@@ -209,6 +212,7 @@
               overflow: hidden !important;
               text-overflow: ellipsis !important;
               margin: 10px !important;
+              font-size: 13px;
             }
             .stepClass{
               display: flex;
@@ -265,8 +269,8 @@
               position: relative;
               z-index: 1;
               left: 13px;
-              top: 14rem;
-              width:50%;
+              /* top: 14rem; */
+              width:30%;
               background: white;
               padding-right: 5px;
             }
@@ -275,10 +279,10 @@
               width:50rem;
               display: flex;
               flex-direction: column;
-              min-height: 547px;
-              max-height: 600px;
+              max-height: 300px;
               overflow-y: auto;
-              left: 18rem;
+              left: 18.2rem;
+              top: 292px;
             }
             #innerLayerInfo{
               position: relative;
@@ -708,9 +712,51 @@
               position: absolute;
               right: 49px;
               top: 224px;
-              background: white;
-              width: 118px;
+              background: none;
               display: none;
+            }
+            #addPoint, #addPolyline, #addPolygon, #addText{
+              border: none;
+            }
+            #styleGeom{
+              position: absolute;
+              display: none;
+              flex-direction: column;
+              top: 440px;
+              right: 8px;
+              width: 166px;
+              background: white;
+              margin-right: 8px;
+              padding: 10px;
+              outline: 2px solid #14375A;
+            }
+            #sketchPolygonStyle, #sketchColors, #sketchStyle{
+              margin-bottom:0px !important;
+            }
+            .togglePoints{
+              display: none;
+              padding-top: 10px;
+            }
+            .toggleLine{
+              display: none;
+              padding-top: 10px;
+            }
+            .toggleColors{
+              display: none;
+              padding-top: 10px;
+            }
+            .togglePolygon, .toggleText{
+              display: none;
+              padding-top: 10px;
+            }
+            #deleteSketch{
+              position: relative;
+              float: left;
+            }
+            #closeSketch{
+              position: relative;
+              float: right;
+              margin: unset !important
             }
             body {
                 margin: 0;
@@ -726,13 +772,19 @@
               top: 134px;
               left: 16px;
             }
-            .hamburgler{
+            #zoomToLoc {
               position: absolute;
               top: 180px;
+              left: 16px;
+            }
+            .hamburgler{
+              position: absolute;
+              top: 220px;
               left: 16px;
               display: none;
               border: none;
             }
+
             #rmvDiv{
               position: absolute;
               left: 83%;
@@ -1252,16 +1304,18 @@
             var query;  
             var lrsButtonStatus=false;
             var graphicsLayer;
+            let sketchGLayer
             var graphicsLayerLRSIdentify;
             let bridgeInventoryFieldsArray = []
             let basemapAll;
             let queryTableResults;
             let draw;
+            let sketch;
+            let selectSketch;
             let addPtEvent;
             let addLineEvent;
             let addPolygonEvent;
             let addTextEvent;
-            
             // URL Parameters
             var urlParams;
             var basemapParam;
@@ -1368,6 +1422,8 @@
                   //map content added below
               });
 
+
+              
               //load toc feature layer
               let tocFeatureLayer = new FeatureLayer({
                 url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
@@ -1772,10 +1828,13 @@
                 }
               };
               
-              let sketch = new Sketch({
-                layer: new GraphicsLayer(),
-                view: view
+              sketchGLayer = new GraphicsLayer();
+
+              sketch = new Sketch({
+                view: view,
+                layer: sketchGLayer,
               })
+
               //Scale Bar-------------------------------------------------------
               var scaleBar = new ScaleBar({
                 view: view,
@@ -2213,7 +2272,7 @@
               }
 
               view.on("click", async function(event){
-                if (lrsButtonStatus==true) {
+                if (lrsButtonStatus === true) {
                   graphicsLayerLRSIdentify.removeAll();
                   let point = view.toMap({x: event.x, y: event.y});
                   var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
@@ -2234,8 +2293,62 @@
                   let response = await getLRSResponse(url)
                   processLRSResponse(response);
                   
-                  event.stopPropagation()                  
-                } 
+                  event.stopPropagation()
+                  return            
+                }
+
+                view.hitTest(event, {include: sketchGLayer})
+                  .then((evt) => {
+                    if(!evt.results.length) return
+                    console.log(evt)
+                    if(evt.results[0].graphic.geometry.type === "point"){
+                      console.log(document.querySelector(".togglePoints"))
+                      document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "block")
+                    }
+                    if(evt.results[0].graphic.geometry.type === "polyline"){
+                      document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "block")
+                    }
+                    if(evt.results[0].graphic.geometry.type === "polygon"){
+                      document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "block")
+                    }
+                    if(evt.results[0].graphic.symbol.type === "text"){
+                      document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
+                      document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "block")
+                    }
+                    let newPxLoc = view.toScreen(evt.results[0].graphic.geometry)
+                    document.getElementById("styleGeom").style.top = `${newPxLoc.y}px`
+                    document.getElementById("styleGeom").style.left = `${newPxLoc.x + 10}px`
+                    console.log(document.getElementById("styleGeom").dataset)
+                    document.getElementById("styleGeom").dataset.selectGeom = evt.results[0].graphic.uid
+                    document.getElementById("styleGeom").style.display = "flex"
+                    
+                    sketch.update(evt.results[0].graphic, {tool: 
+                      {
+                        "point": "move",
+                        "polyline": "reshape",
+                        "polygon": "reshape",
+                      }[evt.results[0].graphic.geometry.type]
+                    })
+                
+                    selectSketch = sketch.on("update", (evt) => {
+                      if(evt.state === "complete"){
+                        //document.getElementById("styleGeom").style.display = "none"
+
+                      }
+
+                    })
+                  })
                 rightClickUrlDisplay(event)
               });
               
@@ -2260,6 +2373,23 @@
               }
 
               function processBeginDFO(val, tab){
+                //error handling if value returns null
+                if(!val.data[0].RTE_DFO){
+                  queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px")
+                  return
+                }
+                createGeomGraphic({
+                  geom: {
+                    type: "point",
+                    longitude: val.data[0].LON,
+                    latitude: val.data[0].LAT,
+                  },
+                  symb: {
+                    type: "simple-marker",
+                    color: "#03C03C"
+                  }
+                })
+                tab === "diagramTab" ? document.getElementById("inpSRDRouteID").value = val.data[0].RTE_DEFN_LN_NM : document.getElementById("eventRoute").value = val.data[0].RTE_DEFN_LN_NM
                 tab === "diagramTab" ? document.getElementById("inpSRDFromDFO").value = Number(val.data[0].RTE_DFO) : document.getElementById("eventBeginDFO").value = Number(val.data[0].RTE_DFO)
                 tab === "diagramTab" ? document.getElementById("setDiagramDFOEndPt").disabled = false : null
                 tab === "diagramTab" ? document.getElementById("inpSRDToDFO").disabled = false : document.getElementById("eventEndDFO").disabled = false
@@ -2268,6 +2398,26 @@
               }
 
               function proceessEndDFO(val, tab){
+                //error handling if value RTE_DEFN_LN_NM does not match current ROUTE NAME 
+                //and if value returns null
+                let currRoadName = tab === "diagramTab" ? document.getElementById("inpSRDRouteID").value : document.getElementById("eventRoute").value
+                if(!val.data[0].RTE_DFO || currRoadName !== val.data[0].RTE_DEFN_LN_NM){
+                  !val.data[0].RTE_DFO ? queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px") : queryResponseUI({para: "Routes do not match", header:"Error"},  null, height="250px", width="350px")
+                  return
+                }
+
+                createGeomGraphic({
+                  geom: {
+                    type: "point",
+                    longitude: val.data[0].LON,
+                    latitude: val.data[0].LAT,
+                  },
+                  symb: {
+                    type: "simple-marker",
+                    color: "#FF3800"
+                  }
+                })
+
                 tab === "diagramTab" ? document.getElementById("inpSRDToDFO").value = Number(val.data[0].RTE_DFO) : document.getElementById("eventEndDFO").value = Number(val.data[0].RTE_DFO)
                 tab === "diagramTab" ? null : document.getElementById("eventColors").disabled = false
                 tab === "diagramTab" ? null : document.getElementById("eventWidth").disabled = false
@@ -2276,6 +2426,16 @@
                 tab === "diagramTab" ? null : document.getElementById("btnRemoveAll").disabled = false
                 tab === "diagramTab" ? null : document.getElementById("btnEventMap").disabled = false
                 tab === "diagramTab" ? document.getElementById("btnUpdateLRM").disabled = false : null
+                return
+              }
+
+              function createGeomGraphic(graphicObj){
+                let startGraphic = new Graphic({
+                  geometry: graphicObj.geom,
+                  symbol: graphicObj.symb
+                })
+
+                graphicsLayer.add(startGraphic)
                 return
               }
 
@@ -2438,29 +2598,168 @@
               document.getElementById("draw").addEventListener("click", ()=>{
                 let divDrawDisplay = document.getElementById("drawSelection").style.display
                 console.log(divDrawDisplay)
-                divDrawDisplay === "block"  ? resetButton("draw") : activateToolButton("draw")
+                divDrawDisplay === "block" ? resetButton("draw") : activateToolButton("draw")
                 divDrawDisplay === "block" ? document.getElementById("drawSelection").style.display = "none" : document.getElementById("drawSelection").style.display = "block"
+                divDrawDisplay === "block" ? null : removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
+                document.getElementById("viewDiv").style.cursor = "default"
+                sketch.cancel()
               })
-
+              //draw add a point
               document.getElementById("addPoint").addEventListener("click", (e)=>{
+                removeSketchEventsListener([{evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
+
                 activateToolButton("addPoint")
                 sketch.create("point", {mode: "click"})
                 addPtEvent = sketch.on("create", (event)=>{
-                  console.log(event)
+                  if(event.state === "complete"){
+                    event.graphic.symbol = {
+                      type: "simple-marker",
+                      color: "#14375a",
+                      size: 5,
+                    }
+                    sketchGLayer.add(event.graphic)
+                    return
+                  }
                 })
               })
+              //draw add a polyline
+              document.getElementById("addPolyline").addEventListener("click", (e)=>{
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
 
-              function removeSketchEventsListener(type){
-                let typeDict = {
-                  "point": addPtEvent,
-                  "line": addLineEvent,
-                  "polygon": addPolygonEvent,
-                  "text": addTextEvent
-                }
+                activateToolButton("addPolyline")
+                sketch.create("polyline", {mode: "click"})
+                addLineEvent = sketch.on("create", (event)=>{
+                  if(event.state === "complete"){
+                    sketchGLayer.add(event.graphic)
+                  }
+                })
+              })
+              //draw add a polygon
+              document.getElementById("addPolygon").addEventListener("click", (e)=>{
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addTextEvent, btn: "addText"}])
 
-                typeDict[type].remove()
+                activateToolButton("addPolygon")
+                sketch.create("polygon", {mode: "click"})
+                addPolygonEvent = sketch.on("create", (event)=>{
+                  if(event.state === "complete"){
+                    
+                    sketchGLayer.add(event.graphic)
+                  }
+                })
+              })
+              //draw add text
+              document.getElementById("addText").addEventListener("click", (e)=>{
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}])
+                activateToolButton("addText")
+                sketch.create("point", {mode: "click"})
+                addPtEvent = sketch.on("create", (event)=>{
+                  if(event.state === "complete"){
+                    event.graphic.symbol = {
+                      type: "text",
+                      color: "black",
+                      text: "Where's the best breakfast taco?",
+                      font:{
+                        size: 12,
+                        family: "Josefin Slab",
+                        weight: "bold"
+                      },
+                    }
+                    sketchGLayer.add(event.graphic)
+                    return
+                  }
+                })
+                //sketch.create("polygon", {mode: "click"})
+                // addPolygonEvent = sketch.on("create", (event)=>{
+                //   console.log(event)
+                // })
+              })
+
+              //alter geometry color
+              document.getElementById("sketchColors").addEventListener("change", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.color = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter geometry point size
+              document.getElementById("sketchSize").addEventListener("input", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.size = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter geometry line width
+              document.getElementById("sketchWidth").addEventListener("input", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.width = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter geometry line style
+              document.getElementById("sketchStyle").addEventListener("change", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.style = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter geometry polygon style
+              document.getElementById("sketchPolygonStyle").addEventListener("change", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.style = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter text
+              document.getElementById("sketchText").addEventListener("input", (e) => {
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.text = e.target.value
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+
+              //alter text angle
+              document.getElementById("sketchTextAngle").addEventListener("input", (e) => {
+                
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                let cloneSymbol = findSelectedGraphic.symbol.clone()
+                cloneSymbol.angle = Number(e.target.value)
+                findSelectedGraphic.symbol = cloneSymbol
+              })
+              function removeSketchEventsListener(sketchBtnEvent){
+                sketchBtnEvent.forEach(e => {
+                  // if(e.evt){
+                    e?.evt?.remove()
+                    resetButton(e.btn)
+                  //}
+                })
                 return
               }
+              
+              document.getElementById("deleteSketch").addEventListener("click", (e) =>{
+                let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
+                let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
+                sketchGLayer.remove(findSelectedGraphic)
+                document.getElementById("styleGeom").style.display = "none"
+                return
+              })
+
+              document.getElementById("closeSketch").addEventListener("click", (e) =>{
+                document.getElementById("styleGeom").style.display = "none"
+                //remove highlight
+                return
+              })
 
               function toggleLayer(id){
                 if(basemapAll.find(x => x.name === id)) return toggleBaseMap(id)
@@ -2478,6 +2777,7 @@
               }
 
               function retrieveFeatureLayer(name){
+
                 let layerId = map.layers.items.filter((lyrId) => {
                   if(lyrId.name === name){
                     return lyrId
@@ -2504,6 +2804,23 @@
                 activateBaseMapItem(id)
                 returnId.visible = 1
                 return
+              }
+
+              async function createViewModelToItemArr(item, layer){
+                let getLayerView = await view.whenLayerView(layer)
+
+                reactiveUtils.when(     
+                  () => !getLayerView.updateRequested,
+                  () =>{
+                    try{
+                      console.log(getLayerView)
+                      item.viewModel = getLayerView
+                    }
+                    catch{
+                    }
+                  }
+                )
+                return getLayerView
               }
 
               function initBasemapOverlayToggle(){
@@ -2540,6 +2857,19 @@
               resetListener.addEventListener('click', (event) => {
                 clearAndResetMap();
                 clearOverlay()
+
+              });
+
+              //zoom to user location
+              const zoomToLocation = document.querySelector('#zoomToLoc');
+              zoomToLocation.addEventListener('click', (event) => {
+                navigator.geolocation.getCurrentPosition((position) => {
+                  console.log(position)
+                  view.goTo({
+                    center: [position.coords.latitude, position.coords.longitude],
+                    zoom: 7
+                  })
+                });
 
               }); 
               
@@ -3067,7 +3397,7 @@
 
                 const viewDiv = document.getElementById("viewDiv")
                 const tocDiv = document.getElementById("left-div")
-                const header = document.getElementById("header")
+                const header = document.getElementByIds("header")
 
                 viewDiv.style.left = "0px"
                 viewDiv.style.width = "100vw"
@@ -3086,8 +3416,8 @@
 
               function setUpURLParams(urlParams){
                 graphicsLayer = new GraphicsLayer();
-                map.add(graphicsLayer);               
-                
+                map.add(graphicsLayer);
+                map.add(sketchGLayer)
                 //Graphics Layer LRS Identify
                 graphicsLayerLRSIdentify = new GraphicsLayer();
                 map.add(graphicsLayerLRSIdentify);   
@@ -4770,7 +5100,7 @@
                 })
                   
                 featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                addFeatureLayer.when((layer)=>{       
+                addFeatureLayer.when(async (layer)=>{       
                   layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
                   if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
                     if(layer.title === "TxDOT Bridges"){
@@ -4784,6 +5114,7 @@
 
                   if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
                     basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
+                    let rdItem = itemArr.find(item => item.name === "Texas Roadways Unsegmented")
                     addFeatureLayer.visible = true
                     addFeatureLayer.opacity = 0
                     addFeatureLayer.legendEnabled = false
@@ -5075,23 +5406,16 @@
               const getActiveLayers = (z) => itemArr.forEach((x) => {
                 if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
                   let feat = retrieveFeatureLayer(x.name)
-                  let layerView;
-                  view.allLayerViews.items.forEach((layer) => {
-                    if(layer.layer.name === feat[0].name){
-                      layerView = layer
-                    }
-                  })
-                    // view.whenLayerView(feat[0]).then((y) =>{
-                    //   test = y
-                    //   test.filter = null
-                    //   console.log(y)
-                    //   displayFeatOnZoom(y,z)
-                    // })
-                  displayFeatOnZoom(layerView, z)
+                    view.whenLayerView(feat[0]).then((y) =>{
+                      // y.queryExtent().then((res) =>{
+                      //   console.log(res)
+                      // })
+                      displayFeatOnZoom(y,z)
+                    })
                 }
               })
               
-              async function displayFeatOnZoom(layerView, zoom){            
+              async function displayFeatOnZoom(layerView,zoom){            
                 let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented", "Roadway Inventory - On-System Roadbeds"]
                 if(displayFeatZoom.includes(layerView.layer.name)){
                   let getItem = {
@@ -5129,93 +5453,65 @@
                     "Texas Roadways Unsegmented" : () => {
                       switch(zoom){
                         case 6: 
-                        layerView.filter = {
-                            where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                          }
-                          console.log(layerView)
+                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 7:
-                        layerView.filter = {
-                            where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                          }
+                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 8:
-                        layerView.filter = {
-                            where: "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
-                          }
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 9:
-                        layerView.filter = {
-                            where: "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
-                          }
+                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 10:
-                        layerView.filter = {
-                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                          }
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 11:
-                        layerView.filter = {
-                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                          }
+                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
                           break;
                         case 12:
-                        layerView.filter = {
-                            where: ""
-                          }
+                          layerView.layer.definitionExpression = ''
                           break;
                         case 13:
-                        layerView.filter = {
-                            where: ""
-                          }
+                          layerView.layer.definitionExpression = ''
                           break;
                         default:
-                        layerView.filter = {
-                            where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                          }
-                          console.log(layerView)
+                          layerView.layer.definitionExpression = ''
                           break;
                       }
                     },
                     "AADT" : () => {
                       switch(zoom){
                         case 5:
-                          layerView.definitionExpression = `zLevel < (7)`
+                          layerView.layer.definitionExpression = `zLevel < (7)`
                           break;
                         case 6:
-                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 7:
-                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 8:
-                          layerView.filter = {
-                            where: `zLevel < (${zoom} + 1)`
-                          }
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 9:
-                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 10:
-                          layerView.filter = {
-                            where: `zLevel < (${zoom} + 1)`
-                          }
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 11:
-                          layerView.filter = {
-                            where: `zLevel < (${zoom} + 1)`
-                          }
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 12:
-                          layerView.filter = {
-                            where: `zLevel < (${zoom} + 1)`
-                          }
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         case 13:
-                          layerView.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
                           break;
                         default:
-                          layerView.definitionExpression = `zLevel <= 13`
+                          layerView.layer.definitionExpression = `zLevel <= 13`
                           break;
                         }
                     },
@@ -5667,7 +5963,7 @@
                 queryFeatureLayerUI({
                   info: `
                     <div id="innerLayerInfo">
-                        <h2>
+                        <h2 style="font-size: 15px;">
                           ${currItem.title}
                           
                         </h2>
@@ -5677,8 +5973,8 @@
                           </div>
                         </div>                      
                         <a href=https://www.arcgis.com/home/item.html?id=${currItem.id} target=_blank>Open Item details page</a>
-                        <h3>Last Modified</h3>
-                        <p>
+                        <h3 style="font-size: 15px;">Last Modified</h3>
+                        <p style="font-size: 13px;">
                           ${new Date(modDate.sourceJSON.editingInfo.dataLastEditDate).toLocaleString(undefined)}
                         </p>
                     </div>
@@ -6031,11 +6327,84 @@
             </div>
             <div id="drawSelection">
               <div style="display: flex; flex-direction: column;">
-                <button class="toolsChild esri-icon-text" id="addPoint">Add Point</button>
+                <button class="toolsChild esri-icon-plus-circled" title="Add Point" id="addPoint"></button>
                 <button class="toolsChild esri-icon-polyline" title="Add Polyline" id="addPolyline"></button>
                 <button class="toolsChild esri-icon-polygon" title="Add Polygon" id="addPolygon"></button>
                 <button class="toolsChild esri-icon-comment" title="Add Text" id="addText"></button>
               </div>
+            </div>
+            <div id="styleGeom">
+              <div id="toggleColors">
+                <label for="sketchColor">Change color:</label>
+                <select id="sketchColors" name="sketchColor" class="spmDropDown noDisabled1 eventDisable" >
+                  <option value="">Select a Color</option>
+                  <option value="#000000" >Black</option>
+                  <option value="#cc6600">Brown</option>
+                  <option value="#009933">Green</option>
+                  <option value="#00bfff">Light Blue</option>
+                  <option value="#ff00ff">Magenta</option>
+                  <option value="#ff8000">Orange</option>
+                  <option value="#ff0000">Red</option>
+                  <option value="#14375a" selected>TxDOT Blue</option>
+                  <option value="#ffff00">Yellow</option>
+                </select>
+              </div>
+ 
+              <div class="togglePoints">
+                <label for="sketchSize">Change size:</label>
+                <input id="sketchSize" name="sketchSize" value="5">
+              </div>
+
+              <div class="toggleLine">
+                <label for="sketchWidth">Change Width:</label>
+                <input id="sketchWidth" name="sketchWidth" value="5">
+              </div>
+
+              <div class="toggleLine">
+                <label for="sketchStyle">Change Line Style:</label>
+                <select id="sketchStyle" name="sketchStyle" class="spmDropDown noDisabled1 eventDisable" >
+                  <option value="none">Select a Style</option>
+                  <option value="dash" >Dash</option>
+                  <option value="dash-dot">Dash Dot</option>
+                  <option value="long-dash">Long Dash</option>
+                  <option value="long-dash-dot">Long Dash Dot</option>
+                  <option value="long-dash-dot-dot">Long Dash Dot Dot</option>
+                  <option value="short-dash">Short Dash</option>
+                  <option value="short-dash-dot">Short Dash Dot</option>
+                  <option value="short-dash-dot-dot" >Short dash Dot Dot</option>
+                  <option value="short-dot">Short Dot</option>
+                  <option value="solid" selected>Solid</option>
+                </select>
+              </div>
+
+              <div class="togglePolygon">
+                <label for="sketchPolygonStyle">Change Area Style:</label>
+                <select id="sketchPolygonStyle" name="sketchPolygonStyle" class="spmDropDown noDisabled1 eventDisable" >
+                  <option value="none">Select a Style</option>
+                  <option value="backward-diagonal" >Backward Diagonal</option>
+                  <option value="cross">Cross</option>
+                  <option value="diagonal-cross">Diagonal Cross</option>
+                  <option value="forward-diagonal">Forward Diagonal</option>
+                  <option value="horizontal">Horizontal</option>
+                  <option value="solid" selected>Solid</option>
+                  <option value="vertical">Vertical</option>
+                </select>
+              </div>
+
+              <div class="toggleText">
+                <label for="sketchText">Change Text:</label>
+                <input id="sketchText" name="sketchText">
+              </div>
+              <div class="toggleText">
+                <label for="sketchTextAngle">Change Text Angle:</label>
+                <input id="sketchTextAngle" name="sketchTextAngle" type="range" min="1" max="360" value="180">
+              </div>
+
+              <div style="position: relative; top: 2px; padding-top: 10px;">
+                <button id="deleteSketch" class="spmSecondaryBtn">Delete</button>
+                <button id="closeSketch" class="spmMainBtn">Close</button>
+              </div>
+
             </div>
             <div id="marginal" class="unselectable">
               <span id="zoom"></span>
@@ -6048,6 +6417,7 @@
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
             <div id="searchBox" class="unselectable"></div>
             <div id="resetMap" class="toolsChild unselectable" title="Clear and reset map">&#x21BB;</div>
+            <div id="zoomToLoc" class="toolsChild unselectable esri-icon-tracking" title="Zoom to location"></div>
             <button class="hamburgler toolsChild esri-icon-drag-horizontal unselectable"></button>
             <div id="results" class="unselectable">Build a query and view the results here...</div>
             <div id="parentCanvas" class="unselectable">
