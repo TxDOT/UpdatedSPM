@@ -63,6 +63,16 @@
                 display: block !important;
               }
             }
+
+            @keyframes rotation {
+              from {
+                transform: rotate(0deg);
+              }
+              to {
+                transform: rotate(359deg);
+              }
+            }
+
             #solarEclipse{
               position: relative;
               width:100%;
@@ -323,6 +333,9 @@
             .esri-print__advanced-options-section{
               display: none;
             }
+            .esri-icon-radio-checked{
+              background-color: black;
+            }
             #queryMessagePara{
               font-size: 1rem;
               padding-left: 1.5rem;
@@ -399,6 +412,27 @@
               top: 20rem;
               left: 15rem;
             }
+            /* .setDFOStartPt--loading .button-text{
+              visibility: hidden;
+              opacity: 0;
+            }
+            .setDFOStartPt--loading::after{
+              content: "";
+              position: absolute;
+              width: 16px;
+              height: 16px;
+              top: 0;
+              left: 0;
+              right: 0;
+              bottom: 0;
+              margin: auto; 
+              border: 2px solid transparent;
+              border-top-color: #ffffff;
+              border-radius: 50%;
+              animation: rotation 1s ease infinite;
+              pointer-events: none;
+            } */
+
             #expandPopup{
               position: absolute;
               right: 3rem;
@@ -715,8 +749,12 @@
               background: none;
               display: none;
             }
-            #addPoint, #addPolyline, #addPolygon, #addText{
+            #addPoint, #addPolyline, #addPolygon, #addText, #clearAllGraphics{
               border: none;
+            }
+            #clearAllGraphics{
+              
+              
             }
             #styleGeom{
               position: absolute;
@@ -732,6 +770,20 @@
             }
             #sketchPolygonStyle, #sketchColors, #sketchStyle{
               margin-bottom:0px !important;
+              width: 100% !important;
+            }
+            #sketchText, #sketchWidth, #sketchSize{
+              width: 93% !important;
+              padding: 0px !important;
+              margin: 0px !important;
+              height: 36px;
+              padding-left: 9px !important;
+            }
+            #sketchTextAngle{
+              position: relative;
+              width: 100%;
+              right: 2px;
+              padding-top: 10px !important;
             }
             .togglePoints{
               display: none;
@@ -741,13 +793,12 @@
               display: none;
               padding-top: 10px;
             }
-            .toggleColors{
-              display: none;
-              padding-top: 10px;
+            #toggleColors{
+              
             }
             .togglePolygon, .toggleText{
               display: none;
-              padding-top: 10px;
+              padding-bottom: 10px;
             }
             #deleteSketch{
               position: relative;
@@ -761,6 +812,8 @@
             body {
                 margin: 0;
                 padding: 0;
+                overflow-x: hidden;
+                overflow-y: hidden;
             }
             nav {
                 position: relative;
@@ -770,12 +823,12 @@
             #resetMap {
               position: absolute;
               top: 134px;
-              left: 16px;
+              left: 15px;
             }
             #zoomToLoc {
               position: absolute;
-              top: 180px;
-              left: 16px;
+              top: 175px;
+              left: 15px;
             }
             .hamburgler{
               position: absolute;
@@ -924,7 +977,7 @@
               padding: 10px;
               border: 1px solid #14375A;
               resize: vertical;
-              margin-bottom: 15px;              
+              margin-bottom: 22px;              
             }
             input:invalid{
               border: 2px solid red;
@@ -971,19 +1024,50 @@
               overflow: hidden;
               width: 19rem;
             }
+            .findDFOLoc{
+              position: absolute;
+              height: 102px;
+              top: 160px;
+              left: 231px;
+              width: 50px;
+              display: flex;
+              flex-direction: column;
+            }
+            .findDFOLoc button{
+              padding-bottom: 2px;
+            }
             .dfoSetBtn{
               position: relative;
             }
-            #setDFOStartPt, #setDiagramDFOStartPt{
-              bottom: 53px;
-              left: 8px;
+            #srdSwitchDFO, #eventSwitchDFO{
+              transform: rotate(90deg);
+              height: 30px;
+              margin: 0px !important;
+              padding: 0px !important;
+              position: absolute;
+              width: 30px;
+              top: 37px;
+              background: none;
+              border: none !important;
+              right: 25px;
             }
+            #srdSwitchDFO:hover, #eventSwitchDFO:hover{
+              color: #204e70 !important;
+            }
+            #setDFOStartPt, #setDiagramDFOStartPt{
+              top: 6px;
+              right: 10px;
+              
+            }
+
             #setDFOEndPt, #setDiagramDFOEndPt{
-              left: 242px;
-              bottom: 46px;
+              right: 10px;
+              top: 34px;
+              width: 94% !important;
+              
             }
             #eventEndDFO, #eventBeginDFO, #inpSRDFromDFO, #inpSRDToDFO{
-              width: 77% !important;
+              width: 70% !important;
             }
 
             #eventEndDFO + #setDFOEndPt:enabled {
@@ -1072,7 +1156,7 @@
               left: 8.6rem !important;
               top: .04rem;
             }
-            #btnExportToKML{
+            #btnExportToKML, #btnExportToKMLPlan{
               position: relative;
               bottom:2rem;
             }
@@ -1284,6 +1368,7 @@
               font-size: 13px;
               position: relative;
               top: .5rem;
+              padding-bottom: 13px;
             }
         </style>
         <script>
@@ -1304,6 +1389,7 @@
             var query;  
             var lrsButtonStatus=false;
             var graphicsLayer;
+            var eventFromToPts;
             let sketchGLayer
             var graphicsLayerLRSIdentify;
             let bridgeInventoryFieldsArray = []
@@ -1413,10 +1499,11 @@
               "esri/layers/support/LabelClass",
               "esri/core/reactiveUtils",
               "esri/popup/ExpressionInfo",
-              "esri/widgets/Sketch"
+              "esri/widgets/Sketch",
+              "esri/widgets/Sketch/SketchViewModel"
             ], function(Map,MapView,FeatureLayer,Query,PopupTemplate,Point,SpatialReference,TileLayer,FeatureLayerView,VectorTileLayer,ScaleBar,DistanceMeasurement2D,
                         request,GraphicsLayer,Graphic,Basemap,Polyline,geometryEngine,webMercatorUtils,SimpleLineSymbol, OpenStreetMapLayer, Search, SubtypeGroupLayer, 
-                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo, Sketch) {
+                        Legend, WebTileLayer, WMTSLayer, Print, PrintVM, Expand, Popup, LabelClass, reactiveUtils, ExpressionInfo, Sketch, SketchViewModel) {
               
               var map = new Map({
                   //map content added below
@@ -1455,7 +1542,8 @@
                   initBasemapOverlayToggle()
                   onViewLoad()
                   roadSegmentQuery("IH0035-KG")
-                  
+                  eventFromToPts = new GraphicsLayer();
+                  map.add(eventFromToPts);
                 }
               }
 
@@ -1833,8 +1921,25 @@
               sketch = new Sketch({
                 view: view,
                 layer: sketchGLayer,
+                viewModel: new SketchViewModel({
+                  polylineSymbol:{
+                  type: "simple-line",
+                  color: "#0056a9",
+                  width: "5",
+                  style: "short-dot"
+                  },
+                  polygonSymbol:{
+                    type: "simple-fill",
+                    color: [0, 86, 169, .3],
+                    style: "solid"
+                  },
+                }),
+                defaultUpdateOptions: {
+                  highlightOptions: {
+                    enabled: false
+                  },
+                }
               })
-
               //Scale Bar-------------------------------------------------------
               var scaleBar = new ScaleBar({
                 view: view,
@@ -2098,11 +2203,15 @@
                       document.getElementById("btnRemoveAll").disabled = false
                       document.getElementById("btnEventMap").disabled = false
                     }
-                    event.explicitOriginalTarget.id === "eventRoute" ? document.getElementById("setDFOStartPt").disabled = false : document.getElementById("setDiagramDFOStartPt").disabled = false
+                    if(event.target.id === 'inpSRDToDFO'){
+                      document.getElementById("btnUpdateLRM").disabled = false
+                    }
                     event.target.nextElementSibling.disabled = false
+                    //event.explicitOriginalTarget.id === "eventRoute" ? document.getElementById("setDFOStartPt").disabled = false : document.getElementById("setDiagramDFOStartPt").disabled = false
+                    //event.target.nextElementSibling.disabled = false
                   }
                   else{
-                    event.target.nextElementSibling.disabled = true
+                    event.target.nextElementSibling.disabled = false
                   }
                 })
               }
@@ -2110,6 +2219,7 @@
               function toggleQueryBtns(id, status) {
                 let btns = document.getElementById(id).getElementsByTagName("button")
                 for(let btn in btns){
+                  if(btns[btn].id === "setDFOStartPt" || btns[btn].id === "setDiagramDFOStartPt") continue
                   btns[btn].disabled = status
                 }
               }
@@ -2231,7 +2341,7 @@
               function turnOffLRS(){
                 if(document.getElementById("sketchTab").style.display === "block"){
                   sketchDraw()
-                }queryToUrl
+                }
                 resetButton("lrsButton");
                 lrsButtonStatus = false;
                 clearInnerHTML("mapClickResults");
@@ -2275,6 +2385,7 @@
                 if (lrsButtonStatus === true) {
                   graphicsLayerLRSIdentify.removeAll();
                   let point = view.toMap({x: event.x, y: event.y});
+                  event.stopPropagation()
                   var url = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
                   
                   //add graphic to map
@@ -2293,60 +2404,81 @@
                   let response = await getLRSResponse(url)
                   processLRSResponse(response);
                   
-                  event.stopPropagation()
+                  
                   return            
                 }
+
+                function convertRGBToHex(colorObj){
+                  let r = (colorObj.r).toString(16).length === 1 ? `0${(colorObj.r).toString(16)}` : (colorObj.r).toString(16)
+                  let g = (colorObj.g).toString(16).length === 1 ? `0${(colorObj.g).toString(16)}` : (colorObj.g).toString(16)
+                  let b = (colorObj.b).toString(16).length === 1 ? `0${(colorObj.b).toString(16)}` : (colorObj.b).toString(16)
+
+                  return `#${r}${g}${b}` 
+                }
+
+                 
 
                 view.hitTest(event, {include: sketchGLayer})
                   .then((evt) => {
                     if(!evt.results.length) return
-                    console.log(evt)
                     if(evt.results[0].graphic.geometry.type === "point"){
-                      console.log(document.querySelector(".togglePoints"))
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
-                      document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "block")
+                      document.querySelectorAll(".togglePoints").forEach((item) => {
+                        item.style.display = "block"
+                        convertRGBToHex(evt.results[0].graphic.symbol.color)
+                        document.getElementById("sketchColors").value = convertRGBToHex(evt.results[0].graphic.symbol.color)
+                        document.getElementById("sketchSize").value = evt.results[0].graphic.symbol.size
+                      })
                     }
                     if(evt.results[0].graphic.geometry.type === "polyline"){
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
-                      document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "block")
+                      document.querySelectorAll(".toggleLine").forEach((item) => {
+                        item.style.display = "block"
+                        document.getElementById("sketchWidth").value = evt.results[0].graphic.symbol.width
+                        document.getElementById("sketchColors").value = convertRGBToHex(evt.results[0].graphic.symbol.color)
+                        document.getElementById("sketchStyle").value = evt.results[0].graphic.symbol.style
+                      }) 
                     }
                     if(evt.results[0].graphic.geometry.type === "polygon"){
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
-                      document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "block")
+                      document.querySelectorAll(".togglePolygon").forEach((item) => {
+                        item.style.display = "block"
+                        document.getElementById("sketchColors").value = convertRGBToHex(evt.results[0].graphic.symbol.color)
+                        document.getElementById('sketchPolygonStyle').value = evt.results[0].graphic.symbol.style
+
+                      })
                     }
                     if(evt.results[0].graphic.symbol.type === "text"){
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
-                      document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "block")
+                      document.querySelectorAll(".toggleText").forEach((item) => {
+                        item.style.display = "block"
+                        document.getElementById("sketchColors").value = convertRGBToHex(evt.results[0].graphic.symbol.color)
+                        document.getElementById("sketchText").value = evt.results[0].graphic.symbol.text === "Reselect to update text" ? "" : evt.results[0].graphic.symbol.text
+                        document.getElementById("sketchTextAngle").value = evt.results[0].graphic.symbol.angle
+
+                      })
                     }
                     let newPxLoc = view.toScreen(evt.results[0].graphic.geometry)
                     document.getElementById("styleGeom").style.top = `${newPxLoc.y}px`
-                    document.getElementById("styleGeom").style.left = `${newPxLoc.x + 10}px`
-                    console.log(document.getElementById("styleGeom").dataset)
+                    document.getElementById("styleGeom").style.left = `${newPxLoc.x}px`
                     document.getElementById("styleGeom").dataset.selectGeom = evt.results[0].graphic.uid
-                    document.getElementById("styleGeom").style.display = "flex"
+                    document.getElementById("styleGeom").style.display = "block"
                     
                     sketch.update(evt.results[0].graphic, {tool: 
                       {
                         "point": "move",
                         "polyline": "reshape",
                         "polygon": "reshape",
-                      }[evt.results[0].graphic.geometry.type]
-                    })
-                
-                    selectSketch = sketch.on("update", (evt) => {
-                      if(evt.state === "complete"){
-                        //document.getElementById("styleGeom").style.display = "none"
-
-                      }
-
+                      }[evt.results[0].graphic.geometry.type],
+                      highlightOptions: {enabled: false}
                     })
                   })
                 rightClickUrlDisplay(event)
@@ -2359,16 +2491,50 @@
 
               function getLocationOnRoad(type, tab){
                 document.getElementById("viewDiv").style.cursor = "crosshair"
+                // document.getElementById("setDFOStartPt").classList.add('setDFOStartPt--loading')
                 let clickDFO = view.on("click", async (event)=>{
                   let mapPt = view.toMap({x: event.x, y: event.y});
+                  event.stopPropagation()
                   let url = `https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat=${mapPt.latitude.toFixed(8)}&lon=${mapPt.longitude.toFixed(8)}`;
                   let val = await getLRSResponse(url)
-                
                   type === "begin" ?  processBeginDFO(val, tab) : proceessEndDFO(val, tab)
                   document.getElementById("viewDiv").style.cursor = "default"
                   clickDFO.remove()
-                  
                 })
+                return
+              }
+
+              function switchEventDFOs(event){
+                let begin = event === "event" ? document.getElementById("eventBeginDFO").value : document.getElementById("inpSRDFromDFO").value
+                let end = event === "event" ? document.getElementById("eventEndDFO").value : document.getElementById("inpSRDToDFO").value
+
+                let eventArr = [begin, end]
+                let startDfoSym = eventFromToPts.graphics.items.find(graphic => graphic.attributes.status === "start")
+                let cloneStartSymb = startDfoSym.symbol.clone()
+                
+                cloneStartSymb.color = eventArr[0] > eventArr[1] ? "#ff8c00" : "#FF3800"
+                startDfoSym.symbol = cloneStartSymb
+
+                let endDfoSym = eventFromToPts.graphics.items.find(graphic => graphic.attributes.status === "end")
+                let cloneEndDfoSym = endDfoSym.symbol.clone()
+                cloneEndDfoSym.color  = eventArr[0] > eventArr[1] ? "#FF3800" : "#ff8c00" 
+                endDfoSym.symbol = cloneEndDfoSym
+
+                if(event === "event"){
+                  document.getElementById("eventEndDFO").value = eventArr[0]
+                  document.getElementById("eventBeginDFO").value = eventArr[1]
+                  return
+                }
+                document.getElementById("inpSRDToDFO").value = eventArr[0]
+                document.getElementById("inpSRDFromDFO").value = eventArr[1]
+                return
+              }
+
+              function removeCurrentFromToGraphic(pos){
+                let isEndPtExist = eventFromToPts.graphics.items.find(graphic => graphic.attributes.status === pos)
+                if(isEndPtExist){
+                  eventFromToPts.remove(isEndPtExist)
+                }
                 return
               }
 
@@ -2378,6 +2544,7 @@
                   queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px")
                   return
                 }
+                removeCurrentFromToGraphic("start")
                 createGeomGraphic({
                   geom: {
                     type: "point",
@@ -2386,7 +2553,10 @@
                   },
                   symb: {
                     type: "simple-marker",
-                    color: "#03C03C"
+                    color: "#ff8c00",
+                  },
+                  attributes:{
+                    "status": "start"
                   }
                 })
                 tab === "diagramTab" ? document.getElementById("inpSRDRouteID").value = val.data[0].RTE_DEFN_LN_NM : document.getElementById("eventRoute").value = val.data[0].RTE_DEFN_LN_NM
@@ -2405,6 +2575,7 @@
                   !val.data[0].RTE_DFO ? queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px") : queryResponseUI({para: "Routes do not match", header:"Error"},  null, height="250px", width="350px")
                   return
                 }
+                removeCurrentFromToGraphic("end")
 
                 createGeomGraphic({
                   geom: {
@@ -2415,6 +2586,9 @@
                   symb: {
                     type: "simple-marker",
                     color: "#FF3800"
+                  },
+                  attributes:{
+                    "status": "end"
                   }
                 })
 
@@ -2432,10 +2606,11 @@
               function createGeomGraphic(graphicObj){
                 let startGraphic = new Graphic({
                   geometry: graphicObj.geom,
-                  symbol: graphicObj.symb
+                  symbol: graphicObj.symb,
+                  attributes: graphicObj.attributes
                 })
 
-                graphicsLayer.add(startGraphic)
+                eventFromToPts.add(startGraphic)
                 return
               }
 
@@ -2481,18 +2656,21 @@
                 if (document.getElementById("diagramTab").style.display == "block"||document.getElementById("eventTab").style.display == "block") {
                   document.getElementById("inpSRDRouteID").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
 		              document.getElementById("eventRoute").value = theResponse.data[lowestIndex].RTE_DEFN_LN_NM;
+                  document.getElementById("btnEventMap").disabled = false;
+                  document.getElementById("btnUpdateLRM").disabled = false;
+        
                   theResponse.data[lowestIndex].RTE_DFO ?? setElementText("mapClickResults", "Road was not detected. Move Closer.")
                   var startingDFO = Number(theResponse.data[lowestIndex].RTE_DFO.toFixed(3));
-                 if ((startingDFO-1)<0) {
-                    document.getElementById("inpSRDFromDFO").value = Number(startingDFO.toFixed(3));
-                    document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3));
-                    document.getElementById("eventBeginDFO").value = Number(startingDFO.toFixed(3));
-                    document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));
-                  } else {
-                    document.getElementById("inpSRDFromDFO").value = Number((startingDFO-1).toFixed(3));
-                    document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3)); 
-                    document.getElementById("eventBeginDFO").value = Number((startingDFO-1).toFixed(3));
-                    document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));                 
+                  if ((startingDFO-1)<0) {
+                      document.getElementById("inpSRDFromDFO").value = Number(startingDFO.toFixed(3));
+                      document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3));
+                      document.getElementById("eventBeginDFO").value = Number(startingDFO.toFixed(3));
+                      document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));
+                    } else {
+                      document.getElementById("inpSRDFromDFO").value = Number((startingDFO-1).toFixed(3));
+                      document.getElementById("inpSRDToDFO").value = Number((startingDFO+1).toFixed(3)); 
+                      document.getElementById("eventBeginDFO").value = Number((startingDFO-1).toFixed(3));
+                      document.getElementById("eventEndDFO").value = Number((startingDFO+1).toFixed(3));                 
                   }
                   
                   ["#diagramTab","#eventTab"].forEach((x) =>{
@@ -2505,11 +2683,10 @@
                               if(getField[0].children[0][a].nextElementSibling.nextElementSibling.id === "eventColors"){
                                  getField[0].children[0][a].nextElementSibling.nextElementSibling.value = "#000000"
                                  getField[0].children[0][a].nextElementSibling.nextElementSibling.nextElementSibling.value = "4"
-                                 document.getElementById("btnEventMap").disabled = false;
+                                
                               }
                             }
                             getField[0].children[0][a].nextElementSibling.disabled = false
-                            
                         }
                       }
                   })
@@ -2597,25 +2774,31 @@
 
               document.getElementById("draw").addEventListener("click", ()=>{
                 let divDrawDisplay = document.getElementById("drawSelection").style.display
-                console.log(divDrawDisplay)
                 divDrawDisplay === "block" ? resetButton("draw") : activateToolButton("draw")
                 divDrawDisplay === "block" ? document.getElementById("drawSelection").style.display = "none" : document.getElementById("drawSelection").style.display = "block"
-                divDrawDisplay === "block" ? null : removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
+                //divDrawDisplay === "block" ? null : removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 document.getElementById("viewDiv").style.cursor = "default"
                 sketch.cancel()
               })
               //draw add a point
               document.getElementById("addPoint").addEventListener("click", (e)=>{
+                if(document.getElementById("addPoint").style.backgroundColor === "rgb(32, 78, 112)"){
+                  sketch.cancel()
+                  resetButton("addPoint")
+                  return
+                }
                 removeSketchEventsListener([{evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
-
                 activateToolButton("addPoint")
                 sketch.create("point", {mode: "click"})
                 addPtEvent = sketch.on("create", (event)=>{
                   if(event.state === "complete"){
                     event.graphic.symbol = {
                       type: "simple-marker",
-                      color: "#14375a",
+                      color: "#0056a9",
                       size: 5,
+                      outline:{
+                        width: "0px"
+                      }
                     }
                     sketchGLayer.add(event.graphic)
                     return
@@ -2623,9 +2806,13 @@
                 })
               })
               //draw add a polyline
-              document.getElementById("addPolyline").addEventListener("click", (e)=>{
-                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
-
+              let addLineListener = document.getElementById("addPolyline").addEventListener("click", (e)=>{
+                if(document.getElementById("addPolyline").style.backgroundColor === "rgb(32, 78, 112)"){
+                  sketch.cancel()
+                  resetButton("addPolyline")
+                  return
+                }
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 activateToolButton("addPolyline")
                 sketch.create("polyline", {mode: "click"})
                 addLineEvent = sketch.on("create", (event)=>{
@@ -2635,9 +2822,13 @@
                 })
               })
               //draw add a polygon
-              document.getElementById("addPolygon").addEventListener("click", (e)=>{
-                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addTextEvent, btn: "addText"}])
-
+              let addPolygonListener = document.getElementById("addPolygon").addEventListener("click", (e)=>{
+                if(document.getElementById("addPolygon").style.backgroundColor === "rgb(32, 78, 112)"){
+                  sketch.cancel()
+                  resetButton("addPolygon")
+                  return
+                }
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 activateToolButton("addPolygon")
                 sketch.create("polygon", {mode: "click"})
                 addPolygonEvent = sketch.on("create", (event)=>{
@@ -2648,16 +2839,21 @@
                 })
               })
               //draw add text
-              document.getElementById("addText").addEventListener("click", (e)=>{
-                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}])
+              let addTextListener = document.getElementById("addText").addEventListener("click", (e)=>{
+                if(document.getElementById("addText").style.backgroundColor === "rgb(32, 78, 112)"){
+                  sketch.cancel()
+                  resetButton("addText")
+                  return
+                }
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 activateToolButton("addText")
                 sketch.create("point", {mode: "click"})
                 addPtEvent = sketch.on("create", (event)=>{
                   if(event.state === "complete"){
                     event.graphic.symbol = {
                       type: "text",
-                      color: "black",
-                      text: "Where's the best breakfast taco?",
+                      color: "#0056a9",
+                      text: "Reselect to update text",
                       font:{
                         size: 12,
                         family: "Josefin Slab",
@@ -2674,12 +2870,20 @@
                 // })
               })
 
+              document.getElementById("clearAllGraphics").addEventListener("click", (e) => {
+                sketchGLayer.removeAll()
+                sketch.cancel()
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
+              })
+
+
               //alter geometry color
               document.getElementById("sketchColors").addEventListener("change", (e) => {
                 let selectGeom = document.getElementById("styleGeom").dataset.selectGeom
                 let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
                 let cloneSymbol = findSelectedGraphic.symbol.clone()
                 cloneSymbol.color = e.target.value
+                cloneSymbol.color.a = cloneSymbol.type === "simple-fill" ? .3 : 1
                 findSelectedGraphic.symbol = cloneSymbol
               })
 
@@ -2737,12 +2941,13 @@
                 cloneSymbol.angle = Number(e.target.value)
                 findSelectedGraphic.symbol = cloneSymbol
               })
+
               function removeSketchEventsListener(sketchBtnEvent){
                 sketchBtnEvent.forEach(e => {
                   // if(e.evt){
                     e?.evt?.remove()
                     resetButton(e.btn)
-                  //}
+                  // }
                 })
                 return
               }
@@ -2752,11 +2957,13 @@
                 let findSelectedGraphic = sketchGLayer.graphics.items.find(graphic => graphic.uid === Number(selectGeom))
                 sketchGLayer.remove(findSelectedGraphic)
                 document.getElementById("styleGeom").style.display = "none"
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 return
               })
 
               document.getElementById("closeSketch").addEventListener("click", (e) =>{
                 document.getElementById("styleGeom").style.display = "none"
+                removeSketchEventsListener([{evt: addPtEvent, btn: "addPoint"}, {evt: addLineEvent, btn: "addPolyline"}, {evt: addPolygonEvent, btn: "addPolygon"}, {evt: addTextEvent, btn: "addText"}])
                 //remove highlight
                 return
               })
@@ -2813,7 +3020,6 @@
                   () => !getLayerView.updateRequested,
                   () =>{
                     try{
-                      console.log(getLayerView)
                       item.viewModel = getLayerView
                     }
                     catch{
@@ -2857,6 +3063,7 @@
               resetListener.addEventListener('click', (event) => {
                 clearAndResetMap();
                 clearOverlay()
+                eventFromToPts.removeAll()
 
               });
 
@@ -2864,7 +3071,6 @@
               const zoomToLocation = document.querySelector('#zoomToLoc');
               zoomToLocation.addEventListener('click', (event) => {
                 navigator.geolocation.getCurrentPosition((position) => {
-                  console.log(position)
                   view.goTo({
                     center: [position.coords.latitude, position.coords.longitude],
                     zoom: 7
@@ -2964,7 +3170,7 @@
                 graphicsLayer.removeAll();
                 checkLRMInputs();
                 resetSrdSelectOption()
-                clearSearch()
+                //clearSearch()
               })
               
               //Add Inventory Attribute listener
@@ -3030,6 +3236,7 @@
                 inventoryDiagramLogAllValues = [];
                 clearDrawings();
                 graphicsLayer.removeAll();
+                eventFromToPts.removeAll();
                 document.getElementById("inpSRDRouteID").value="";
                 document.getElementById("inpSRDFromDFO").value="";
                 document.getElementById("inpSRDToDFO").value="";
@@ -3101,33 +3308,52 @@
                 event.target.disabled = true
               });
               
+              //Plan Export KML
+              document.getElementById("btnExportToKMLPlan").addEventListener("click", () => {
+                exportKML()
+              })
               //Recalculate Sketch
               document.getElementById("btnRecalcProject").addEventListener("click",()=>{
                 deCalculateCost()
               })
 
               //get start dfo location
-              document.getElementById("setDFOStartPt").addEventListener("click", ()=>{
+              document.getElementById("setDFOStartPt").addEventListener("click", (event)=>{
                 let tab = "eventTab"
                 getLocationOnRoad("begin", tab)
                 document.getElementById("setDFOEndPt").disabled = false
+                document.getElementById("eventBeginDFO").disabled = false
               })
 
               document.getElementById("setDiagramDFOStartPt").addEventListener("click", ()=>{
                 let tab = "diagramTab"
                 getLocationOnRoad("begin", tab)
                 document.getElementById("setDFOEndPt").disabled = false
+                document.getElementById("inpSRDFromDFO").disabled = false
               })
 
               //get end dfo location
+              
               document.getElementById("setDFOEndPt").addEventListener("click", (event)=>{
                 let tab = "eventTab"
                 getLocationOnRoad("end", tab)
+                
+                document.getElementById("eventSwitchDFO").disabled = false
+              })
+              //switch Event DFOs
+              document.getElementById("eventSwitchDFO").addEventListener("click", (event)=>{
+                switchEventDFOs("event")
+              })
+
+              //switch SRD DFOs
+              document.getElementById("srdSwitchDFO").addEventListener("click", (event)=>{
+                switchEventDFOs("srd")
               })
 
               document.getElementById("setDiagramDFOEndPt").addEventListener("click", (event)=>{
                 let tab = "diagramTab"
                 getLocationOnRoad("end", tab)
+                document.getElementById("srdSwitchDFO").disabled = false
               })
               
               //Add Event Button
@@ -3148,8 +3374,9 @@
                 if(Number(eventBeginDFO) >= Number(eventEndDFO)){
                   queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, null, height="250px", width="350px")
                   return
-                }            
+                }      
                 getLineworkWithM(eventRoute,eventBeginDFO,eventEndDFO,eventColors,eventWidth,eventDescription);
+                event.stopPropagation()
               });           
               
               //Export Events to KML
@@ -3175,6 +3402,7 @@
                 document.getElementById("btnExportToKML").disabled = true;
                 document.getElementById("btnGenerateURL").disabled = true;
                 graphicsLayer.removeAll();
+                eventFromToPts.removeAll()
                 setElementText("graphics", "")
                 document.querySelectorAll(".eventDisable").forEach(x => x.disabled = true)
               });         
@@ -3218,6 +3446,7 @@
               }
 
               function resetAllTabs(skip) {
+                removeInfoUI()
                 resetButton("baseMaps");
                 resetButton("dataQuery");                
                 resetButton("roadwayDiagram");
@@ -3248,6 +3477,7 @@
                 //resetBaseMapItem(bi.id)
                 userDrawnSketchLength=0;
                 graphicsLayer.removeAll();
+                eventFromToPts.removeAll()
                 resetLRSIdentify();
                 linePoints.length = 0;
                 setElementText("deCostResult", "")
@@ -3255,7 +3485,7 @@
               }
               
               function resetAllTools() {
-                resetButton("measureButton");
+                ("measureresetButtonButton");
                 resetButton("lrsButton"); 
               }      
               
@@ -3312,7 +3542,7 @@
 
               function activateToolButton(theElement){
                 document.getElementById(theElement).style.backgroundColor = "#204e70";
-                document.getElementById(theElement).style.color = "white";  
+                document.getElementById(theElement).style.color = "white";
                 return
               }
               
@@ -3732,15 +3962,13 @@
                 let innerDiv = cloneTemplate.querySelectorAll("div")
                 innerDiv[0].classList.add("featLayerUIClass")
                 innerDiv[0].id = "featLayerUIDiv"
-                // let header = document.createElement("h2")
-                // header.id = "featLayerId"
-                // header.textContent = text.header
+
                 let bottomSpan = document.createElement("span")
                 bottomSpan.id = "infoBottomSpan"
                 let layerInfo = document.createElement("p")
                 layerInfo.innerHTML = text.info
+                
                 innerDiv[0].appendChild(bottomSpan)
-                // innerDiv[0].appendChild(header)
                 innerDiv[0].appendChild(layerInfo)
                 document.getElementById("appendToMe").appendChild(cloneTemplate)
                 return
@@ -5015,7 +5243,6 @@
                 infoBtn.id = `infoBtn${layerItem}`
                 infoBtn.onclick = (event) => {
                   if(infoBtn.classList.contains("closeInfoBox")){
-                    infoBtn.classList.toggle("closeInfoBox")
                     removeInfoUI()
                     return
                   }
@@ -5362,7 +5589,7 @@
                       expression: `
                         if(TypeOf($feature.${i}) == "String"){
                           if(Count($feature.${i}) < 1){
-                            return "UNKNOWN"
+                            return "NULL"
                           }
 
                           else{
@@ -5373,7 +5600,7 @@
                           return $feature.${i}
                         }
                         else{
-                          return "UNKNOWN"
+                          return "NULL"
                         }
                       `,
                       }
@@ -5725,7 +5952,6 @@
                     
                   })
                   .then((y) => {
-                    console.log(y)
                     if(layerType === "featureLayer"){
                       let status = false
                       errorArr = ["was not found"]
@@ -5773,7 +5999,7 @@
               })
 
               function aboutModal(){
-                let version = "5.0.5 Santa Fe"
+                let version = "5.0.7 Rochester"
                 queryResponseUI({para: `
                   The Statewide Planning Map displays data in support of planning operations at TxDOT.
                   <br>
@@ -5816,7 +6042,8 @@
                                     {text: "Updated Bridge Popups to include Bridge Report", event: "old"}, 
                                     {text: "Updated Roadway Inventory - On System and Reference Marker scale dependencies", event: "old"}, {text: "Updated Control Section Job in Search", event: "old"},
                                     {text: "Added 'Copy XY' button to Popup", event: "old"}, {text: "Add Admin Alert Control", event: "old"}, {text: "Updated eLRS endpoints", event: "old"}, {text: "Enabled copy and paste on eLRS/feature popups", event: "old"},
-                                    {text: "Roadname Search added to Query, Event, SRD forms", event: "new"}, {text:"City Boundaries feature layer added to Overlay list", event: "new"}
+                                    {text: "Roadname Search added to Query, Event, SRD forms", event: "new"}, {text:"City Boundaries feature layer added to Overlay list", event: "old"}, {text:"Layer metadata request button", event: "new"},
+                                    {text:"New zoom to current location button", event: "new"}, {text: "New draw functionality for point, lines, polygons, and text", event: "new"}
                                   ]
 
                 let oldReleaseNotesList="";
@@ -5924,6 +6151,8 @@
               
               function removeInfoUI(){
                 if(document.querySelector(".featLayerUIClass")){
+                  let toggleInfoBtnOff = document.querySelectorAll(".closeInfoBox")
+                  toggleInfoBtnOff.forEach(infoBox => infoBox.classList.toggle("closeInfoBox"))
                   let featExistArr = document.querySelectorAll(".featLayerUIClass")
                   featExistArr.forEach(y => y.remove())
                   return true
@@ -5935,17 +6164,14 @@
                 //on hover fetch layer info
                 //display layer info in box
                 try{
-                  console.log(event)
                   const elementName = event.target.parentElement.id
                   removeInfoUI()
                   const featLayerArr = retrieveFeatureLayer(elementName)
                   
                   featLayerArr.forEach((feat, index) => {
-                    console.log(feat, index)
                     fetch(`https://www.arcgis.com/sharing/rest/content/items/${feat.serviceItemId}?f=json`)
                       .then(resp => resp.json())
                       .then(item => {
-                        console.log(item)
                         // infoArr.push({"layerName": item.title, "layerDesc": item.description, "dateModified": feat.sourceJSON.editingInfo.dataLastEditDate, "layerOwner": item.owner, "id": item.id, eleName: elementName, "length": featLayerArr.length, "isVisible" : false
                         // })
                         showLayerInfo(item, feat)
@@ -5972,9 +6198,9 @@
                             ${currItem.description}
                           </div>
                         </div>                      
-                        <a href=https://www.arcgis.com/home/item.html?id=${currItem.id} target=_blank>Open Item details page</a>
+                        <a href=https://www.arcgis.com/home/item.html?id=${currItem.id} target=_blank style="font-size: 14px; padding-left: 11px;">Open item details page</a>
                         <h3 style="font-size: 15px;">Last Modified</h3>
-                        <p style="font-size: 13px;">
+                        <p style="font-size: 13px; padding-left: 11px;">
                           ${new Date(modDate.sourceJSON.editingInfo.dataLastEditDate).toLocaleString(undefined)}
                         </p>
                     </div>
@@ -6164,8 +6390,15 @@
                 <input id="inpSRDFromDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="Begin Measure - Example: 15" disabled>
                 <input id="inpSRDToDFO"  step="0.001" type="number" class="noDisabled1 inputSRD" placeholder="End Measure - Example: 20" disabled>
 
-                <button class="dfoSetBtn" id="setDiagramDFOStartPt">X</button>
-                <button class="dfoSetBtn" id="setDiagramDFOEndPt">Y</button>
+                <div class="findDFOLoc">
+                  <button class="dfoSetBtn spmMainBtn"  id="setDiagramDFOStartPt">
+                    <span>From</span>
+                  </button>
+                  <button class="esri-icon-swap spmSecondaryBtn" id="srdSwitchDFO"></button>
+                  <button class="dfoSetBtn spmMainBtn" id="setDiagramDFOEndPt">
+                    <span>To</span>
+                  </button>
+                </div>
                 
                 <!-- <span class="stepClass" style="position: relative; top: -0.3rem; margin-bottom: .4rem;">Step 2: Add Control Sections to Diagram</span> -->
                 <button id="btnUpdateLRM" class="queryButtonClass srdBtn spmMainBtn btnAddCondition" disabled>Create Diagram</button>
@@ -6225,9 +6458,16 @@
                 <input type="number" step="0.001" id="eventBeginDFO" class="noDisabled1 eventDisable" name="BDFO" placeholder="Begin Measure - Example: 15.123" min="0" max="1000" disabled/>
                 <input disabled type="number" step="0.001" id="eventEndDFO" class="noDisabled1 eventDisable" name="EDFO" placeholder="End Measure - Example: 20.123" min="0" max="1000"/>
                 
-                <button class="dfoSetBtn" id="setDFOStartPt">X</button>
-                <button class="dfoSetBtn" id="setDFOEndPt">Y</button>
-                
+                <div class="findDFOLoc">
+                  <button class="dfoSetBtn spmMainBtn" id="setDFOStartPt">
+                    <span class="button-text">From</span>
+                  </button>
+                  <button class="esri-icon-swap spmSecondaryBtn" id="eventSwitchDFO"></button>
+                  <button class="dfoSetBtn spmMainBtn" id="setDFOEndPt">
+                    <span>To</span>
+                  </button>
+                </div>
+
                 <span class="stepClass underline" style="position: relative; top: -0.1rem; margin-bottom: .4rem;">Customize</span>
                 <select id="eventColors" name="Color" class="spmDropDown noDisabled1 eventDisable" disabled>
                     <option value="">Select a Color</option>
@@ -6311,7 +6551,11 @@
                 <button id="btnClearProject" class="queryButtonClass spmMainBtn" title="Clear Project" disabled>Clear</button>
                 <button id="btnRecalcProject" class="queryButtonClass spmMainBtn" title="Re-Calculate Project" disabled>Re-Calculate</button>
                 <span class="stepClass underline">Results</span>
-    						<div id="deCostResult"></div>      					
+    						<div id="deCostResult"></div>
+                <div>
+                  <button id="btnGenerateURL" class="queryButtonClass eventBtn spmSecondaryBtn btnQueryGenerateURL exportBtn"><span class="esri-icon-share esriIcons"></span>Share URL</button>
+                  <button id="btnExportToKMLPlan" class="queryButtonClass eventBtn spmSecondaryBtn exportBtn"><span class="esri-icon-link-external esriIcons" ></span>Export KML</button>
+                </div>  					
               </div>
             </div>            
         </div>
@@ -6327,84 +6571,86 @@
             </div>
             <div id="drawSelection">
               <div style="display: flex; flex-direction: column;">
-                <button class="toolsChild esri-icon-plus-circled" title="Add Point" id="addPoint"></button>
+                <button class="toolsChild esri-icon-radio-checked" title="Add Point" id="addPoint"></button>
                 <button class="toolsChild esri-icon-polyline" title="Add Polyline" id="addPolyline"></button>
                 <button class="toolsChild esri-icon-polygon" title="Add Polygon" id="addPolygon"></button>
                 <button class="toolsChild esri-icon-comment" title="Add Text" id="addText"></button>
+                <button class="toolsChild esri-icon-erase" title="Clear Graphics" id="clearAllGraphics"></button>
               </div>
             </div>
             <div id="styleGeom">
-              <div id="toggleColors">
-                <label for="sketchColor">Change color:</label>
-                <select id="sketchColors" name="sketchColor" class="spmDropDown noDisabled1 eventDisable" >
-                  <option value="">Select a Color</option>
-                  <option value="#000000" >Black</option>
-                  <option value="#cc6600">Brown</option>
-                  <option value="#009933">Green</option>
-                  <option value="#00bfff">Light Blue</option>
-                  <option value="#ff00ff">Magenta</option>
-                  <option value="#ff8000">Orange</option>
-                  <option value="#ff0000">Red</option>
-                  <option value="#14375a" selected>TxDOT Blue</option>
-                  <option value="#ffff00">Yellow</option>
-                </select>
-              </div>
- 
-              <div class="togglePoints">
-                <label for="sketchSize">Change size:</label>
-                <input id="sketchSize" name="sketchSize" value="5">
-              </div>
+              <div>
+                <div class="toggleText">
+                  <label for="sketchText">Text:</label>
+                  <input id="sketchText" name="sketchText" autofocus>
+                </div>
+                <div id="toggleColors">
+                  <label for="sketchColor">Color:</label>
+                  <select id="sketchColors" name="sketchColor" class="spmDropDown noDisabled1 eventDisable" >
+                    <option value="#0056a9" selected>TxDOT Blue</option>
+                    <option value="#000000" >Black</option>
+                    <option value="#cc6600">Brown</option>
+                    <option value="#BEBEBE">Grey</option>
+                    <option value="#009933">Green</option>
+                    <option value="#00bfff">Light Blue</option>
+                    <option value="#ff00ff">Magenta</option>
+                    <option value="#ff8000">Orange</option>
+                    <option value="#ff0000">Red</option>
+                    <option value="#ffff00">Yellow</option> 
+                  </select>
+                </div>
+  
+                <div class="togglePoints">
+                  <label for="sketchSize">Size:</label>
+                  <input id="sketchSize" name="sketchSize" value="5" type="number" auto-focus>
+                </div>
 
-              <div class="toggleLine">
-                <label for="sketchWidth">Change Width:</label>
-                <input id="sketchWidth" name="sketchWidth" value="5">
-              </div>
+                <div class="toggleLine">
+                  <label for="sketchWidth">Width:</label>
+                  <input id="sketchWidth" name="sketchWidth" value="5" type="number" auto-focus>
+                </div>
 
-              <div class="toggleLine">
-                <label for="sketchStyle">Change Line Style:</label>
-                <select id="sketchStyle" name="sketchStyle" class="spmDropDown noDisabled1 eventDisable" >
-                  <option value="none">Select a Style</option>
-                  <option value="dash" >Dash</option>
-                  <option value="dash-dot">Dash Dot</option>
-                  <option value="long-dash">Long Dash</option>
-                  <option value="long-dash-dot">Long Dash Dot</option>
-                  <option value="long-dash-dot-dot">Long Dash Dot Dot</option>
-                  <option value="short-dash">Short Dash</option>
-                  <option value="short-dash-dot">Short Dash Dot</option>
-                  <option value="short-dash-dot-dot" >Short dash Dot Dot</option>
-                  <option value="short-dot">Short Dot</option>
-                  <option value="solid" selected>Solid</option>
-                </select>
-              </div>
+                <div class="toggleLine">
+                  <label for="sketchStyle">Style:</label>
+                  <select id="sketchStyle" name="sketchStyle" class="spmDropDown noDisabled1 eventDisable" >
+                    <option value="short-dot" selected>Short Dot</option>
+                    <option value="dash">Dash</option>
+                    <option value="dash-dot">Dash Dot</option>
+                    <option value="long-dash">Long Dash</option>
+                    <option value="long-dash-dot">Long Dash Dot</option>
+                    <option value="long-dash-dot-dot">Long Dash Dot Dot</option>
+                    <option value="short-dash">Short Dash</option>
+                    <option value="short-dash-dot">Short Dash Dot</option>
+                    <option value="short-dash-dot-dot" >Short dash Dot Dot</option>
+                    <option value="solid">Solid</option>
+                  </select>
+                </div>
 
-              <div class="togglePolygon">
-                <label for="sketchPolygonStyle">Change Area Style:</label>
-                <select id="sketchPolygonStyle" name="sketchPolygonStyle" class="spmDropDown noDisabled1 eventDisable" >
-                  <option value="none">Select a Style</option>
-                  <option value="backward-diagonal" >Backward Diagonal</option>
-                  <option value="cross">Cross</option>
-                  <option value="diagonal-cross">Diagonal Cross</option>
-                  <option value="forward-diagonal">Forward Diagonal</option>
-                  <option value="horizontal">Horizontal</option>
-                  <option value="solid" selected>Solid</option>
-                  <option value="vertical">Vertical</option>
-                </select>
-              </div>
+                <div class="togglePolygon" style="padding-top: 10px;">
+                  <label for="sketchPolygonStyle">Fill style:</label>
+                  <select id="sketchPolygonStyle" name="sketchPolygonStyle" class="spmDropDown noDisabled1 eventDisable" >
+                    <option value="solid" selected>Solid</option>
+                    <option value="backward-diagonal" >Backward Diagonal</option>
+                    <option value="cross">Cross</option>
+                    <option value="diagonal-cross">Diagonal Cross</option>
+                    <option value="forward-diagonal">Forward Diagonal</option>
+                    <option value="horizontal">Horizontal</option>
+                    <option value="vertical">Vertical</option>
+                    <option value="none" >No fill</option>
+                  </select>
+                </div>
 
-              <div class="toggleText">
-                <label for="sketchText">Change Text:</label>
-                <input id="sketchText" name="sketchText">
-              </div>
-              <div class="toggleText">
-                <label for="sketchTextAngle">Change Text Angle:</label>
-                <input id="sketchTextAngle" name="sketchTextAngle" type="range" min="1" max="360" value="180">
-              </div>
 
-              <div style="position: relative; top: 2px; padding-top: 10px;">
-                <button id="deleteSketch" class="spmSecondaryBtn">Delete</button>
-                <button id="closeSketch" class="spmMainBtn">Close</button>
-              </div>
+                <div class="toggleText" style="padding-top: 10px;">
+                  <label for="sketchTextAngle">Angle:</label>
+                  <input id="sketchTextAngle" name="sketchTextAngle" type="range" min="1" max="360" value="180">
+                </div>
 
+                <div style="position: relative; top: 2px; padding-top: 10px;">
+                  <button id="deleteSketch" class="spmSecondaryBtn">Delete</button>
+                  <button id="closeSketch" class="spmMainBtn">Close</button>
+                </div>
+            </div>
             </div>
             <div id="marginal" class="unselectable">
               <span id="zoom"></span>
@@ -6416,7 +6662,7 @@
             </div>     
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
             <div id="searchBox" class="unselectable"></div>
-            <div id="resetMap" class="toolsChild unselectable" title="Clear and reset map">&#x21BB;</div>
+            <div id="resetMap" class="toolsChild unselectable esri-icon-refresh" title="Clear and reset map"></div>
             <div id="zoomToLoc" class="toolsChild unselectable esri-icon-tracking" title="Zoom to location"></div>
             <button class="hamburgler toolsChild esri-icon-drag-horizontal unselectable"></button>
             <div id="results" class="unselectable">Build a query and view the results here...</div>
