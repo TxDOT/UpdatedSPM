@@ -3072,10 +3072,14 @@
               zoomToLocation.addEventListener('click', (event) => {
                 navigator.geolocation.getCurrentPosition((position) => {
                   view.goTo({
-                    center: [position.coords.latitude, position.coords.longitude],
-                    zoom: 7
+                    center: [position.coords.longitude, position.coords.latitude],
+                    zoom: 14
                   })
-                });
+                },
+                () =>{
+                  console.log('err')
+                }
+                );
 
               }); 
               
@@ -5241,6 +5245,7 @@
                 
                 infoBtn.className = "esri-icon-description featInfoBtn"
                 infoBtn.id = `infoBtn${layerItem}`
+                infoBtn.title = "View layer metadata"
                 infoBtn.onclick = (event) => {
                   if(infoBtn.classList.contains("closeInfoBox")){
                     removeInfoUI()
@@ -6203,9 +6208,11 @@
                         <p style="font-size: 13px; padding-left: 11px;">
                           ${new Date(modDate.sourceJSON.editingInfo.dataLastEditDate).toLocaleString(undefined)}
                         </p>
+                        <h3 style="font-size: 15px;">Contact</h3>
+                        <p style="font-size: 13px; padding-left: 11px;">
+                          ${currItem.accessInformation}
+                        </p>
                     </div>
-                  
-                  
                   `, header: `${modDate.name} Layer Info`},null, width="50px")
               }
             
