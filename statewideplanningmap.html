@@ -73,6 +73,11 @@
               }
             }
 
+            :root{
+              --main-header-color: rgb(20, 55, 90);
+              --main-section-color: rgb(20, 55, 90);
+            }
+
             #solarEclipse{
               position: relative;
               width:100%;
@@ -278,7 +283,7 @@
             .featLayerUIClass{
               position: relative;
               z-index: 1;
-              left: 13px;
+              left: 18px;
               /* top: 14rem; */
               width:30%;
               background: white;
@@ -296,7 +301,7 @@
             }
             #innerLayerInfo{
               position: relative;
-              left: 3px;
+              left: 13px;
               bottom: 10px;
             }
 
@@ -307,22 +312,24 @@
               margin-bottom: 1rem;
               margin-left: calc(24vw - 5.8rem);
               right: -1rem;
-              bottom: -22px;
+              top: 32px;
             }
             #copyCoord{
               position: relative;
               z-index: 1;
               margin-top: -3rem;
-              margin-right: calc(24vw - 6rem);
+              margin-right: calc(24vw - 103px);
               left: 1.4rem;
+              
             }
             #copyURL{
               position: relative;
               z-index: 1;
-              margin-top: -3rem;
-              margin-right: calc(24vw - 6rem);
+              margin-top: 0rem;
+              margin-right: calc(24vw - 103px);
               visibility: hidden;
               left: 6.5rem;
+              bottom: 16px;
             }
             .esri-icon-close{
               color:#14375A
@@ -342,6 +349,11 @@
               padding-right: 1.5rem;
               text-align: left;
             }
+            #showStep{
+              position: relative;
+              float: right;
+              margin-right: 15px;
+            }
             .main{
               font-family: Roboto, Avenir, Helvetica, Arial, sans-serif !important;
               color:black !important;
@@ -349,10 +361,10 @@
               font-weight: 400;
               line-height: 1.375rem;
             }
-            .unselectable{
+            /* .unselectable{
               user-select: none;
               -webkit-user-select: none;
-            }
+            } */
             .featInfoBtn{
               position: absolute;
               left:77%;
@@ -363,7 +375,6 @@
               border: none;
               z-index: 9999;
             }
-
             .dwnloadBtn{
               position: absolute;
               left: 83%;
@@ -440,8 +451,8 @@
             #header {
                 height: 40px;
                 width: 100%;
-                background-color: rgb(20, 55, 90);
-                display: flex;
+                background-color: var(--main-header-color);
+                display: none;
                 justify-content: space-between;
                 align-items: center;
                 color: white;
@@ -468,7 +479,7 @@
                 position: absolute;
                 left: 0px;
                 top: 40px;
-                width: 300px;
+                width: 310px;
                 height: calc(100vh - 40px);
                 background-color: white;
                 overflow-y: auto;
@@ -482,7 +493,7 @@
             #viewDiv {
                 position: absolute;
                 top: 40px;
-                left: 300px;
+                left: 309px;
                 height: calc(100vh - 40px);
                 width: calc(100vw - 300px);
                 float: left;
@@ -594,7 +605,7 @@
               border-radius: 0px;
               font-size: 13px;
             }
-            .spmSecondaryBtn:disabled{
+            .spmSecondaryBtn:disabled, div:disabled{
               outline: #888;
               background-color: lightgray;
               border: 2px solid lightgray;
@@ -617,7 +628,7 @@
               top: 0rem;
               position: relative;
             }
-
+ 
             .spmDropDown:disabled{
               border: 1px solid #888;
               color:#888;
@@ -752,16 +763,12 @@
             #addPoint, #addPolyline, #addPolygon, #addText, #clearAllGraphics{
               border: none;
             }
-            #clearAllGraphics{
-              
-              
-            }
             #styleGeom{
               position: absolute;
               display: none;
               flex-direction: column;
-              top: 440px;
-              right: 8px;
+              top: 18px;
+              right: 88px;
               width: 166px;
               background: white;
               margin-right: 8px;
@@ -792,9 +799,6 @@
             .toggleLine{
               display: none;
               padding-top: 10px;
-            }
-            #toggleColors{
-              
             }
             .togglePolygon, .toggleText{
               display: none;
@@ -905,10 +909,12 @@
             #searchBox input{
               width: 100% !important;
               padding: 0px !important;
+              padding-left: 5px !important;
               border: 0px solid #ccc !important;
               resize: both !important;
               margin-bottom: 0px !important;
             }
+
             tr:nth-child(odd) {background-color: #ffffff;}
             tr:nth-child(even) {background-color: #f2f2f2;}
             th {text-align: left;}    
@@ -917,6 +923,14 @@
               cursor: pointer;
               color: blue;
               font-size: 13px;
+            }
+            #runXYELRSConv{
+              color: blue;
+              font-size: 13px;
+              padding-left: 8px;
+              text-decoration: none;
+              position: relative;
+              left: 64px;
             }
             .tocTabs {
               position: absolute;
@@ -944,7 +958,7 @@
             }
             .basemapHeader {
               color: white;
-              background-color: #204e70;
+              background-color: var(--main-section-color);
               text-align: left;
               padding-left: .3rem;
               font-size: 15px;
@@ -954,6 +968,11 @@
               color: black;
               font-weight: normal;
               padding-left: 1rem;
+            }
+            .disableListItem{
+              pointer-events: none;
+              color: grey;
+              text-decoration: line-through;
             }
             #mapTab,#queryTab,#diagramTab,#eventTab,#sketchTab {
               display: none;
@@ -1370,6 +1389,16 @@
               top: .5rem;
               padding-bottom: 13px;
             }
+            .grid-container{
+              display: grid;
+              grid-template-columns: auto auto;
+              padding: 10px;
+            }
+            .grid-item{
+              border: 1px solid rgba(0, 0, 0, 0.8);
+              padding: 5px;
+              text-align: left;
+            }
         </style>
         <script>
             var view;
@@ -1386,7 +1415,8 @@
             var featureLayerView;
             var theQuery="";
             var queryTask;
-            var query;  
+            var query;
+            let zoomTimer;
             var lrsButtonStatus=false;
             var graphicsLayer;
             var eventFromToPts;
@@ -1401,7 +1431,8 @@
             let addPtEvent;
             let addLineEvent;
             let addPolygonEvent;
-            let addTextEvent;
+            let addTextEvent; 
+            let suggEditObj = {userEmail: '', userAffilation: null, editType: null, description: null, location: {route: null, dfo: null, xy:[]}}
             // URL Parameters
             var urlParams;
             var basemapParam;
@@ -1513,14 +1544,14 @@
               
               //load toc feature layer
               let tocFeatureLayer = new FeatureLayer({
-                url: "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
+                url:  "https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layer_Dev/FeatureServer/0" //"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/SPM_TOC_Layers_Updated/FeatureServer/0"
               })
               
               let popupArcadeDefinition = {
                 "sum numbers" : "SUM([$feature.ev_dc_fast_num, $feature.ev_level1_evse_num, $feature.ev_level2_evse_num])",
                 "outsideShoulderText": `DECODE($feature.S_TYPE_O, 0, "Unpaved", 1, "Paved", 2, "Paved", 3, "Unpaved", 4, "Unpaved", 5, "Unpaved", 6, "Brick", "Unknown")`,
                 "costTruck": "Text(ROUND(($feature.COST_TRK/1000000),2), '$###.### Million')",
-                "surfTypeText": `DECODE($feature.SRF_TYPE, 1, "Unpaved", 99, "Unknown", "Paved")`,
+                "surfTypeText": `DECODE($feature.SRF_TYPE, 11, "Unpaved", 12, "Unpaved", 13, "Unpaved", 99, "Unknown", "Paved")`,
                 "pedBorderBool": `DECODE($feature.PED, 1, "Yes", 0, "No", "NA")`,
                 "commBorderBool": `DECODE($feature.VEH_COML, 1, "Yes", 0, "No", "NA")`,
                 "carBorderBool": `DECODE($feature.VEH_CAR, 1, "Yes", 0, "No", "NA")`,
@@ -1537,11 +1568,23 @@
                 //loadBaseMaps()
                 basemapFeatureLayerActiveCheck(tileLayerTxDOT, "basemapLayer")
                 window.onload = async () => {
-                  await loadTOCContent()
+                  let tocItems = await tocFeatureLayer.queryFeatures({
+                    where: "1=1",
+                    orderByFields: ["name"],
+                    outFields: ["*"]
+                  })
+
+                  //const holidayCSS = tocItems.features.find(item => item.attributes.name === 'Holiday CSS')
+                  //const setHoliday = JSON.parse(holidayCSS.attributes.popup).header ?? 'green'
+                  // document.documentElement.style.setProperty('--main-header-color', setHoliday)
+                  document.getElementById("header").style.display = 'flex';
+                  
+
+                  await loadTOCContent(tocItems)
                   getURLParams(window.location.search).get("ui") ? setIFrameUi() : readUrlParams()
                   initBasemapOverlayToggle()
                   onViewLoad()
-                  roadSegmentQuery("IH0035-KG")
+                  //roadSegmentQuery("IH0035-KG")
                   eventFromToPts = new GraphicsLayer();
                   map.add(eventFromToPts);
                 }
@@ -1646,7 +1689,7 @@
                 }
                 catch(err){
                   console.log(err)
-                  queryResponseUI({para: "Incorrect Values. Try again.", header:"Error"},  null, height="250px", width="350px")
+                  queryResponseUI({para: "Incorrect Values. Try again.", header:"Error"},  null, height="250px", width="461px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   document.getElementById("parentCanvas").style.display = "none";
@@ -1656,7 +1699,7 @@
               
               function walkGeom(theGeom,rteID,theBegin,theEnd,theColor,theWidth,theDescription) {
                 if(!theGeom.data.features.length){
-                  queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, null, height="250px", width="350px")
+                  queryResponseUI({para: "Incorrect Route ID. Try again.", header:"Error"}, null, height="250px", width="461px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   return true 
@@ -1949,7 +1992,7 @@
               
               let searchBar = new Search({
                 view: view,
-                visible: false,
+                visible: true,
                 allPlaceholder: "Search for TxDOT Item",
                 includeDefaultSources: false,
                 container: searchBox,
@@ -1964,6 +2007,8 @@
                   localSearchDisabled: true,
                 }]
               });
+
+              document.getElementById("searchBox").style.display = "none"
 
               view.ui.add(searchBar, {
                 position: "top-left",
@@ -2056,19 +2101,21 @@
               //End Measure-----------------------------------------------------
               
               //Search-----------------------------------------------------------------------
-              searchBar.when((search) => {
-                document.getElementById("searchTool").addEventListener("click", (event) =>{
-                  if(searchBar.visible === true){
-                    searchBar.visible = false
-                    resetButton("searchTool")
-                    return
-                  }
-
-                  searchBar.visible = true
-                  activateToolButton("searchTool")
+            
+              document.getElementById("searchTool").addEventListener("click", (event) =>{
+                if(document.getElementById("searchBox").style.display === "block"){
+                  document.getElementById("searchBox").style.display = "none"
+                  resetButton("searchTool")
+                  searchBar.blur()
+                  searchBar.clear()
                   return
-                })
+                }
+                activateToolButton("searchTool")
+                document.getElementById("searchBox").style.display = "block"
+                searchBar.focus()
+                return
               })
+            
               //End Search--------------------------------------------------------------------
 
               //Load Roadway Inventory forms------------------------------------
@@ -2248,20 +2295,20 @@
               
               function onViewLoad(){
                 let url = getURLParams(window.location.search)
-                let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
+                //let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
 
-                let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
+                //let getCurrentFeatLayer = retrieveFeatureLayer(getQueryType)
 
-                view.whenLayerView(getCurrentFeatLayer[0]).then(function(layerView) {
-                  populateQueryForm(getQueryType);
+                // await view.whenLayerView(getCurrentFeatLayer[0])
+                // populateQueryForm(getQueryType);
 
-                });
-                  view.popup = new Popup({
-                    dockOptions: {
-                      position: "top-right",
-                    },
-                    container: expandPopup
-                  })
+                
+                view.popup = new Popup({
+                  dockOptions: {
+                    position: "top-right",
+                  },
+                  container: expandPopup
+                })
                 if(conditions.length < 1){
                   document.getElementById("outputFields").disabled = true
                   clearConditions()
@@ -2298,6 +2345,7 @@
                   return
                 }
                 populateQueryForm(event)
+                return
               }
 
               async function populateQueryForm(type) {
@@ -2420,8 +2468,13 @@
 
                 view.hitTest(event, {include: sketchGLayer})
                   .then((evt) => {
+                    let newPxLoc;
                     if(!evt.results.length) return
                     if(evt.results[0].graphic.geometry.type === "point"){
+                      newPxLoc = {
+                        x: evt.results[0].graphic.geometry.x,
+                        y: evt.results[0].graphic.geometry.y
+                      }
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
@@ -2433,6 +2486,13 @@
                       })
                     }
                     if(evt.results[0].graphic.geometry.type === "polyline"){
+                      newPxLoc = {
+                        x: evt.results[0].graphic.geometry.paths[0][0][0],
+                        y: evt.results[0].graphic.geometry.paths[0][0][1],
+                        spatialReference:{
+                          wkid: 4326
+                        }
+                      }
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
@@ -2444,6 +2504,10 @@
                       }) 
                     }
                     if(evt.results[0].graphic.geometry.type === "polygon"){
+                      newPxLoc = {
+                        x: evt.results[0].graphic.geometry.rings[0][0][0],
+                        y: evt.results[0].graphic.geometry.rings[0][0][1]
+                      }
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleText").forEach((item) => item.style.display = "none")
@@ -2455,6 +2519,10 @@
                       })
                     }
                     if(evt.results[0].graphic.symbol.type === "text"){
+                      newPxLoc = {
+                        x: evt.results[0].graphic.geometry.x,
+                        y: evt.results[0].graphic.geometry.y
+                      }
                       document.querySelectorAll(".togglePoints").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".toggleLine").forEach((item) => item.style.display = "none")
                       document.querySelectorAll(".togglePolygon").forEach((item) => item.style.display = "none")
@@ -2466,9 +2534,10 @@
 
                       })
                     }
-                    let newPxLoc = view.toScreen(evt.results[0].graphic.geometry)
-                    document.getElementById("styleGeom").style.top = `${newPxLoc.y}px`
-                    document.getElementById("styleGeom").style.left = `${newPxLoc.x}px`
+                    // newPxLoc = view.toScreen(evt.results[0].graphic.geometry)
+                    // console.log(evt.results[0].graphic.geometry)
+                    //document.getElementById("styleGeom").style.top = `${newPxLoc.y}px`
+                    // document.getElementById("styleGeom").style.left = `${newPxLoc.x}px`
                     document.getElementById("styleGeom").dataset.selectGeom = evt.results[0].graphic.uid
                     document.getElementById("styleGeom").style.display = "block"
                     
@@ -2541,7 +2610,7 @@
               function processBeginDFO(val, tab){
                 //error handling if value returns null
                 if(!val.data[0].RTE_DFO){
-                  queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px")
+                  queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="461px")
                   return
                 }
                 removeCurrentFromToGraphic("start")
@@ -2572,7 +2641,7 @@
                 //and if value returns null
                 let currRoadName = tab === "diagramTab" ? document.getElementById("inpSRDRouteID").value : document.getElementById("eventRoute").value
                 if(!val.data[0].RTE_DFO || currRoadName !== val.data[0].RTE_DEFN_LN_NM){
-                  !val.data[0].RTE_DFO ? queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="350px") : queryResponseUI({para: "Routes do not match", header:"Error"},  null, height="250px", width="350px")
+                  !val.data[0].RTE_DFO ? queryResponseUI({para: "Route not detected. Try Again.", header:"Error"},  null, height="250px", width="461px") : queryResponseUI({para: "Routes do not match", header:"Error"},  null, height="250px", width="461px")
                   return
                 }
                 removeCurrentFromToGraphic("end")
@@ -2642,7 +2711,7 @@
                     lowestIndex = i;
                   }
                 }     
-                
+                console.log(theResponse)
                 var lrsReadoutData=[];
                 lrsReadoutData.push(["Control Section",theResponse.data[lowestIndex].CTRL_SECT_LN_NBR]);
                 lrsReadoutData.push(["Mile Point",theResponse.data[lowestIndex].CTRL_SECT_MPT]); 
@@ -2695,12 +2764,14 @@
                
                 var table = document.createElement("table");
                 table.setAttribute("id", "lrsOutputTable");
-                
+                console.log(lrsReadoutData)
+  
                 for (i = 0; i < lrsReadoutData.length; i++) {
                   var row = document.createElement("tr");
                   for (var j = 0; j < lrsReadoutData[i].length; j++) {
                     var cell = document.createElement("td");
                     var cellText = document.createTextNode(lrsReadoutData[i][j]);
+                    
                     cell.appendChild(cellText);
                     row.appendChild(cell);
                   }
@@ -2714,31 +2785,52 @@
                 var newSpan = document.createElement("span");
                 newSpan.setAttribute("id", "exportSpan");                
                 newSpan.innerHTML = "Export Readout";
-              
+                
+                let xyExport = document.createElement("a");
+                xyExport.setAttribute("id", "runXYELRSConv");                
+                xyExport.innerHTML = "eLRS";
+                xyExport.target = "_blank"
+                xyExport.href = `https://apps3.txdot.gov/gis/elrs/latlong?lat=${lrsReadoutData[6][1]}&long=${lrsReadoutData[7][1]}`
+                
                 newSpan.addEventListener("click", function() {
                   exportTableToCSV("#lrsOutputTable");
                 });
                 
-                document.getElementById("mapClickResults").appendChild(newSpan); 
+                document.getElementById("mapClickResults").appendChild(newSpan);
+                document.getElementById("mapClickResults").appendChild(xyExport);
               }
               //End LRS Identify------------------------------------------------
-        
+              
+              function displayFeat(zoom){
+                const arrActiveLayers = getActiveLayers(zoom)
+                for(let a = 0; a < arrActiveLayers.length; a++){
+                  console.log(arrActiveLayers[a])
+                  filterFeatOnZoom(arrActiveLayers[a], zoom)
+                }
+              }
+
               //Lat Long Coordinates on mouse move------------------------------
               view.when((v) => {
-                reactiveUtils.when(
-                  () => v.stationary,
-                  () => {
+                reactiveUtils.once(() => v.stationary)
+                  .then(() => {
                     document.getElementById("zoom").textContent = `Level: ${v.zoom},`
                     v.watch("zoom", (z)=>{
                       if(Number.isInteger(v.zoom)){
                         document.getElementById("zoom").textContent = `Level: ${v.zoom},`
-                        //getActiveLayers(v.zoom)
+                        console.log(zoomTimer)
+                        if(zoomTimer){
+                          console.log("clear")
+                          clearTimeout(zoomTimer)
+                        }
+                        zoomTimer = setTimeout(()=> {
+                          displayFeat(v.zoom)
+                          zoomTimer = null
+                        },1000)
+                        console.log(event)
+                        console.log(z)
                       }
                     })
-                    getActiveLayers(v.zoom)
-                  }
-                )
-                
+                  })
                 v.on('pointer-move',function(event){
                   let point = v.toMap({x: event.x, y: event.y});
                   setElementText("coords", point.latitude.toFixed(6) + ", " + point.longitude.toFixed(6))
@@ -2979,7 +3071,7 @@
                 let isVisible = itemArr.find(x => x.visible)
                 isVisible ? resetBaseMapItem("CLEAR") : activateBaseMapItem("CLEAR")
                 map.reorder(layerId[0], itemArr.length+1)
-                getActiveLayers(view.zoom)
+                displayFeat(view.zoom)
                 return
               }
 
@@ -3003,7 +3095,6 @@
                 if(layerId.name === "Bridges" || layerId.name === "RoadInventory"){
                   layerId.definitionExpression = ""
                 }
-
               }
 
               function setIsVisible(layerId, returnId, id){
@@ -3011,22 +3102,6 @@
                 activateBaseMapItem(id)
                 returnId.visible = 1
                 return
-              }
-
-              async function createViewModelToItemArr(item, layer){
-                let getLayerView = await view.whenLayerView(layer)
-
-                reactiveUtils.when(     
-                  () => !getLayerView.updateRequested,
-                  () =>{
-                    try{
-                      item.viewModel = getLayerView
-                    }
-                    catch{
-                    }
-                  }
-                )
-                return getLayerView
               }
 
               function initBasemapOverlayToggle(){
@@ -3376,7 +3451,7 @@
                 var eventWidth = document.getElementById("eventWidth").value;
                 var eventDescription = document.getElementById("eventDescription").value;
                 if(Number(eventBeginDFO) >= Number(eventEndDFO)){
-                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, null, height="250px", width="350px")
+                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "Event Message"}, null, height="250px", width="461px")
                   return
                 }      
                 getLineworkWithM(eventRoute,eventBeginDFO,eventEndDFO,eventColors,eventWidth,eventDescription);
@@ -3666,7 +3741,7 @@
                 diagramParam = urlParams.get("diagram");
                 urlParams.get("coords") ? locationParam = `${urlParams.get("coords")}, ${urlParams.get("z")}` : null
                 let queryType = urlParams.get("queryType")
-                return
+                return queryType
               }
 
               function setOverlays(){
@@ -3680,9 +3755,12 @@
                   let returnId = itemArr.find(overlay => overlay.name === layerName)
                   layerId.forEach((featLayer) => {
                     featLayer.when((f) =>{
+                      f.opacity = 1
                       setIsVisible(f, returnId, layerName)
                       resetBaseMapItem("CLEAR")
-                      getActiveLayers(view.zoom)
+                      console.log(view.zoom)
+                      displayFeat(view.zoom)
+                      
                       document.getElementById(`dwnloadBtn${layerName}`).style.display = "block"
                     })
                   })
@@ -3725,7 +3803,7 @@
 
                 urlParams = getURLParams(url);
                 //set Url params
-                setUpURLParams(urlParams)
+                let queryType = setUpURLParams(urlParams)
 
                 if(!url.length){
                   resetTabInput("eventTab")
@@ -3923,11 +4001,11 @@
               
               //Remove startup message in the conditions element
               function removeStartUpCondition() {
-                  var ulElement = document.getElementById('conditions');
-                  var firstLiElement = ulElement.querySelector('li:first-child');
-                  if (firstLiElement && firstLiElement.textContent === 'Conditions listed here') {
-                    ulElement.removeChild(firstLiElement);
-                  }                  
+                var ulElement = document.getElementById('conditions');
+                var firstLiElement = ulElement.querySelector('li:first-child');
+                if (firstLiElement && firstLiElement.textContent === 'Conditions listed here') {
+                  ulElement.removeChild(firstLiElement);
+                }                  
               }
               
               //Add startup message to conditions element
@@ -3938,6 +4016,7 @@
 
               function resetFeatureLayer(roadId){
                 let featLayer = retrieveFeatureLayer(roadId)
+
                 featLayer[0].visible = false
                 featLayer[0].definitionExpression = ""
                 clearConditions()
@@ -3948,16 +4027,6 @@
                   activateBaseMapItem("CLEAR")
                 }
                 // toggleLayer(featLayer[0].name)
-              }
-
-              function createQueryBtn(btn, b){
-                btn.id = b.id
-                btn.className = "spmMainBtn"
-                btn.textContent = b.btnText
-                btn.onclick = () => {
-                  b.btnClick()
-                }
-                return btn
               }
 
               function queryFeatureLayerUI(text, height, width){
@@ -3976,67 +4045,6 @@
                 innerDiv[0].appendChild(layerInfo)
                 document.getElementById("appendToMe").appendChild(cloneTemplate)
                 return
-              }
-
-              function queryResponseUI(text, btnType, height, width){
-                let getTemplate = document.getElementById("queryTemplate")
-                let templateClone = getTemplate.content.cloneNode(true)
-                let div = templateClone.querySelectorAll("div")
-
-                let innerModal = document.createElement("div")
-                let h2 = document.createElement("h2")
-                let textArea = document.createElement("div")
-                innerModal.classList.add("overlay")
-                let p = document.createElement("p")
-                p.id = "queryMessagePara"
-                textArea.id = "previewUrl"
-                h2.id = "modalHeader"
-
-                
-                textArea.textContent = text.url
-                textArea.disabled = true
-                text.url ? textArea.style.display = "block" : textArea.style.display = "none"
-
-                h2.textContent = text.header
-                p.innerHTML = text.para
-                div[0].appendChild(h2)
-                div[0].appendChild(p)
-                div[0].appendChild(textArea)
-                div[0].classList.add("queryStatus")
-                let btns;
-                [{btnText: "CLOSE", id: "queryMessageBtn", btnClick: ()=>{removeQueryResponseUI()}}, {btnText: "COPY URL", id: "copyURL", btnClick: ()=>{navigator.clipboard.writeText(text.url)}}].forEach((b) =>{
-                  let innerDiv = document.createElement("div")
-                  let outerDiv = document.createElement("div")
-                  outerDiv.style.width = "100%"
-                  outerDiv.style.marginRight = "25px"
-                  let btns = document.createElement("button")
-                  innerDiv.appendChild(createQueryBtn(btns, b))
-                  innerDiv.style.float = "right"
-                  outerDiv.appendChild(innerDiv)
-                  div[0].appendChild(outerDiv)
-                })
-
-                if(btnType){
-                  let coordBtn = document.createElement("button")
-                  coordBtn.id = "copyCoord"
-                  coordBtn.textContent = btnType.name
-                  coordBtn.className = "spmSecondaryBtn"
-                  coordBtn.onclick = () =>{
-                    navigator.clipboard.writeText(btnType.coord)
-                    document.getElementById("copyURL").style.visibility = "visible"
-                  }
-                  div[0].appendChild(coordBtn)
-                }
-                
-                
-                document.body.appendChild(innerModal)
-                document.body.appendChild(templateClone)
-              }
-
-              const removeQueryResponseUI = () => {
-                document.querySelector(".queryStatus").remove()
-                document.querySelector(".overlay").remove()
-                
               }
               
               //Query form functions--------------------------------------------
@@ -4109,39 +4117,53 @@
                   document.getElementById("btnRunQuery").disabled = true;
                   document.getElementById("btnAddCondition").disabled = true;
                   addStartUpCondition();
+
               }              
               
-              async function runAssetQuery(where, outFields, featLayer){
+              async function runAssetQuery(whereStatement, outFields, featLayer){
                 document.getElementById("btnRunQuery").textContent = "Loading..."
                 document.getElementById("btnRunQuery").disabled = true
-                query = new Query();
-                query.where = where;
-                query.outFields = [outFields];
-                query.returnGeometry = true;
-                query.supportsPagination = true;
-                try{                  
-                  let layerView = await view.whenLayerView(featLayer)
-                  let returnQuery = await layerView.layer.queryFeatures(query)
-                  layerView.layer.definitionExpression = where;
+                let assetQuery = new Query({
+                  where: whereStatement,
+                  outFields: outFields,
+                  returnGeometry: true,
+                });
+
+                //query.supportsPagination = true;
+                try{
+                  console.log(featLayer)   
+                  //let layerView = featLayer
+                  console.log(assetQuery)
+                  featLayer.filter = {
+                    where: whereStatement
+                  };
+                  let returnQuery = await featLayer.layer.queryFeatures(assetQuery)
+                  console.log(returnQuery)
+
+
                   if(!returnQuery.features.length){
-                    queryResponseUI({para: `Welp, no items were returned.  Update your query and try again.`, header:"Query Message"}, null, height="250px", width="350px")
+                    queryResponseUI({para: `Welp, no items were returned. Update your query and try again.`, header:"Query Message"}, null, height="250px", width="461px")
                     document.getElementById("btnRunQuery").textContent = "Run Query"
                     document.getElementById("btnRunQuery").disabled = false
                     return
                   }
-
+                  
+                  console.log(returnQuery)
                   queryTableResults = returnQuery
                   document.getElementById("btnToggleTableView").disabled = false
                   document.getElementById("btnClearConditions").disabled = false
                   document.getElementById("btnExportToCSV").disabled = false
                   document.getElementById("btnQueryGenerateURL").disabled = false
+                  
                   makeTableFromService(returnQuery);
                   
                   document.getElementById("btnRunQuery").textContent = "Run Query"
                   document.getElementById("btnRunQuery").disabled = false
+                  return assetQuery
                 }
                 catch(err){
-                  queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, null, height="250px", width="350px") 
+                  console.log(err)
+                  queryResponseUI({para:`Welp, Invalid query. Check your parameters and retry.`, header: "Query Message"}, null, height="250px", width="461px") 
                   document.getElementById("btnRunQuery").textContent = "Run Query"
                   document.getElementById("btnRunQuery").disabled = false
                   //removeQueryResponseUI()
@@ -4149,8 +4171,9 @@
               }
 
               function runQuery(){
-                let getQueryFeatLayer = retrieveFeatureLayer(document.querySelector(`input[name="featQuery"]:checked`).value)
-                setLayerDefinitionExpression(getQueryFeatLayer[0]);
+                let getQueryFeatLayer = itemArr.find((layer) => layer.name === (document.querySelector(`input[name="featQuery"]:checked`).value))
+                console.log(getQueryFeatLayer) 
+                setLayerDefinitionExpression(getQueryFeatLayer.featLayer);
                 return 
               }
 
@@ -4159,15 +4182,19 @@
                 document.getElementById("btnRunQuery").textContent = "Loading..."
                 document.getElementById("btnRunQuery").disabled = true
                 var outputFieldsSelect = document.getElementById("outputFields");
-                var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value).join(',');
+                var outputFieldList = Array.from(outputFieldsSelect.selectedOptions).map(option => option.value);
                 var queryWhere = conditions.map(condition => `${condition.field} ${condition.operator} '${condition.value}'`).join(' AND ')
-                await runAssetQuery(queryWhere, outputFieldList, featLayer)
-
-                let queryExtentComplete = await featLayer.queryExtent(query)
+                console.log(outputFieldList)
+                let returnQuery = await runAssetQuery(queryWhere, outputFieldList, featLayer)
+                console.log(featLayer)
+                console.log(returnQuery)
+                let queryExtentComplete = await featLayer.layer.queryExtent(returnQuery)
                 if(!queryExtentComplete.extent){
                   return
                 }
-                featLayer.visible = true
+                console.log(queryExtentComplete)
+                featLayer.layer.visible = true
+                featLayer.layer.opacity = 1
                 goToQuery(queryExtentComplete, featLayer)
                 
                   //check extents
@@ -4175,13 +4202,11 @@
               }
 
               function goToQuery(queryReturnExtent, layer){
-                view.whenLayerView(layer).then(layerView => {
-                  view.goTo(queryReturnExtent.extent)
-                  document.getElementById("btnToggleTableView").textContent = "Hide Table"
-                  document.getElementById("btnRunQuery").textContent = "Run Query"
-                  document.getElementById("btnRunQuery").disabled = false
-                  document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
-                })
+                view.goTo(queryReturnExtent.extent)
+                document.getElementById("btnToggleTableView").textContent = "Hide Table"
+                document.getElementById("btnRunQuery").textContent = "Run Query"
+                document.getElementById("btnRunQuery").disabled = false
+                document.querySelectorAll(".exportBtn").forEach(x => x.disabled = false)
                 return 
               }
 
@@ -4212,6 +4237,7 @@
                   }
                   
                 })
+                console.log(rowArr)
                 view.goTo(rowArr)
               }
 
@@ -4531,7 +4557,7 @@
                 let nonRouteArr = ["LG", "RG"]
                 for(let x=0; x < nonRouteArr.length; x++){
                   if(diagramTitle.includes(nonRouteArr[x])){
-                    queryResponseUI({para:`Only use KG or centerline Route IDs (i.e IH0035-KG)`, header: "SRD Message"}, null, height="250px", width="350px")
+                    queryResponseUI({para:`Only use KG or centerline Route IDs (i.e IH0035-KG)`, header: "SRD Message"}, null, height="250px", width="461px")
                     document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                     document.getElementById("btnUpdateLRM").disabled = false
                     return
@@ -4540,7 +4566,7 @@
 
                 //Check that Route input is not empty
                 if(diagramEndDFO <= diagramBeginDFO){
-                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "SRD Message"}, null, height="250px", width="350px")
+                  queryResponseUI({para:`Begin DFO value is equal or greater than the End DFO value.`, header: "SRD Message"}, null, height="250px", width="461px")
                   document.getElementById("btnUpdateLRM").textContent = "Create Diagram"
                   document.getElementById("btnUpdateLRM").disabled = false
                   return
@@ -5057,7 +5083,6 @@
               //----------------------------------------------------------------
 
               function resetShareUrl(){
-
                 document.getElementById("previewUrl").textContent = ""
               }
               //Download controls
@@ -5080,7 +5105,7 @@
               function queryToUrl(textString, btnCoords){
                   navigator.clipboard.writeText(textString)
                   .then(()=>{
-                    queryResponseUI({para: "URL has been copied! Paste and go.", url: textString, header:"Share URL"}, btnCoords, height="250px", width="350px")
+                    queryResponseUI({para: "URL has been copied! Paste and go.", url: textString, header:"Share URL"}, btnCoords, height="250px", width="461px")
                     document.getElementById("previewUrl").textContent = textString
                   })
                   .catch(err => console.log("exportQuery:", err))
@@ -5149,13 +5174,9 @@
               }
 
               //load Table of Contents items
-              async function loadTOCContent(){
+              async function loadTOCContent(returnToc){
                 const docFrag = document.createDocumentFragment()
-                let returnToc = await tocFeatureLayer.queryFeatures({
-                  where: "1=1",
-                  orderByFields: ["name"],
-                  outFields: ["*"]
-                })
+               
                 returnToc.features.forEach((x)=>{
                   let splitUrl = !x.attributes.url ? null : x.attributes.url.split(",")
                   itemArr.push({name: x.attributes.name, url: splitUrl, tocType: x.attributes.Toc_Type, popup: x.attributes.popup, popupTxt: x.attributes.popupText, defExpress: x.attributes.defExpress, render: x.attributes.renderer, isLabel: x.attributes.labelText, visible: false, addToTOC: 0})
@@ -5174,13 +5195,16 @@
                   <tr><th class="basemapHeader">Additional Overlays</th></tr>
                   <small style="position:relative; left: .3rem;">Select a Layer to Add (Max 5):</small>
                   <div class="dropDown">
-                  <select name="dropDown" id="layerSearch" placeholder="Search for Layer"></select>
+                  <select name="dropDown" id="layerSearch" placeholder="Search for Layer">
+                  </select>
                   </div>
                   <tbody id="addFeatRow"> 
                   </tbody>
                 `
-                //const setAlert = JSON.parse(tocObj.find((x) => x.name === "SPM ALERT").popup)
-                //setAlert.IsActive === "Yes" ? createServiceDown(setAlert.Text, setAlert.Color) : null
+                const setAlert = JSON.parse(tocObj.find((x) => x.name === "SPM ALERT").popup)
+                //const holidayColor = JSON.parse(tocObj.find((x) => x.name === "Holiday CSS").popup).header
+                //console.log(holidayColor)
+                setAlert.IsActive === "Yes" ? createServiceDown(setAlert.Text, setAlert.Color) : null
 
                 let previousItem
                 for(i=0; i < tocObj.length; i++){
@@ -5223,6 +5247,7 @@
                 let td = document.createElement("td")
                 
                 td.id = layerItem
+                
                 td.className = "baseMapList"
                 td.onclick = (event) => {
                   if(event.target.id.includes("dwnloadBtn") || event.target.id.includes("infoBtn")) return
@@ -5233,7 +5258,7 @@
 
                 let div = document.createElement("div")
                 div.id = layerItem
-                
+                div.disabled = true
                 let dwnloadBtn = document.createElement("button")
                 let infoBtn = document.createElement("button")
                
@@ -5245,7 +5270,6 @@
                 
                 infoBtn.className = "esri-icon-description featInfoBtn"
                 infoBtn.id = `infoBtn${layerItem}`
-                infoBtn.title = "View layer metadata"
                 infoBtn.onclick = (event) => {
                   if(infoBtn.classList.contains("closeInfoBox")){
                     removeInfoUI()
@@ -5277,6 +5301,7 @@
                 
                 td.appendChild(dwnloadBtn)
                 td.appendChild(infoBtn)
+		div.disabled
                 div.appendChild(document.createTextNode(layerItem))
                 div.style.width = "77%"
                 td.appendChild(div)
@@ -5315,16 +5340,16 @@
               function addFeatureLayerToMap(featLayer, popupInfo){
                 let label = JSON.parse(featLayer.isLabel)
                 let featLayerLabel = new LabelClass(label)
-                
+                featLayer.label = label
                 let addFeatureLayer = new FeatureLayer({
                   url: featLayer.url,
                   visible: false,
                   outFields: ["*"],
                   name: featLayer.name,
                   popupEnabled: true,
-                  popupTemplate: popupInfo,
+                  //popupTemplate: popupInfo,
                   labelIsVisible: true,
-                  labelingInfo: JSON.parse(featLayer.isLabel),
+                  //labelingInfo: label,
                   dockOptions:{
                     position: "bottom-right"
                   },
@@ -5332,30 +5357,83 @@
                 })
                   
                 featLayer.render ? addFeatureLayer.renderer = JSON.parse(featLayer.render) : null
-                addFeatureLayer.when(async (layer)=>{       
-                  layer.opacity = layer.geometryType === "polygon" ? 0.3 : 1
-                  if(layer.title === "TxDOT Bridges" || layer.title === "TxDOT Roadway Inventory"){
-                    if(layer.title === "TxDOT Bridges"){
-                      bridgeInventoryFieldsArray = layer.fieldsIndex.uid.split(",")
-                      createSourcesArr(layer)
-                      return 
-                    }
-                      featureLayerView = layer.fieldsIndex.uid.split(",")
-                      return
-                  }
+                map.add(addFeatureLayer)
+                //addFeatureLayer.when(async (layer)=>{    
+                  if(featLayer.name === "Bridges" || featLayer.name === "RoadInventory" || featLayer.name === "AADT" || featLayer.name === "Control Sections"){                    document.getElementById(featLayer.name).classList.add("disableListItem")
+                    addFeatureLayer.visible = true
+                    addFeatureLayer.opacity = 0.3
+                    view.whenLayerView(addFeatureLayer)
+                      .then((layerViews) => {
+                        featLayer.featLayer = layerViews
+                        reactiveUtils.once(() => !layerViews.updating)
+                        .then(() => {
+                          console.log(featLayer.name)
+                          document.getElementById(featLayer.name).classList.remove("disableListItem")
+                          addFeatureLayer.visible = false
+                          addFeatureLayer.opacity = 1
+                          addFeatureLayer.popupTemplate = popupInfo
+                          //addFeatureLayer.labelingInfo = label
+                          if(addFeatureLayer.title.includes("TxDOT Bridges")){
+                            bridgeInventoryFieldsArray = addFeatureLayer.fieldsIndex.uid.split(",")
+                            createSourcesArr(addFeatureLayer)
+                            return 
+                          }
 
+                          featureLayerView = addFeatureLayer.fieldsIndex.uid.split(",")
+                          let url = getURLParams(window.location.search)
+                          let getQueryType = url.get("queryType") ? url.get("queryType") : document.querySelector(`input[name="featQuery"]:checked`) ? document.querySelector(`input[name="featQuery"]:checked`).value : "RoadInventory"
+                          console.log(getQueryType)
+                          
+                          populateQueryForm(getQueryType);
+                        })
+                      })
+
+                    //console.log(layerViews)
+
+
+                    //   .then((res) => {
+                    //     console.log(res)
+                        
+                    //     reactiveUtils.once(() => !res.updateRequested)
+                    //     .then(() => {
+                    //       console.log("done")
+                    //       console.log(res.queryFeatureCount().then((x) => console.log(x)))
+                    //       featLayer.featLayer = res
+                    //     })
+                    // })
+
+                    return
+                  }
+                  addFeatureLayer.opacity = addFeatureLayer.geometryType === "polygon" ? 0.3 : 1
                   if(addFeatureLayer.name === "Texas Roadways Unsegmented"){
                     basemapFeatureLayerActiveCheck(`${addFeatureLayer.parsedUrl.path}`, "featureLayer")
-                    let rdItem = itemArr.find(item => item.name === "Texas Roadways Unsegmented")
-                    addFeatureLayer.visible = true
-                    addFeatureLayer.opacity = 0
-                    addFeatureLayer.legendEnabled = false
-                    addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                    view.whenLayerView(addFeatureLayer)
+                      .then((layerViews) => {
+                        addFeatureLayer.visible = true
+                        addFeatureLayer.opacity = 0
+                        addFeatureLayer.legendEnabled = false
+                        // addFeatureLayer.definitionExpression = `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                        reactiveUtils.once(() => !layerViews.updating)
+                        .then(() => {
+                          addFeatureLayer.popupTemplate = popupInfo
+                          addFeatureLayer.labelingInfo = label
+                          console.log(featLayer.name)
+                          featLayer.visible = 1
+                          featLayer.featLayer = layerViews
+                          // layerViews.filter = {
+                          //   where: `RTE_PRFX in ('IH') AND RDBD_TYPE = 'Single Roadbed'`
+                          // }
+                        })
+                      })
+
+
                   }
-                  createSourcesArr(layer)
+                  addFeatureLayer.popupTemplate = popupInfo
+                  addFeatureLayer.labelingInfo = label
+                  createSourcesArr(addFeatureLayer)
                   
-                })
-                map.add(addFeatureLayer)
+
+                //})
                 return
               }
 
@@ -5366,29 +5444,28 @@
                 return
               }
 
-              function roadSegmentQuery(rdName){
-                const getRdUnsegLayer = retrieveFeatureLayer("Texas Roadways Unsegmented")[0]
-                const roadQuery = getRdUnsegLayer.createQuery()
-                roadQuery.where = `"RTE_NM" like '${rdName}%'`
-                roadQuery.start = 0
+              async function roadSegmentQuery(rdName, featViewLayer){
+                console.log(featViewLayer)
+                const roadQuery = new Query()
+                roadQuery.where = `RTE_NM like '%${rdName}%'`
                 roadQuery.num = 10
-                roadQuery.outFields = ['"RTE_NM"']
+                roadQuery.outFields = ["RTE_NM"]
                 roadQuery.returnGeometry = false
                   
                 //roadQuery.maxRecordCountFactor = 5
                 roadQuery.returnDistinctValues = true
 
-                let returnQuery = getRdUnsegLayer.queryFeatures(roadQuery)
+                let returnQuery = await featViewLayer.queryFeatures(roadQuery)
                 return returnQuery
               }
 
-              async function loadRoadNames(rdName, id, queryElem){
+              async function loadRoadNames(rdName, id, queryElem, featViewLayer){
                 //abort query feature fetch
                 abortFetch()
                
                 //page ++
-                const returnRoadQuery = await roadSegmentQuery(rdName)
-                  
+                const returnRoadQuery = await roadSegmentQuery(rdName, featViewLayer)
+
                 if(!returnRoadQuery.features.length){
                   document.getElementById(`${id}`).innerHTML = `<span>No Results.</span>`
                   document.querySelectorAll(".clear-dropdown").forEach((btn) => {
@@ -5482,14 +5559,14 @@
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways_Search/FeatureServer/0", name: "TxDOT_Roadways_Search/FeatureServer", searchFields: ["RTE_CNTY"], displayField: "RTE_CNTY", outFields: ["*"], title: "On System Highway", count: 9},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Top_100_Congested_Roadways/FeatureServer/0", name: "TxDOT_Top_100_Congested_Roadways/FeatureServer", searchFields: ["RANK"], displayField: "RANK", outFields: ["*"], title: "Top 100 Rank", count: 6},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Highway_Designations/FeatureServer/0", name: "TxDOT_Highway_Designations/FeatureServer", searchFields: ["MO_NBR"], displayField: "MO_NBR", outFields: ["*"], title: "Minute Order Number", count: 6},
-                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges/FeatureServer/0", name: "TxDOT_Bridges/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)", count: 6},
+                                {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Bridges_DEV/FeatureServer/0", name: "TxDOT_Bridges_DEV/FeatureServer/0", searchFields: ["BRDG_ID"], displayField: "BRDG_ID", displayField: "BRDG_ID", outFields:["*"], title: "NBI Structure Number (Bridge ID)", count: 6},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_City_Boundaries/FeatureServer/0", name: "TxDOT_City_Boundaries", searchFields: ["CITY_NM"], displayField: "CITY_NM", outFields: ["*"], title: "City", count: 6},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Control_Sections/FeatureServer/0", name: "TxDOT_Control_Sections", searchFields: ["CTRL_SECT_NBR"], displayField: "CTRL_SECT_NBR", outFields: ["*"], title:"Control Section", count: 6},
                                 {url:"https://services.arcgis.com/KTcxiTD9dsQw4r7Z/arcgis/rest/services/TxDOT_Roadways/FeatureServer/0", name: "Texas_Roadways", searchFields: ["RTE_NM"], displayField: "RTE_NM", outFields: ["*"], title:"Road Search", count: 6}]
 
                 let featLayerPath = featLayer.parsedUrl.path.toLowerCase()
                 let src = sourcesObj.find(source => featLayerPath.includes(source.url.toLowerCase()))
-                let isInSearch = src ? searchBar.sources.find(x => x.name === src.title) : null          
+                let isInSearch = src ? searchBar.sources.find(x => x.name === src.title) : null        
                 if(!src || isInSearch) return
                 let sourceObj = {
                   layer: new FeatureLayer({
@@ -5507,6 +5584,7 @@
                   autoSelect: true,
                   maxResults: src.count,
                   maxSuggestions: src.count,
+                  prefix: '%',
                   minSuggestCharacters: 0,
                   outFields: src.outFields,
                   name: src.title,
@@ -5514,7 +5592,7 @@
                       type: "simple-line",
                       color: "cyan",
                       width: "6px",
-                  }
+                  },
                 }
                 searchBar.sources.push(sourceObj)
               }
@@ -5635,314 +5713,418 @@
                   }
                 }
               }
-              const getActiveLayers = (z) => itemArr.forEach((x) => {
-                if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
-                  let feat = retrieveFeatureLayer(x.name)
-                    view.whenLayerView(feat[0]).then((y) =>{
-                      // y.queryExtent().then((res) =>{
-                      //   console.log(res)
-                      // })
-                      displayFeatOnZoom(y,z)
-                    })
-                }
-              })
+              const getActiveLayers = (z) => {
+                console.log(z)
+                return itemArr.filter((x) => {
+                  let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented", "Roadway Inventory - On-System Roadbeds"]
+                  if(x.visible === 1 && displayFeatZoom.includes(x.name)){
+                    if(x.featLayer){
+                      return x
+                    }
+                    let feat = retrieveFeatureLayer(x.name)
+                    feat[0].definitionExpression = ""
+                    view.whenLayerView(feat[0])
+                        .then((res) => {
+                          console.log(res)
+                          reactiveUtils.once(() => !res.updateRequested)
+                          .then(() => x.featLayer = feat[0])
+                        })
+                        
+                        filterFeatOnZoom(x, z)
+                    return x
+                  }
+                  return
+                })
+              }
               
-              async function displayFeatOnZoom(layerView,zoom){            
-                let displayFeatZoom = ["AADT", "Functional Classification & Urban Areas", "Reference Markers", "Control Sections", "Speed Limits", "Future Traffic & Percent Truck", "Cemeteries", "Texas Roadways Unsegmented", "Roadway Inventory - On-System Roadbeds"]
-                if(displayFeatZoom.includes(layerView.layer.name)){
+                
+                // if(x.visible === 1 || x.name === "Texas Roadways Unsegmented"){
+                //   let feat = retrieveFeatureLayer(x.name)
+                    // if(x.viewModel){
+                    //   reactiveUtils.once(() => !x.viewModel._pipelineIsUpdating)
+                    //     .then(() =>  {
+                    //       console.log(x.viewModel)
+                    //       displayFeatOnZoom(x.viewModel,z)
+                    //     })
+                    //   return
+                    // }
+                    // view.whenLayerView(feat[0]).then((y) => {
+                    //   x.viewModel = y
+                    //   console.log(y)
+                    //   displayFeatOnZoom(y,z)
+
+                    //   // y.queryExtent().then((res) =>{
+                    //   //   console.log(res)
+                    //   // })
+                      
+                    // })
+               // }
+              //})
+              
+              async function filterFeatOnZoom(layerView, zoom){            
+                
+                //if(){
                   let getItem = {
                     "Roadway Inventory - On-System Roadbeds" : () => {
                       switch(zoom){
                         case 6: 
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          layerView.featLayer.filter = {
+                            where: "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          }
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          layerView.featLayer.filter = {
+                            where: "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          }
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          layerView.featLayer.filter = {
+                            where: "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                          }
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          layerView.featLayer.filter = {
+                            where: "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          }
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          layerView.featLayer.filter = {
+                            where: "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          }
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          layerView.featLayer.filter = {
+                            where: "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                          }
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = ''
+                          layerView.featLayer.filter = {
+                            where: ""
+                          }
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = ''
+                          layerView.featLayer.filter = {
+                            where: ""
+                          }
                           break;
                         default:
-                          layerView.layer.definitionExpression = ''
+                          layerView.featLayer.filter = {
+                            where: ""
+                          }
                           break;
                       }
                     },
-                    "Texas Roadways Unsegmented" : () => {
-                      switch(zoom){
-                        case 6: 
-                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 7:
-                          layerView.layer.definitionExpression = "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 8:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 9:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 10:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 11:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
-                          break;
-                        case 12:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        case 13:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        default:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                      }
-                    },
-                    "AADT" : () => {
+                    // "Texas Roadways Unsegmented" : (zoom) => {
+                    //   switch(zoom){
+                    //     case 6: 
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 7:
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX = 'IH' AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 8:
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX IN ('IH', 'US') AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 9:
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX IN ('IH', 'US', 'SH', 'SL', 'FM', 'RM') AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 10:
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 11:
+                    //       console.log(zoom)
+                    //       layerView.featLayer.filter = {
+                    //         where: "RTE_PRFX NOT IN ('CS', 'PR') AND RDBD_TYPE = 'Single Roadbed'"
+                    //       }
+                    //       break;
+                    //     case 12:
+                    //       layerView.featLayer.filter = {
+                    //         where: ''
+                    //       }
+                    //       break;
+                    //     case 13:
+                    //       layerView.featLayer.filter = {
+                    //         where: ''
+                    //       }
+                    //       break;
+                    //     default:
+                    //       layerView.featLayer.filter = {
+                    //         where: ''
+                    //       }
+                    //       break;
+                    //   }
+                    // },
+                    "AADT" : (zoom) => {
+                      console.log(layerView)
                       switch(zoom){
                         case 5:
-                          layerView.layer.definitionExpression = `zLevel < (7)`
+                          layerView.featLayer.filter = {where: `zLevel < (7)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label							 
                           break;
                         case 6:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where:`zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where:`zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = `zLevel < (${zoom} + 1)`
+                          layerView.featLayer.filter = {where: `zLevel < (${zoom} + 1)`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         default:
-                          layerView.layer.definitionExpression = `zLevel <= 13`
+                          layerView.featLayer.filter = {where: `zLevel <= 13`}
+                          layerView.featLayer.layer.labelingInfo = layerView.label
                           break;
                         }
                     },
                     "Functional Classification & Urban Areas" : () => {
                         switch(zoom){
                           case 6:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"} : null
                             break;
                           case 7:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"} : null
                             break;
                           case 8:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"} : null
                             break;
                           case 9:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"} : null
                             break;
                           case 10:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression ="(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "(RTE_PRFX IN ('IH', 'US') OR F_SYSTEM IN (1,2,3)) AND RDBD_TYPE = 'KG'"} : null
                             break;
                           case 11:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "RDBD_TYPE = 'KG'"} : null
                             break;
                           case 12:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "RDBD_TYPE = 'KG'" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: "RDBD_TYPE = 'KG'"} : null
                             break;
                           case 13:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: ""} : null
                             break;
                           default:
-                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.layer.definitionExpression = "" : null
+                            layerView.layer.title === "TxDOT Functional Classification" ? layerView.filter = {where: ""} : null
                             break;
                         }
                     },
-                    "Reference Markers" : () => {
+                    "Reference Markers" : (zoom) => {
                       switch(zoom){
                         case 6:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          layerView.featLayer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          layerView.featLayer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'"
+                          layerView.featLayer.definitionExpression = "RTE_PRFX='IH' AND MRKR_NBR LIKE '%25'" 
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
+                          layerView.featLayer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
+                          layerView.featLayer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0'))"
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          layerView.featLayer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
+                          layerView.featLayer.definitionExpression = "(RTE_PRFX='IH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='US' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SH' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5')) or (RTE_PRFX='SL' AND (MRKR_NBR LIKE '%0' OR MRKR_NBR LIKE '%5'))"
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = ""
+                          layerView.featLayer.definitionExpression = ""
                           break;
                         default:
-                          layerView.layer.definitionExpression = ""
+                          layerView.featLayer.definitionExpression = ""
                           break;
                         }
 
                     },
-                    "Control Sections" : () => {
+                    "Control Sections" : (zoom) => {
                       switch(zoom){
                         case 5:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX='IH'"
+                          }
                           break;
                         case 6:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX='IH'"
+                          }
                           break;
                         case 7:
-                          layerView.layer.definitionExpression = "RTE_PRFX='IH'"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX='IH'"
+                          }
                           break;
                         case 8:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          layerView.featLayer.filter = {
+                            where: "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          }
                           break;
                         case 9:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          layerView.featLayer.filter = {
+                            where: "(RTE_PRFX='IH' or RTE_PRFX='US')"
+                          }
                           break;
                         case 10:
-                          layerView.layer.definitionExpression = "(RTE_PRFX='IH' or RTE_PRFX='SH' or RTE_PRFX='US' or RTE_PRFX='SL')"
+                          layerView.featLayer.filter = {
+                            where: "(RTE_PRFX='IH' or RTE_PRFX='SH' or RTE_PRFX='US' or RTE_PRFX='SL')"
+                          }
                           break;
                         case 11:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
+                          }
                           break;
                         case 12:
-                          layerView.layer.definitionExpression = "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX NOT IN ('CS', 'FC', 'CR', 'FD', 'PR')"
+                          }
                           break;
                         case 13:
-                          layerView.layer.definitionExpression = "RTE_PRFX <> 'CS'"
+                          layerView.featLayer.filter = {
+                            where: "RTE_PRFX <> 'CS'"
+                          }
                           break;
                         default:
-                          layerView.layer.definitionExpression = ""
+                          layerView.featLayer.filter = {
+                            where: ""
+                          }
                           break;
                         }
                     },
-                    "Speed Limits" : () => {
-                      switch(zoom){
-                        case 6:
-                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 7:
-                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 8:
-                          layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 9:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 10:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 11:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 12:
-                          layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
-                          break;
-                        case 13:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        default:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        }
-                    },
-                    "Future Traffic & Percent Truck" : () => {
-                      switch(zoom){
-                        case 6:
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                          break;
-                        case 7:
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                          break;
-                        case 8:
-                          layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
-                          break;
-                        case 9:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                          break;
-                        case 10:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
-                          break;
-                        case 11:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
-                          break;
-                        case 12:
-                          layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
-                          break;
-                        case 13:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        default:
-                          layerView.layer.definitionExpression = ''
-                          break;
-                        }
-                    },
-                    "Cemeteries" : () => {
-                      switch(zoom){
-                        case 6:
-                          layerView.layer.definitionExpression = "Zoom <= 7"
-                          break;
-                        case 7:
-                          layerView.layer.definitionExpression = "Zoom <= 7"
-                          break;
-                        case 8:
-                          layerView.layer.definitionExpression = "Zoom <= 7"
-                          break;
-                        case 9:
-                          layerView.layer.definitionExpression = "Zoom <= 10"
-                          break;
-                        case 10:
-                          layerView.layer.definitionExpression = "Zoom <= 10"
-                          break;
-                        case 11:
-                          layerView.layer.definitionExpression = "Zoom <= 16"
-                          break;
-                        case 12:
-                          layerView.layer.definitionExpression = "Zoom <= 16"
-                          break;
-                        case 13:
-                          layerView.layer.definitionExpression = "Zoom <= 16"
-                          break;
-                        default:
-                          layerView.layer.definitionExpression = "Zoom <= 16"
-                          break;
-                        }
-                    },
-
+                    // "Speed Limits" : () => {
+                    //   switch(zoom){
+                    //     case 6:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 7:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 8:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX ='IH' AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 9:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 10:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','US') AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 11:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 12:
+                    //       layerView.layer.definitionExpression = "RTE_PRFX IN ('IH','SH','US','SL') AND RDBD_TYPE = 'KG'"
+                    //       break;
+                    //     case 13:
+                    //       layerView.layer.definitionExpression = ''
+                    //       break;
+                    //     default:
+                    //       layerView.layer.definitionExpression = ''
+                    //       break;
+                    //     }
+                    // },
+                    // "Future Traffic & Percent Truck" : () => {
+                    //   switch(zoom){
+                    //     case 6:
+                    //       layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                    //       break;
+                    //     case 7:
+                    //       layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                    //       break;
+                    //     case 8:
+                    //       layerView.layer.definitionExpression = "SUBSTRING(RIA_RTE_ID,1,2)='IH'"
+                    //       break;
+                    //     case 9:
+                    //       layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                    //       break;
+                    //     case 10:
+                    //       layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US')"
+                    //       break;
+                    //     case 11:
+                    //       layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
+                    //       break;
+                    //     case 12:
+                    //       layerView.layer.definitionExpression = "(SUBSTRING(RIA_RTE_ID,1,2)='IH' or SUBSTRING(RIA_RTE_ID,1,2)='US' or SUBSTRING(RIA_RTE_ID,1,2)='SH' or SUBSTRING(RIA_RTE_ID,1,2)='SL' or SUBSTRING(RIA_RTE_ID,1,2)='TL')"
+                    //       break;
+                    //     case 13:
+                    //       layerView.layer.definitionExpression = ''
+                    //       break;
+                    //     default:
+                    //       layerView.layer.definitionExpression = ''
+                    //       break;
+                    //     }
+                    // },
+                    // "Cemeteries" : () => {
+                    //   switch(zoom){
+                    //     case 6:
+                    //       layerView.layer.definitionExpression = "Zoom <= 7"
+                    //       break;
+                    //     case 7:
+                    //       layerView.layer.definitionExpression = "Zoom <= 7"
+                    //       break;
+                    //     case 8:
+                    //       layerView.layer.definitionExpression = "Zoom <= 7"
+                    //       break;
+                    //     case 9:
+                    //       layerView.layer.definitionExpression = "Zoom <= 10"
+                    //       break;
+                    //     case 10:
+                    //       layerView.layer.definitionExpression = "Zoom <= 10"
+                    //       break;
+                    //     case 11:
+                    //       layerView.layer.definitionExpression = "Zoom <= 16"
+                    //       break;
+                    //     case 12:
+                    //       layerView.layer.definitionExpression = "Zoom <= 16"
+                    //       break;
+                    //     case 13:
+                    //       layerView.layer.definitionExpression = "Zoom <= 16"
+                    //       break;
+                    //     default:
+                    //       layerView.layer.definitionExpression = "Zoom <= 16"
+                    //       break;
+                    //     }
+                    // },
                   }
-                  getItem[layerView.layer.name]()
-                }
                   
+                console.log(layerView)
+                getItem[layerView.name](zoom)
               }
+    
 
               async function basemapFeatureLayerActiveCheck(url, layerType){
                 let alertTxt = "One or more layers are currently unavailable. We are aware of the problem and are working to fix it."
@@ -5996,99 +6178,28 @@
               document.getElementById("about").addEventListener("click", ()=>{
                 aboutModal()
                 document.getElementById("closeAbout").addEventListener("click", ()=>{
-                  removeQueryResponseUI();
-                  appDetailsModal()
+
                 })
-                
-                
+                document.getElementById("suggestEditBtn").addEventListener("click", ()=>{
+
+                })
               })
 
-              function aboutModal(){
-                let version = "5.0.7 Rochester"
-                queryResponseUI({para: `
-                  The Statewide Planning Map displays data in support of planning operations at TxDOT.
-                  <br>
-                  <br>
-                  Although we try to update information as often as possible, we are not assuming any responsibility for any damages or inaccuracies if you rely on it.
-                  <br>
-                  <br>
-                  We offer no warranty that this application is accurate or complete. The information shown is for informational purposes and may not have been prepared for or be suitable for legal, engineering, or surveying purposes.
-                  <br>
-                  <br>
-                  It does not represent an on-the-ground survey and represents only the approximate relative location of property/administrative boundaries.
-                  <br>
-                  <br>
-                  <b style="font-size:1.2rem">Resouces</b>
-                  <br>
-                  Download and explore TxDOT GIS Data
-                  <br>
-                  <a target="_blank" href="https://gis-txdot.opendata.arcgis.com/" style="color:#14375A"><u>Open Data Portal</u></a><br>
-                  <a target="_blank" href="https://txdot.maps.arcgis.com/home/index.html" style="color:#14375A"><u>ArcGIS Online</u></a>
-                  <br>
-                  <br>
-                  Explore TxDOT data and maps
-                  <br>
-                  <a target="_blank" href="https://www.txdot.gov/data-maps.html" style="color:#14375A"><u>https://www.txdot.gov/data-maps.html</u></a>
-                  <br>
-                  <br>
-                  <b style="font-size:1.2rem">Contact Us</b>
-                  <br>
-                  <a target="_blank" href="mailto:TPP_GIS@txdot.gov" style="color:#14375A"><u>TPP_GIS@txdot.gov</u></a>
-                  <br>
-                  <br>
-                  <a id="closeAbout">Version: ${version}</a>
-
-                  `, header:"About the Statewide Planning Map"}, null, height="714px", width="473px")
-              }
-
-              function appDetailsModal(){
-                
-                let releaseNotes = [{text: "Updated JS to ESRI 4.x", event: "old"}, {text:"Updated User Interface", event: "old"}, {text:"Updated Search to include Bridges", event: "old"}, 
-                                    {text: "Updated Bridge Popups to include Bridge Report", event: "old"}, 
-                                    {text: "Updated Roadway Inventory - On System and Reference Marker scale dependencies", event: "old"}, {text: "Updated Control Section Job in Search", event: "old"},
-                                    {text: "Added 'Copy XY' button to Popup", event: "old"}, {text: "Add Admin Alert Control", event: "old"}, {text: "Updated eLRS endpoints", event: "old"}, {text: "Enabled copy and paste on eLRS/feature popups", event: "old"},
-                                    {text: "Roadname Search added to Query, Event, SRD forms", event: "new"}, {text:"City Boundaries feature layer added to Overlay list", event: "old"}, {text:"Layer metadata request button", event: "new"},
-                                    {text:"New zoom to current location button", event: "new"}, {text: "New draw functionality for point, lines, polygons, and text", event: "new"}
-                                  ]
-
-                let oldReleaseNotesList="";
-                let newReleaseNotesList="";
-
-                releaseNotes.map((x) => {
-                  x.event === "old" ? oldReleaseNotesList += `<li class="show-details">${x.text}</li>` : newReleaseNotesList += `<li class="show-details">${x.text}</li>`
-                  //oldReleaseNotesList += `<li class="show-details">${x}</li>`
-                })
-                queryResponseUI({para: `
-     
-                      <span id="curr-change-btn" class="app-details stepClass underline">Current Changes</span>
-                      <div id="curr-release-notes">
-                        <ul>
-                          ${newReleaseNotesList}
-                        </ul>
-                      </div>
-                      <span id="old-release-btn" class="app-details stepClass underline">Previous Changes</span>
-                      <div id="old-release-notes">
-                        <ul>
-                          ${oldReleaseNotesList}
-                        </ul>
-                      </div>
-                  `, header: "Release Notes"}, null, height="310px", width="473px")
-              } 
-
               function runRoadNameQuery(){
+                const getRdUnsegLayer = itemArr.find(fL => fL.name === "Texas Roadways Unsegmented")
                 let tabDictionary = {
                   "queryTab" : document.getElementById("value"),
                   "eventTab" : document.getElementById("eventRoute"),
                   "diagramTab": document.getElementById("inpSRDRouteID")
                 }
-                document.querySelectorAll(".search-results").forEach(async (elem) => {
+                document.querySelectorAll(".search-results").forEach((elem) => {
                   if(elem.parentNode.parentElement.style.display === "block"){
                     let queryElemId = tabDictionary[`${elem.parentNode.offsetParent.id}`]
                     queryElemId.addEventListener("keyup", (event)=>{
                       if((elem.parentNode.offsetParent.id === "queryTab" && elem.parentNode[2].value !== "RIA_RTE_ID") || (event.key === "Shift" || event.key === "Enter")) return
                       if(event.target.value.length >= 3){
                         elem.style.display = "flex"
-                        loadRoadNames(event.target.value, elem.id, queryElemId.id)
+                        loadRoadNames(event.target.value, elem.id, queryElemId.id, getRdUnsegLayer.featLayer)
                       }
                     })
                   }
@@ -6213,9 +6324,15 @@
                           ${currItem.accessInformation}
                         </p>
                     </div>
+                  
+                  
                   `, header: `${modDate.name} Layer Info`},null, width="50px")
               }
-            
+
+              window.returnXY = function returnXY(){
+
+                return 55
+              }
             // end require - - -        
             });
             function getRdName(e){
@@ -6270,19 +6387,357 @@
             }
 
             function changeSrcUrl(direction){
-                const spmVideoList = [
-                  {url: "https://www.youtube.com/embed/R7JAVPfOcls", index: 0},{url: "https://www.youtube.com/embed/xnBjuLCQZUU", index: 1},{url: "https://www.youtube.com/embed/XG9H89IkoHc", index: 2},
-                  {url: "https://www.youtube.com/embed/wC5MIASMOsQ", index: 3},{url: "https://www.youtube.com/embed/KB4tYiZXVAE", index: 4},{url: "https://www.youtube.com/embed/89X3bJBexKc", index: 5},
-                  {url: "https://www.youtube.com/embed/jm9b_dsw9KQ", index: 6},{url: "https://www.youtube.com/embed/aZm_IXg5XKw", index: 7},{url: "https://www.youtube.com/embed/drRTYGgj0ro", index: 8},
-                  {url: "https://www.youtube.com/embed/yldKy65sSNA", index: 9},{url: "https://www.youtube.com/embed/p5hB779LxkA", index: 10}
-                ]
+                try{
+                  const spmVideoList = [
+                    {url: "https://www.youtube.com/embed/R7JAVPfOcls", index: 0},{url: "https://www.youtube.com/embed/xnBjuLCQZUU", index: 1},{url: "https://www.youtube.com/embed/XG9H89IkoHc", index: 2},
+                    {url: "https://www.youtube.com/embed/wC5MIASMOsQ", index: 3},{url: "https://www.youtube.com/embed/KB4tYiZXVAE", index: 4},{url: "https://www.youtube.com/embed/89X3bJBexKc", index: 5},
+                    {url: "https://www.youtube.com/embed/jm9b_dsw9KQ", index: 6},{url: "https://www.youtube.com/embed/aZm_IXg5XKw", index: 7},{url: "https://www.youtube.com/embed/drRTYGgj0ro", index: 8},
+                    {url: "https://www.youtube.com/embed/yldKy65sSNA", index: 9},{url: "https://www.youtube.com/embed/p5hB779LxkA", index: 10}
+                  ]
 
-                let index = spmVideoList.find(vid => vid.url === youtubeVid.src).index
-                direction === 'incr' ? index += 1 : index -= 1
+                  let index = spmVideoList.find(vid => vid.url === youtubeVid.src).index
+                  if((index === 0 && direction === "decr") || (index === spmVideoList.length-1 && direction === "incr")) return
+                  console.log(index, direction)
+                  direction === 'incr' ? index += 1 : index -= 1
 
-                changeVideo(index)
-                return
+                  changeVideo(index)
+                  return
+                }
+                catch(err){
+                  console.log("err")
+                }
+
             }
+
+            function queryResponseUI(text, btnType, height, width){
+              let getTemplate = document.getElementById("queryTemplate")
+              let templateClone = getTemplate.content.cloneNode(true)
+              let div = templateClone.querySelectorAll("div")
+              
+              let innerModal = document.createElement("div")
+              let h2 = document.createElement("h2")
+              let textArea = document.createElement("div")
+              innerModal.classList.add("overlay")
+              let p = document.createElement("p")
+              p.id = "queryMessagePara"
+              textArea.id = "previewUrl"
+              h2.id = "modalHeader"
+
+              
+              textArea.textContent = text.url
+              textArea.disabled = true
+              text.url ? textArea.style.display = "block" : textArea.style.display = "none"
+
+              h2.innerHTML = `<span>${text.header}</span><span id="showStep">${text.count}</span>`
+              
+              p.innerHTML = text.para
+              div[0].appendChild(h2)
+              div[0].appendChild(p)
+              div[0].appendChild(textArea)
+              div[0].classList.add("queryStatus")
+
+              div[0].style.maxWidth = width
+              let btns;
+              [{btnText: "CLOSE", id: "queryMessageBtn", btnClick: ()=>{removeQueryResponseUI()}}, 
+                {btnText: "COPY URL", id: "copyURL", btnClick: ()=>{navigator.clipboard.writeText(text.url)}}].forEach((b) =>{
+                let innerDiv = document.createElement("div")
+                let outerDiv = document.createElement("div")
+                outerDiv.style.width = "100%"
+                outerDiv.style.marginRight = "25px"
+                let btns = document.createElement("button")
+                innerDiv.appendChild(createQueryBtn(btns, b))
+                innerDiv.style.float = "right"
+                outerDiv.appendChild(innerDiv)
+                div[0].appendChild(outerDiv)
+              })
+
+              if(btnType){
+                let coordBtn = document.createElement("button")
+                coordBtn.id = "copyCoord"
+                coordBtn.textContent = btnType.name
+                coordBtn.className = "spmSecondaryBtn"
+                coordBtn.onclick = () =>{
+                  navigator.clipboard.writeText(btnType.coord)
+                  document.getElementById("copyURL").style.visibility = "visible"
+                }
+                div[0].appendChild(coordBtn)
+              }
+              
+              
+              document.body.appendChild(innerModal)
+              document.body.appendChild(templateClone)
+              document.getElementById("showStep").style.display = text.count ? "block" : "none"
+            }
+
+            const removeQueryResponseUI = () => {
+              document.querySelector(".queryStatus").remove()
+              document.querySelector(".overlay").remove() 
+            }
+
+            function createQueryBtn(btn, b){
+              btn.id = b.id
+              btn.className = "spmMainBtn"
+              btn.textContent = b.btnText
+              btn.onclick = () => {
+                b.btnClick()
+              }
+              return btn
+            }
+            function aboutModal(){
+              let version = "5.0.8 Boston"
+              queryResponseUI({para: `
+                The Statewide Planning Map displays data in support of planning operations at TxDOT.
+                <br>
+                <br>
+                Although we try to update information as often as possible, we are not assuming any responsibility for any damages or inaccuracies if you rely on it.
+                <br>
+                <br>
+                We offer no warranty that this application is accurate or complete. The information shown is for informational purposes and may not have been prepared for or be suitable for legal, engineering, or surveying purposes.
+                <br>
+                <br>
+                It does not represent an on-the-ground survey and represents only the approximate relative location of property/administrative boundaries.
+                <br>
+                <br>
+                <b style="font-size:1.2rem">Resources</b>
+                <br>
+                Download and explore TxDOT GIS Data
+                <br>
+                <a target="_blank" href="https://gis-txdot.opendata.arcgis.com/" style="color:#14375A"><u>Open Data Portal</u></a><br>
+                <a target="_blank" href="https://txdot.maps.arcgis.com/home/index.html" style="color:#14375A"><u>ArcGIS Online</u></a>
+                <br>
+                <br>
+                Explore TxDOT data and maps
+                <br>
+                <a target="_blank" href="https://www.txdot.gov/data-maps.html" style="color:#14375A"><u>https://www.txdot.gov/data-maps.html</u></a>
+                <br>
+                <br>
+                <b style="font-size:1.2rem">Contact Us</b>
+                <br>
+                <a target="_blank" href="mailto:TPP_GIS@txdot.gov" style="color:#14375A"><u>TPP_GIS@txdot.gov</u></a><br>
+                If you see an error or missing data, you can <a style="color:#14375A" id="suggestEditBtn" onclick="removeQueryResponseUI();startSuggestEdit()"><u>suggest an edit</u></a>
+                <br>
+                <br>
+                <a id="closeAbout" onclick="removeQueryResponseUI();appDetailsModal();">Version: ${version}</a>
+
+                `, header:"About the Statewide Planning Map"}, null, height="714px", width="500px")
+            }
+
+            function appDetailsModal(){
+              let releaseNotes = [{text: "Updated JS to ESRI 4.x", event: "old"}, {text:"Updated User Interface", event: "old"}, {text:"Updated Search to include Bridges", event: "old"}, 
+                                  {text: "Updated Bridge Popups to include Bridge Report", event: "old"}, 
+                                  {text: "Updated Roadway Inventory - On System and Reference Marker scale dependencies", event: "old"}, {text: "Updated Control Section Job in Search", event: "old"},
+                                  {text: "Added 'Copy XY' button to Popup", event: "old"}, {text: "Add Admin Alert Control", event: "old"}, {text: "Updated eLRS endpoints", event: "old"}, {text: "Enabled copy and paste on eLRS/feature popups", event: "old"},
+                                  {text: "Roadname Search added to Query, Event, SRD forms", event: "new"}, {text:"City Boundaries feature layer added to Overlay list", event: "old"}, {text:"Layer metadata request button", event: "new"},
+                                  {text:"New zoom to current location button", event: "new"}, {text: "New draw functionality for point, lines, polygons, and text", event: "new"}
+                                ]
+
+              let oldReleaseNotesList="";
+              let newReleaseNotesList="";
+
+              releaseNotes.map((x) => {
+                x.event === "old" ? oldReleaseNotesList += `<li class="show-details">${x.text}</li>` : newReleaseNotesList += `<li class="show-details">${x.text}</li>`
+                //oldReleaseNotesList += `<li class="show-details">${x}</li>`
+              })
+              queryResponseUI({para: `
+                <span id="curr-change-btn" class="app-details stepClass underline">Current Changes</span>
+                <div id="curr-release-notes">
+                  <ul>
+                    ${newReleaseNotesList}
+                  </ul>
+                </div>
+                <span id="old-release-btn" class="app-details stepClass underline">Previous Changes</span>
+                <div id="old-release-notes">
+                  <ul>
+                    ${oldReleaseNotesList}
+                  </ul>
+                </div>
+                `, header: "Release Notes"}, null, height="310px", width="473px")
+              }
+              function startSuggestEdit(){
+                queryResponseUI({para: `
+                    <div>
+                     
+                        Thank you for your assistance in keeping our road network up to date!
+                        <br>
+                        <br>
+                        Use this tool to report missing or misaligned roads
+                        <br>
+                        <hr style="display: block; height: 0px; border-top: 0px solid #4472c4;"></hr>
+                        <b>Contact Info</b>
+                        <br>
+                        <span></span>
+                        Before getting started, please provide your contact info.
+                        <br>
+                        <br>
+                        We'll contact you when
+                        edits are completed or if more information is needed.
+                        <br>
+                        <br>
+                        <b>Note:</b> we do not accept anonymous edits.
+                        <br>
+                        <label>Email</label>
+                        <input type="text" style="width: 91.7% !important;" onblur="suggEditObj.userEmail = event.target.value" value="${suggEditObj.userEmail}"></input>
+                        <br>
+                        
+                        <label>Affiliation</label>
+                        <select id="editAffiliation">
+                          <option selected value="TxDOT employee">TxDOT employee</option>
+                          <option value="Government partner or institution">Government partner or institution</option>
+                          <option value="Company/consultant">Company/consultant</option>
+                          <option value="Private citizen">Private citizen</option>
+                        </select>
+                      
+                    </div>
+                    <div style="position: relative; float: right; left: 16px; top: 24px;">
+                      <button id="cancelStartEditProcess" class="spmSecondaryBtn" onclick="removeQueryResponseUI(); aboutModal();">Cancel</button>
+                      <button id="nextEditProcess" class="spmMainBtn" onclick="selectAddInput('editAffiliation', 'userAffilation');removeQueryResponseUI(); secondStepSuggestEdit();">Next</button>
+                    </div>
+                `, header: "Suggest an edit", count: "1 of 4"}, null, height="310px", width="473px")
+                document.getElementById("queryMessageBtn").style.display = "none"
+                return
+              }
+              function secondStepSuggestEdit(){
+                console.log(document.getElementById("editAffiliation"))
+                queryResponseUI({para: `
+                    <div>
+                      
+                        Please provide a reason for this edit.
+                        <br>
+                        <br>
+                        <label>Select a reason</label>
+                        <select id="suggestEditType">
+                          <option selected value="Missing road">Missing road</option>
+                          <option value="Realignment of existing road">Realignment of existing road</option>
+                          <option value="Incorrect road name">Incorrect road name</option>
+                          <option value="City Boundary update (maybe not?)">City Boundary update (maybe not?)</option>
+                          <option value="Other">Other</option>
+                        </select>
+                        <br>
+                        Provide additional infomation. Note that vague or ambiguois suggestions are less likely to be updadate
+                        without sufficient information.
+                        <br>
+                        <br>
+                        <textarea onblur="suggEditObj.description = event.target.value">${suggEditObj.description}</textarea>
+                      
+                    </div>
+                    <div style="position:relative; top: 24px; width: 100%;">
+                      <button class="spmMainBtn" onclick="removeQueryResponseUI();startSuggestEdit();">Back</button>
+    
+                      <div style="position: relative; float: right; left: 16px;">
+                        <button id="cancelStartEditProcess" class="spmSecondaryBtn" onclick="removeQueryResponseUI(); aboutModal();">Cancel</button>
+                        <button id="nextEditProcess" class="spmMainBtn" onclick="selectAddInput('suggestEditType', 'editType');removeQueryResponseUI();thirdStepSuggestEdit();">Next</button>
+                      </div>                    
+                    </div>
+
+                `, header: "Suggest an edit", count: "2 of 4"}, null, height="310px", width="473px")
+                document.getElementById("queryMessageBtn").style.display = "none"
+                return
+              }
+              function thirdStepSuggestEdit(){
+                queryResponseUI({para: `
+                    <div>
+                      
+                        <b>Mark the road to edit</b>
+                        <br>
+                        <br>
+                        When you're ready, click the Place Point button below.
+
+                        <ul>
+                          <li>This popup will close, allowing you to place a point.</li>
+                          <li>Zoom to the area of interest.</li>
+                          <li>Hovering over an existing road will show an orange line. Single click to snap the point to that road.</li>
+                          <li>To place a point in an empty space on the map where there's a missing road, simply single click on that location.</li>
+                          <li>A popup will reopen after you place the point.</li>
+                        </ul>
+                        <br>
+                        <br>
+                        <div style="display: flex; justify-content: center;">
+                          <button class="spmMainBtn" style="padding: 8px 70px 8px 70px;" onclick="startPointProcess()">Place Point</button>
+                        </div>
+                      
+                    </div>
+                    <div style="position:relative; top: 24px; width: 100%;">  
+                      <button class="spmMainBtn" onclick="removeQueryResponseUI();secondStepSuggestEdit();">Back</button>
+                      <div style="position: relative; float: right; left: 16px;">
+                        <button id="cancelStartEditProcess" class="spmSecondaryBtn" onclick="removeQueryResponseUI(); aboutModal();">Cancel</button>
+                        <button id="nextEditProcess" class="spmMainBtn" onclick="removeQueryResponseUI();fourthStepSuggestEdit();">Next</button>
+                      </div>  
+                    </div>
+
+                `, header: "Suggest an edit", count: "3 of 4"}, null, height="310px", width="473px")
+                document.getElementById("queryMessageBtn").style.display = "none"
+                return
+              }
+              function fourthStepSuggestEdit(){
+                queryResponseUI({para: `
+                    <div>
+                      
+                        <b>Review and confirm</b>
+                        <br>
+                        <br>
+                        Review the information you provided below. Click the Submit button to send to TxDOT for review. Click the Back button to make adjustments.
+                        <div class="grid-container">
+                          <div class="grid-item">Email</div>
+                          <div class="grid-item">${suggEditObj.userEmail}</div>
+                          <div class="grid-item">Edit Type</div>
+                          <div class="grid-item">${suggEditObj.editType}</div>
+                          <div class="grid-item">Description</div>
+                          <div class="grid-item">${suggEditObj.description}</div>
+                          <div class="grid-item">Location</div>
+                          <div class="grid-item">${suggEditObj.location.route}, ${suggEditObj.location.dfo}, ${suggEditObj.location.xy.toString()}</div>
+                        </div>
+                        <br>
+                        <br>
+                      
+                    </div>
+                    <div style="position:relative; top: 24px; width: 100%;">  
+                      <button class="spmMainBtn" onclick="removeQueryResponseUI();thirdStepSuggestEdit()">Back</button>
+                      <div style="position: relative; float: right; left: 16px;">
+                        <button id="cancelStartEditProcess" class="spmSecondaryBtn" onclick="removeQueryResponseUI(); aboutModal();">Cancel</button>
+                        <button id="nextEditProcess" class="spmMainBtn">Submit</button>
+                      </div>  
+                    </div>
+
+                `, header: "Suggest an edit", count: "4 of 4"}, null, height="310px", width="473px")
+                document.getElementById("queryMessageBtn").style.display = "none"
+                return
+              }
+              function selectAddInput(id, objValue){
+                suggEditObj[`${objValue}`] = document.getElementById(id).value
+              }
+
+              
+              async function placesuggestEditPoint(){
+                let suggestEditPointPromise = new Promise(function(res, rej){
+                  document.getElementById("viewDiv").style.cursor = "crosshair"
+                  console.log(this)
+                  let suggestPointClick = view.on("click", async (e) => {
+                    let point = view.toMap({x: e.x, y: e.y});
+                    e.stopPropagation()
+                    let xyURL = "https://lrs-ext.us-e1.cloudhub.io/api/elrs/v1/xy?lat="+point.latitude.toFixed(8)+"&lon="+point.longitude.toFixed(8);
+                    let response = await fetch(xyURL)
+                    res(response.json())
+                    suggestPointClick.remove()
+                  })
+
+
+                })
+                return await suggestEditPointPromise
+              }
+              async function startPointProcess() {
+                removeQueryResponseUI()
+                placesuggestEditPoint()
+                  .then((e) => {
+                    //proceed to step 4 or redisplay step 3
+                    console.log(e)
+                    suggEditObj.location.route = e[0].RTE_DEFN_LN_NM
+                    suggEditObj.location.dfo = e[0].RTE_DFO
+                    suggEditObj.location.xy = [e[0].LAT, e[0].LON]
+                    fourthStepSuggestEdit()
+                    document.getElementById("viewDiv").style.cursor = "default"
+                  })
+              }
+
         </script>
     </head>
     <body class="main">
@@ -6331,7 +6786,7 @@
                   <span class="stepClass underline" style="position: relative; top: 0.7rem;">Select Layer</span>
                   <div style="position: relative; top: 1rem; right: .4rem; font-size: 13px;">
                     <input type="radio" id="RoadInventory" class="noDisabled" name="featQuery" value="RoadInventory" 
-                    <label for="RoadInventory" value="Roadway Query"><a href="https://gis-txdot.opendata.arcgis.com/datasets/txdot-roadway-inventory-specifications-2021" target="_blank" title="Roadway Inventory Data Dictionary">Roadway Query</a></label>
+                    <label for="RoadInventory" value="Roadway Query"><a href="https://gis-txdot.opendata.arcgis.com/datasets/txdot-roadway-inventory-specifications-2023" target="_blank" title="Roadway Inventory Data Dictionary">Roadway Query</a></label>
                     <input id="Bridges" class="noDisabled" type="radio" name="featQuery" value="Bridges">
                     <label for="Bridges" value="Bridge Query"><a href='https://txdot.maps.arcgis.com/sharing/rest/content/items/e9d8d0e3a9794be19be6ecaf5a24c176/data' target='_blank' title="Bridge Data Dictionary">Bridge Query</a></label>
                   </div>
@@ -6668,7 +7123,7 @@
             <!--Measure and LRS results, Legend-->
             </div>     
             <div id="searchTool" title="Search Tool" class="esri-icon-search toolsChild unselectable"></div>
-            <div id="searchBox" class="unselectable"></div>
+            <div id="searchBox"></div>
             <div id="resetMap" class="toolsChild unselectable esri-icon-refresh" title="Clear and reset map"></div>
             <div id="zoomToLoc" class="toolsChild unselectable esri-icon-tracking" title="Zoom to location"></div>
             <button class="hamburgler toolsChild esri-icon-drag-horizontal unselectable"></button>
